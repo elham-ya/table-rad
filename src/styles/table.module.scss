@@ -1,7 +1,43 @@
+@use './variables' as *;
+
 body {
+    padding: 50px;
     direction: rtl;
 }
-.table {
-    border: 2px solid rgb(220, 226, 222);
-    border-radius: 1px;
+
+.tableContainer {
+  border: 1px solid $table-border;
+  padding: 0;
+  border-radius: 10px;
+}
+
+.tableContainer .th_container{
+  text-align: center;
+  font-size: 14px;
+  font-weight: 600;
+  background-color: $table-header;
+  padding: 12px 8px;
+  border-bottom: 1px solid $table-border;
+  border-right: 1px solid $table-border;
+
+  &:last-child {
+    border-top-left-radius: 10px;
+    border-right: none;
+  }
+  &:first-child {
+    border-top-right-radius: 10px;
+  }
+}
+.theader_container {
+  border-radius: 10px 10px 0 0;
+}
+.tr_container {
+  // border-radius: 10px 0 0 0;
+}
+.tableContainer .td_container{
+  text-align: center;
+  padding: 10px;
+  border: 1px solid $table-border;
+  // border-radius: 10px 0 0 0;
+  
 }

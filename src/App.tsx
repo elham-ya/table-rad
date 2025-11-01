@@ -4076,18 +4076,47 @@ const cols = [
       },
     },
     {
-        title: "توضیحات",
-        uniqueId:"clientId",
-        key: "clientId",
-        width:"200",
-        // type:"text",
+      title: "توضیحات",
+      uniqueId:"clientId",
+      key: "clientId",
+      width:"200",
+      type:"text",
     },
     {
       uniqueId: "billNumber",
       title: "شناسه قبض",
       key:"billNumber",
       width: "200",
-    }
+      type:"text",
+    },
+    {
+      uniqueId:"price3",
+      title: "اطلاعات مشتری",
+      width: "200",
+      key: "customerInfo",
+      type:"text",
+    },
+    {
+      uniqueId:"price1",
+      title: "وضعیت سفارش",
+      width: "200",
+      key: "orderStatus",
+      type:"text",
+    },
+    {
+      uniqueId:"price2",
+      title: "روش پرداخت",
+      width: "200",
+      key: "paymentType",
+      type:"text",
+    },
+    {
+      uniqueId:"price4",
+      title: "تعداد اقلام",
+      width: "200",
+      key: "itemNumber",
+      type:"text",
+    }, 
 ];
 
   return (

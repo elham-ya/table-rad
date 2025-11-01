@@ -12,12 +12,12 @@ const TableView: React.FC<TableProps> = ({data, cols }) => {
   }
     return (
       <>
-        <div className={styles.table}>
-          <ReactstrapTable bordered responsive>
-            <thead>
-              <tr>
+     
+          <ReactstrapTable className={styles.tableContainer}>
+            <thead className={styles.theader_container}>
+              <tr className={styles.tr_container}>
                 {cols.map((col, index) => (
-                  <th key={index}>{col.title}</th>
+                  <th className={styles.th_container} key={index}>{col.title}</th>
                 ))}
               </tr>
             </thead>
@@ -29,7 +29,7 @@ const TableView: React.FC<TableProps> = ({data, cols }) => {
                       cols.map((col) => (
                         <td 
                           key={col.uniqueId}
-                          style={{ border: '1px solid #ddd', padding: '8px' }}
+                          className={styles.td_container}
                         >
                           {col.htmlFunc
                           ? col.htmlFunc(row) // اگر htmlFunc وجود داشته باشد، از آن استفاده کن
@@ -43,7 +43,7 @@ const TableView: React.FC<TableProps> = ({data, cols }) => {
               }
             </tbody>
           </ReactstrapTable>
-        </div>
+    
         <PaginationView />
       </>
   );

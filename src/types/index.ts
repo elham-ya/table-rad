@@ -10,7 +10,7 @@ export interface TableColumn {
     title: string;
     key: string;
     width: string;
-    type?: Function;
+    type?: Function | string;
     htmlFunc?: (row: any) => any;
     excelFunc?: (row: any) => any;
 }
