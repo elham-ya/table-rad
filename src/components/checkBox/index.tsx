@@ -15,7 +15,7 @@ const Checkbox: React.FC<CheckboxProps> = ({
   // onSelect
 }) => {
   const inputRef = useRef<HTMLInputElement>(null);
-
+// const [checked, setIsChecked] = useState(false);
   useEffect(() => {
     if(inputRef.current) {
       inputRef.current.indeterminate = indeterminate;
@@ -26,13 +26,13 @@ const Checkbox: React.FC<CheckboxProps> = ({
   return (
     <div className={`${styles.custom_checkbox_wrapper} ${className}`}>
       <Input
-        name='checkbox'
+        name='tablecheckbox'
         type="checkbox"
         id={id}
         innerRef={inputRef}
         checked={checked}
         defaultChecked={defaultChecked}
-        onChange={(e: CheckboxChangeEvent) => onChange?.(e.target.checked, e)}
+        onChange={(e: CheckboxChangeEvent) => onChange?.(e.target.checked)}
         disabled={disabled}
         value={value}
       />

@@ -1,55 +1,84 @@
-import React, { useEffect, useState, useMemo } from 'react';
-import { TableProps, TableColumn} from '../../types/index'
+import React, { useState, useEffect, useMemo } from "react";
+import _ from "lodash";
+import { TableColumn, TableProps } from "../../types/index";
 import styles from "./table.module.scss";
 import { Table as ReactstrapTable } from 'reactstrap';
-import _ from 'lodash';
-import PaginationView from '../pagination';
-import Checkbox from '../checkBox/index';
 
-
-const TableView: React.FC<TableProps> = ({
-  data, 
+const Table: React.FC<TableProps> = ({
+  data,
   cols,
   checkBox = false,
-  onRowSelect,}) => {
+  onRowSelect,
+}) => {
+  // --- فقط ایندکس‌ها رو نگه می‌داریم ---
+  const [selectedRowIndices, setSelectedRowIndices] = useState<Set<number>>(
+    new Set()
+  );
 
-  const [selectedRows, setSelectedRows] = useState<Set<number>>(new Set());
-
+  // --- وقتی data عوض شد، انتخاب‌ها رو ریست کن ---
   useEffect(() => {
-    setSelectedRows(new Set());
+    setSelectedRowIndices(new Set());
   }, [data]);
 
+  // --- به والد بگو کدوم ردیف‌ها انتخاب شدن (داده واقعی) ---
   useEffect(() => {
     if (onRowSelect) {
-      const selectedData = data.filter((_, i) => selectedRows.has(i));
+      const selectedData = Array.from(selectedRowIndices)
+        .sort((a, b) => a - b)
+        .map((i) => data[i])
+        .filter(Boolean);
       onRowSelect(selectedData);
     }
-  }, [selectedRows, data, onRowSelect]);
+  }, [selectedRowIndices, data, onRowSelect]);
+// تابع کمکی — بالای کامپوننت
+const isTwoArgRender = (
+  value: TableColumn['type']
+): value is (row: unknown, index: number) => React.ReactNode => {
+  return typeof value === 'function' && value.length === 2;
+};
+  // --- کامپوننت چک‌باکس (ساده و کارکردی) ---
+  const Checkbox = ({
+    checked,
+    onChange,
+  }: {
+    checked: boolean;
+    onChange: () => void;
+  }) => (
+    <input
+      type="checkbox"
+      checked={checked}
+      onChange={onChange}
+      style={{
+        width: "16px",
+        height: "16px",
+        cursor: "pointer",
+        accentColor: "#007bff",
+      }}
+    />
+  );
 
-  
-
+  // --- ستون چک‌باکس ---
   const checkboxColumn: TableColumn = {
-    uniqueId: '__row_selector__',
+    uniqueId: "__row_selector__",
     title: (
       <Checkbox
-        checked={data.length > 0 && selectedRows.size === data.length}
+        checked={data.length > 0 && selectedRowIndices.size === data.length}
         onChange={() => {
-          setSelectedRows(prev =>
-            prev.size === data.length ? new Set() : new Set(data.map((_, i) => i))
+          setSelectedRowIndices((prev) =>
+            prev.size === data.length
+              ? new Set()
+              : new Set(data.map((_, i) => i))
           );
         }}
       />
     ),
-    key: '__row_selector__',
-    width: '50',
+    key: "__row_selector__",
+    width: "50",
     type: (_row: unknown, rowIndex: number) => (
       <Checkbox
-        checked={selectedRows.has(rowIndex)}
-        onChange={(a,b) => {
-          console.log(a,':a');
-          console.log(b,':b');
-          
-          setSelectedRows(prev => {
+        checked={selectedRowIndices.has(rowIndex)}
+        onChange={() => {
+          setSelectedRowIndices((prev) => {
             const next = new Set(prev);
             if (next.has(rowIndex)) {
               next.delete(rowIndex);
@@ -63,73 +92,80 @@ const TableView: React.FC<TableProps> = ({
     ),
   };
 
+  // --- ستون‌های نهایی ---
   const finalColumns = useMemo(() => {
     return checkBox ? [checkboxColumn, ...cols] : cols;
   }, [checkBox, cols]);
- 
 
-  
-    return (
-      <>
-        <ReactstrapTable className={styles.tableContainer}>
-          <thead className={styles.theader_container}>
-            <tr className={styles.tr_container}>
-              {finalColumns.map((col, index) => (
-                <th className={styles.th_container} key={index}>{col.title}</th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {
-              data.map((row, rowIndex) => (
-                <tr key={rowIndex}>
-                  {
-
-
-                    finalColumns.map(col => {
-                // رندر بر اساس type, htmlFunc, یا key
-                let cellContent: React.ReactNode;
+  // --- رندر ---
+  return (
+    <ReactstrapTable
+      className={styles.tableContainer}
+    >
+      <thead className={styles.theader_container}>
+        <tr className={styles.tr_container}>
+          {finalColumns.map((col) => (
+            <th
+              key={col.uniqueId}
+              className={styles.th_container}
+            >
+              {col.title}
+            </th>
+          ))}
+        </tr>
+      </thead>
+      <tbody>
+        {data.length === 0 ? (
+          <tr>
+            <td
+              colSpan={finalColumns.length}
+              className={styles.td_container}
+            >
+              داده‌ای وجود ندارد.
+            </td>
+          </tr>
+        ) : (
+          data.map((row, rowIndex) => (
+            <tr
+              key={rowIndex} // مهم: key باید rowIndex باشه
+              className={styles.tr_container}
+            >
+              {finalColumns.map((col) => {
+                let cellContent: React.ReactNode = "-";
 
                 if (col.type) {
-                  if (typeof col.type === 'function') {
-                    // اگر تابع دو آرگومان می‌گیره (row, index)
-                    if (col.type.length === 2) {
-                      cellContent = (col.type as (row: unknown, index: number) => React.ReactNode)(
-                        row,
-                        rowIndex
-                      );
+                  if (typeof col.type === "function") {
+                    if (isTwoArgRender(col.type)) {
+                      cellContent = col.type(row, rowIndex);
                     } else {
-                      cellContent = (col.type as (row: unknown) => React.ReactNode)(row);
+                      cellContent = (
+                        col.type as (row: unknown) => React.ReactNode
+                      )(row);
                     }
                   } else {
-                    cellContent = col.type; // string یا React.FC
+                    cellContent = col.type;
                   }
                 } else if (col.htmlFunc) {
                   cellContent = col.htmlFunc(row);
                 } else {
-                  cellContent = _.get(row, col.key, '-');
+                  cellContent = _.get(row, col.key, "-");
                 }
 
                 return (
                   <td
-                  className={styles.td_container}
                     key={col.uniqueId}
-                    
+                    className={styles.td_container}
                   >
                     {cellContent}
                   </td>
                 );
-              })
-
-
-                  }
-                </tr>
-              ))
-            }
-          </tbody>
-        </ReactstrapTable>
-        <PaginationView />
-      </>
+              })}
+            </tr>
+          ))
+        )}
+      </tbody>
+    </ReactstrapTable>
   );
-}
-export default TableView;
+};
+
+export default Table;
