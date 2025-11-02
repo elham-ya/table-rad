@@ -4121,7 +4121,7 @@ const cols = [
 
   return (
     <>
-      <TableView data={data} cols={cols} totalCount={data.length}  />
+      <TableView data={data} cols={cols} totalCount={data.length} checkBox={true}  />
     </>
   )
 }
