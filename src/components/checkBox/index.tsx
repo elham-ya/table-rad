@@ -16,14 +16,6 @@ const Checkbox: React.FC<CheckboxProps> = ({
   
   const inputRef = useRef<HTMLInputElement>(null);
 
- console.log('🔵 CHECKBOX PROPS:', {
-    uniqueId,
-    checked,
-    defaultChecked,
-    indeterminate,
-    hasOnChange: !!onChange
-  });
-
   useEffect(() => {
     if (inputRef.current) {
       inputRef.current.indeterminate = indeterminate;
@@ -41,7 +33,6 @@ const Checkbox: React.FC<CheckboxProps> = ({
         checked={checked}
         onChange={(e: CheckboxChangeEvent) => onChange?.(e.target.checked)}
         disabled={disabled}
-        // value={value}
       />
     </div>
   );

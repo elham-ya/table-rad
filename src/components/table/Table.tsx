@@ -16,20 +16,6 @@ const Table: React.FC<TableProps> = ({
     new Set()
   );
 
-  console.log("🟠 INITIAL STATE:", {
-    dataLength: data.length,
-    initialSelectedIds: Array.from(selectedRowIds),
-  });
-
-  console.log(
-    "🟡 COMPONENT RENDER - selectedRowIds:",
-    Array.from(selectedRowIds)
-  );
-  console.log(
-    "🟡 COMPONENT RENDER - data ids:",
-    data.map((item) => (item as any)?.id)
-  );
-
   // selection of rows send to parent
   useEffect(() => {
     if (onRowSelect) {
@@ -40,11 +26,6 @@ const Table: React.FC<TableProps> = ({
       onRowSelect(selectedData);
     }
   }, [selectedRowIds, data, onRowSelect]);
-
-  // helper function
-  // const isTwoArgRender = (value: TableColumn['type']): value is (row: unknown, index: number) => React.ReactNode => {
-  //   return typeof value === 'function' && value.length === 2;
-  // };
 
   const checkboxColumn: TableColumn = {
     uniqueId: "__row_selector__",
@@ -60,6 +41,8 @@ const Table: React.FC<TableProps> = ({
           selectedRowIds.size < data.length
         }
         onChange={(checked: boolean) => {
+          console.log("ch:", checked);
+
           setSelectedRowIds(
             checked
               ? new Set(
@@ -72,12 +55,6 @@ const Table: React.FC<TableProps> = ({
     ),
     htmlFunc: (row: any, rowIndex: number) => {
       const rowId = row?.id;
-      // console.log('🔴 ROW DEBUG:', {
-      //   rowId,
-      //   row,
-      //   selectedRowIds: Array.from(selectedRowIds),
-      //   isChecked: rowId !== undefined && selectedRowIds.has(rowId)
-      // });
       return (
         <Checkbox
           uniqueId={`checkbox-${rowId}`}
@@ -103,9 +80,7 @@ const Table: React.FC<TableProps> = ({
   // final column
   const finalColumns = useMemo(() => {
     return checkBox ? [checkboxColumn, ...cols] : cols;
-  }, [checkBox, cols]);
-
-  console.log("finalColumns:", finalColumns);
+  }, [checkBox, cols, selectedRowIds]);
 
   return (
     <ReactstrapTable className={styles.tableContainer}>
