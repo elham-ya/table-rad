@@ -1,8 +1,9 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import _ from "lodash";
 import { TableColumn, TableProps } from "../../types/index";
 import styles from "./table.module.scss";
 import { Table as ReactstrapTable } from 'reactstrap';
+import Checkbox from "../checkBox";
 
 const Table: React.FC<TableProps> = ({
   data,
@@ -10,94 +11,100 @@ const Table: React.FC<TableProps> = ({
   checkBox = false,
   onRowSelect,
 }) => {
-  // --- فقط ایندکس‌ها رو نگه می‌داریم ---
-  const [selectedRowIndices, setSelectedRowIndices] = useState<Set<number>>(
-    new Set()
-  );
+  // just keeping index
+  const [selectedRowIds, setSelectedRowIds] = useState<Set<string | number>>(new Set());
 
-  // --- وقتی data عوض شد، انتخاب‌ها رو ریست کن ---
-  useEffect(() => {
-    setSelectedRowIndices(new Set());
-  }, [data]);
+  console.log('🟠 INITIAL STATE:', {
+    dataLength: data.length,
+    initialSelectedIds: Array.from(selectedRowIds)
+  });
 
-  // --- به والد بگو کدوم ردیف‌ها انتخاب شدن (داده واقعی) ---
+  console.log('🟡 COMPONENT RENDER - selectedRowIds:', Array.from(selectedRowIds));
+  console.log('🟡 COMPONENT RENDER - data ids:', data.map(item => (item as any)?.id));
+
+
+
+  // selection of rows send to parent
   useEffect(() => {
     if (onRowSelect) {
-      const selectedData = Array.from(selectedRowIndices)
-        .sort((a, b) => a - b)
-        .map((i) => data[i])
-        .filter(Boolean);
+      const selectedData = data.filter(row => {
+        const rowId = (row as any)?.id;
+        return rowId != null && selectedRowIds.has(rowId);
+      });
       onRowSelect(selectedData);
     }
-  }, [selectedRowIndices, data, onRowSelect]);
-// تابع کمکی — بالای کامپوننت
-const isTwoArgRender = (
-  value: TableColumn['type']
-): value is (row: unknown, index: number) => React.ReactNode => {
-  return typeof value === 'function' && value.length === 2;
-};
-  // --- کامپوننت چک‌باکس (ساده و کارکردی) ---
-  const Checkbox = ({
-    checked,
-    onChange,
-  }: {
-    checked: boolean;
-    onChange: () => void;
-  }) => (
-    <input
-      type="checkbox"
-      checked={checked}
-      onChange={onChange}
-      style={{
-        width: "16px",
-        height: "16px",
-        cursor: "pointer",
-        accentColor: "#007bff",
-      }}
-    />
-  );
+  }, [selectedRowIds, data, onRowSelect]);
 
-  // --- ستون چک‌باکس ---
+
+  // helper function
+  const isTwoArgRender = (
+    value: TableColumn['type']
+  ): value is (row: unknown, index: number) => React.ReactNode => {
+    return typeof value === 'function' && value.length === 2;
+  };
+  
+
   const checkboxColumn: TableColumn = {
     uniqueId: "__row_selector__",
     title: (
       <Checkbox
-        checked={data.length > 0 && selectedRowIndices.size === data.length}
-        onChange={() => {
-          setSelectedRowIndices((prev) =>
-            prev.size === data.length
-              ? new Set()
-              : new Set(data.map((_, i) => i))
+        checked={data.length > 0 && selectedRowIds.size === data.length}
+        indeterminate={
+          data.length > 0 &&
+          selectedRowIds.size > 0 &&
+          selectedRowIds.size < data.length
+        }
+        onChange={(checked: boolean) => {
+          setSelectedRowIds(
+            checked ? new Set(
+                data.map(row => (row as any)?.id).filter(id => id != null)
+              ) : new Set()
           );
         }}
       />
     ),
     key: "__row_selector__",
     width: "50",
-    type: (_row: unknown, rowIndex: number) => (
-      <Checkbox
-        checked={selectedRowIndices.has(rowIndex)}
-        onChange={() => {
-          setSelectedRowIndices((prev) => {
-            const next = new Set(prev);
-            if (next.has(rowIndex)) {
-              next.delete(rowIndex);
-            } else {
-              next.add(rowIndex);
-            }
-            return next;
-          });
-        }}
-      />
-    ),
+    type: (row: any, rowIndex: number) => {
+      const rowId = row?.id;
+      console.log('🔴 ROW DEBUG:', {
+        rowId,
+        row,
+        selectedRowIds: Array.from(selectedRowIds),
+        isChecked: rowId !== undefined && selectedRowIds.has(rowId)
+      });
+      return (
+        <Checkbox
+          uniqueId={`checkbox-${rowId}`}
+          checked={rowId !== undefined && selectedRowIds.has(rowId)}
+          onChange={(checked) => {
+            setSelectedRowIds(prev => {
+              const next = new Set(prev);
+              const id = row?.id;
+              
+              if (id === undefined || id === null) return next;
+              
+              if (checked) {
+                next.add(id);
+              } else {
+                next.delete(id);
+              }
+              
+              return next;
+            });
+          }}
+        />
+      )
+    },
   };
 
-  // --- ستون‌های نهایی ---
+
+  // final column
   const finalColumns = useMemo(() => {
     return checkBox ? [checkboxColumn, ...cols] : cols;
   }, [checkBox, cols]);
 
-  // --- رندر ---
+
   return (
     <ReactstrapTable
       className={styles.tableContainer}

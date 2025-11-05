@@ -1,5 +1,6 @@
 import TableView from "./components/table/Table";
-// import TestTable  from "./components/table/TestTable";
+import TestTable  from "./components/table/TestTable";
+import TestCheckbox from "./components/checkBox/TestCheckbox"
 
 function App() {
   const data = [
@@ -4098,14 +4099,17 @@ function App() {
     console.log("ردیف‌های انتخاب‌شده :", selectedRows);
   };
   return (
-    <TableView
-      data={data}
-      cols={cols}
-      totalCount={data.length}
-      checkBox={true}
-      onRowSelect={handleSelect}
-    />
-    // <TestTable />
+    <>
+      <TableView
+        data={data}
+        cols={cols}
+        totalCount={data.length}
+        checkBox={true}
+        onRowSelect={handleSelect}
+      />
+      <TestTable />
+      <TestCheckbox />
+    </>
   );
 }
 

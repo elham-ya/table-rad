@@ -30,7 +30,7 @@ export interface CheckboxProps<T = unknown> {
   defaultChecked?: boolean;
   onChange?: (checked: boolean) => void;
   disabled?: boolean;
-  id?: string;
+  uniqueId?: string;
   value?: string;
   indeterminate?: boolean;
   className?: string;
