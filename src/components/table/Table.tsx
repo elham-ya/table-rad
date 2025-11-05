@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useMemo, useRef } from "react";
 import _ from "lodash";
-import { TableColumn, TableProps } from "../../types/index";
+import { TableColumn, TableProps, ContentType } from "../../types/index";
 import styles from "./table.module.scss";
-import { Table as ReactstrapTable } from 'reactstrap';
+import { Table as ReactstrapTable } from "reactstrap";
 import Checkbox from "../checkBox";
 
 const Table: React.FC<TableProps> = ({
@@ -12,22 +12,28 @@ const Table: React.FC<TableProps> = ({
   onRowSelect,
 }) => {
   // just keeping index
-  const [selectedRowIds, setSelectedRowIds] = useState<Set<string | number>>(new Set());
+  const [selectedRowIds, setSelectedRowIds] = useState<Set<string | number>>(
+    new Set()
+  );
 
-  console.log('🟠 INITIAL STATE:', {
+  console.log("🟠 INITIAL STATE:", {
     dataLength: data.length,
-    initialSelectedIds: Array.from(selectedRowIds)
+    initialSelectedIds: Array.from(selectedRowIds),
   });
 
-  console.log('🟡 COMPONENT RENDER - selectedRowIds:', Array.from(selectedRowIds));
-  console.log('🟡 COMPONENT RENDER - data ids:', data.map(item => (item as any)?.id));
-
-
+  console.log(
+    "🟡 COMPONENT RENDER - selectedRowIds:",
+    Array.from(selectedRowIds)
+  );
+  console.log(
+    "🟡 COMPONENT RENDER - data ids:",
+    data.map((item) => (item as any)?.id)
+  );
 
   // selection of rows send to parent
   useEffect(() => {
     if (onRowSelect) {
-      const selectedData = data.filter(row => {
+      const selectedData = data.filter((row) => {
         const rowId = (row as any)?.id;
         return rowId != null && selectedRowIds.has(rowId);
       });
@@ -35,17 +41,16 @@ const Table: React.FC<TableProps> = ({
     }
   }, [selectedRowIds, data, onRowSelect]);
 
-
   // helper function
-  const isTwoArgRender = (
-    value: TableColumn['type']
-  ): value is (row: unknown, index: number) => React.ReactNode => {
-    return typeof value === 'function' && value.length === 2;
-  };
-  
+  // const isTwoArgRender = (value: TableColumn['type']): value is (row: unknown, index: number) => React.ReactNode => {
+  //   return typeof value === 'function' && value.length === 2;
+  // };
 
   const checkboxColumn: TableColumn = {
     uniqueId: "__row_selector__",
+    key: "__row_selector__",
+    width: "50",
+    type: ContentType.Function,
     title: (
       <Checkbox
         checked={data.length > 0 && selectedRowIds.size === data.length}
@@ -56,67 +61,59 @@ const Table: React.FC<TableProps> = ({
         }
         onChange={(checked: boolean) => {
           setSelectedRowIds(
-            checked ? new Set(
-                data.map(row => (row as any)?.id).filter(id => id != null)
-              ) : new Set()
+            checked
+              ? new Set(
+                  data.map((row) => (row as any)?.id).filter((id) => id != null)
+                )
+              : new Set()
           );
         }}
       />
     ),
-    key: "__row_selector__",
-    width: "50",
-    type: (row: any, rowIndex: number) => {
+    htmlFunc: (row: any, rowIndex: number) => {
       const rowId = row?.id;
-      console.log('🔴 ROW DEBUG:', {
-        rowId,
-        row,
-        selectedRowIds: Array.from(selectedRowIds),
-        isChecked: rowId !== undefined && selectedRowIds.has(rowId)
-      });
+      // console.log('🔴 ROW DEBUG:', {
+      //   rowId,
+      //   row,
+      //   selectedRowIds: Array.from(selectedRowIds),
+      //   isChecked: rowId !== undefined && selectedRowIds.has(rowId)
+      // });
       return (
         <Checkbox
           uniqueId={`checkbox-${rowId}`}
           checked={rowId !== undefined && selectedRowIds.has(rowId)}
           onChange={(checked) => {
-            setSelectedRowIds(prev => {
+            setSelectedRowIds((prev) => {
               const next = new Set(prev);
               const id = row?.id;
-              
               if (id === undefined || id === null) return next;
-              
               if (checked) {
                 next.add(id);
               } else {
                 next.delete(id);
               }
-              
               return next;
             });
           }}
         />
-      )
+      );
     },
   };
-
 
   // final column
   const finalColumns = useMemo(() => {
     return checkBox ? [checkboxColumn, ...cols] : cols;
   }, [checkBox, cols]);
 
+  console.log("finalColumns:", finalColumns);
 
   return (
-    <ReactstrapTable
-      className={styles.tableContainer}
-    >
+    <ReactstrapTable className={styles.tableContainer}>
       <thead className={styles.theader_container}>
         <tr className={styles.tr_container}>
-          {finalColumns.map((col) => (
-            <th
-              key={col.uniqueId}
-              className={styles.th_container}
-            >
-              {col.title}
+          {finalColumns.map((colItem) => (
+            <th key={colItem.uniqueId} className={styles.th_container}>
+              {colItem.title}
             </th>
           ))}
         </tr>
@@ -124,46 +121,118 @@ const Table: React.FC<TableProps> = ({
       <tbody>
         {data.length === 0 ? (
           <tr>
-            <td
-              colSpan={finalColumns.length}
-              className={styles.td_container}
-            >
+            <td colSpan={finalColumns.length} className={styles.td_container}>
               داده‌ای وجود ندارد.
             </td>
           </tr>
         ) : (
           data.map((row, rowIndex) => (
             <tr
-              key={rowIndex} // مهم: key باید rowIndex باشه
+              key={(row as any).id ?? rowIndex}
               className={styles.tr_container}
             >
               {finalColumns.map((col) => {
-                let cellContent: React.ReactNode = "-";
-
-                if (col.type) {
-                  if (typeof col.type === "function") {
-                    if (isTwoArgRender(col.type)) {
-                      cellContent = col.type(row, rowIndex);
-                    } else {
-                      cellContent = (
-                        col.type as (row: unknown) => React.ReactNode
-                      )(row);
-                    }
-                  } else {
-                    cellContent = col.type;
-                  }
-                } else if (col.htmlFunc) {
-                  cellContent = col.htmlFunc(row);
-                } else {
-                  cellContent = _.get(row, col.key, "-");
-                }
+                const val = col.key ? _.get(row, col.key) : null;
 
                 return (
-                  <td
-                    key={col.uniqueId}
-                    className={styles.td_container}
-                  >
-                    {cellContent}
+                  <td key={col.uniqueId} className={styles.td_container}>
+                    {(() => {
+                      // 1. متن ساده
+                      if (!col.type || col.type === ContentType.Text) {
+                        return <span>{val ?? "-"}</span>;
+                      }
+
+                      // 2. عدد با کاما
+                      if (col.type === ContentType.Number) {
+                        return (
+                          <span className="font-mono">
+                            {val?.toLocaleString?.() ?? "-"}
+                          </span>
+                        );
+                      }
+
+                      // 3. بج
+                      if (col.type === ContentType.Badge) {
+                        const variant = (col as any).badgeVariant || "info";
+                        const badgeStyles: Record<string, string> = {
+                          success: "bg-green-100 text-green-800",
+                          warning: "bg-yellow-100 text-yellow-800",
+                          danger: "bg-red-100 text-red-800",
+                          info: "bg-blue-100 text-blue-800",
+                        };
+                        return (
+                          <span
+                            className={`px-2 py-1 rounded-full text-xs font-medium ${badgeStyles[variant]}`}
+                          >
+                            {val ?? "-"}
+                          </span>
+                        );
+                      }
+
+                      // 4. دکمه
+                      if (col.type === ContentType.Button) {
+                        const buttonText =
+                          typeof (col as any).buttonText === "function"
+                            ? (col as any).buttonText(row)
+                            : (col as any).buttonText || "کلیک";
+                        return (
+                          <button
+                            onClick={() => (col as any).onButtonClick?.(row)}
+                            className="px-3 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 transition"
+                          >
+                            {buttonText}
+                          </button>
+                        );
+                      }
+
+                      // 5. تصویر
+                      if (col.type === ContentType.Image) {
+                        return val ? (
+                          <img
+                            src={val as string}
+                            alt="تصویر"
+                            className="w-10 h-10 object-cover rounded"
+                          />
+                        ) : (
+                          <div className="w-10 h-10 bg-gray-200 border-2 border-dashed rounded" />
+                        );
+                      }
+
+                      // 6. نقشه
+                      if (col.type === ContentType.Map) {
+                        return val ? (
+                          <a
+                            href={`https://www.google.com/maps?q=${val}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-600 underline text-xs"
+                          >
+                            نمایش روی نقشه
+                          </a>
+                        ) : (
+                          "-"
+                        );
+                      }
+
+                      // 7. تابع سفارشی
+                      if (col.type === ContentType.Function) {
+                        if (col.htmlFunc) {
+                          // اگر دو آرگومان داره
+                          if (
+                            typeof col.htmlFunc === "function" &&
+                            col.htmlFunc.length === 2
+                          ) {
+                            return (col.htmlFunc as any)(row, rowIndex);
+                          }
+                          // فقط یک آرگومان
+                          return (col.htmlFunc as any)(row);
+                        }
+                        return "-";
+                      }
+
+                      // پیش‌فرض
+                      return <span>{val ?? "-"}</span>;
+                    })()}
                   </td>
                 );
               })}

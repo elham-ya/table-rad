@@ -1,3 +1,18 @@
+const ContentTypeValues = {
+  Button : "button", 
+  Image: "img",
+  Map: "map",
+  Text: "text",
+  Badge: "badge",
+  Number: "number",
+  Function: "function"
+
+}  as const;
+
+export type ContentType = typeof ContentTypeValues[keyof typeof ContentTypeValues];
+export const ContentType = ContentTypeValues;
+
+
 export interface TableProps {
   data: unknown[];
   cols: TableColumn[];
@@ -8,18 +23,18 @@ export interface TableProps {
 }
 
 export interface TableColumn {
-  uniqueId: string;
-  title: React.ReactNode;
-  key: string;
-  width: string;
-  type?:
-    | React.FC<unknown>
-    | string
-    | ((row: unknown) => React.ReactNode)
-    | ((row: unknown, index: number) => React.ReactNode);
-  htmlFunc?: (row: unknown) => unknown;
+  uniqueId?: string;
+  title?: React.ReactNode;
+  key?: string;
+  width?: string;
+  type?: ContentType;
+  htmlFunc?:
+  | React.FC<unknown>
+  | ((row: unknown, index: number) => React.ReactNode)
+  | ((row: unknown) => React.ReactNode)
   excelFunc?: (row: unknown) => unknown;
 }
+
 
 export interface PaginationProps {
   total?: number;
@@ -41,3 +56,8 @@ export interface CheckboxProps<T = unknown> {
 }
 
 export type CheckboxChangeEvent = React.ChangeEvent<HTMLInputElement>;
+
+export interface ButtonProps {
+  data: unknown[];
+  cols: TableColumn[];
+}

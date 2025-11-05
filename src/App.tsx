@@ -1,6 +1,7 @@
 import TableView from "./components/table/Table";
 import TestTable  from "./components/table/TestTable";
-import TestCheckbox from "./components/checkBox/TestCheckbox"
+import TestCheckbox from "./components/checkBox/TestCheckbox";
+import { ContentType } from './types/index'
 
 function App() {
   const data = [
@@ -4043,7 +4044,7 @@ function App() {
       title: "عملیات",
       key: "updated.user_name",
       width: "200",
-      // type: "TYPES.FUNCTION",
+      type: ContentType.Function,
       htmlFunc: () => {
         return "1,000,000 rial";
       },
@@ -4056,42 +4057,43 @@ function App() {
       uniqueId: "clientId",
       key: "clientId",
       width: "200",
-      type: "text",
+      type: ContentType.Text,
+      
     },
     {
       uniqueId: "billNumber",
       title: "شناسه قبض",
       key: "billNumber",
       width: "200",
-      type: "text",
+      type: ContentType.Number,
     },
     {
       uniqueId: "price3",
       title: "اطلاعات مشتری",
       width: "200",
       key: "customerInfo",
-      type: "text",
+      type: ContentType.Text,
     },
     {
       uniqueId: "price1",
       title: "وضعیت سفارش",
       width: "200",
       key: "orderStatus",
-      type: "text",
+      type: ContentType.Text,
     },
     {
       uniqueId: "price2",
       title: "روش پرداخت",
       width: "200",
       key: "paymentType",
-      type: "text",
+      type: ContentType.Text,
     },
     {
       uniqueId: "price4",
       title: "تعداد اقلام",
       width: "200",
       key: "itemNumber",
-      type: "text",
+      type: ContentType.Text,
     },
   ];
 
