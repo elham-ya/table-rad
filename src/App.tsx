@@ -1,6 +1,5 @@
+import { uniqueId } from "lodash";
 import TableView from "./components/table/Table";
-import TestTable  from "./components/table/TestTable";
-import TestCheckbox from "./components/checkBox/TestCheckbox";
 import { ContentType } from './types/index'
 
 function App() {
@@ -249,7 +248,7 @@ function App() {
         paymentType: "cash",
         orderStatus: {
           uniqueId: "",
-          name: "",
+          name: "پرداخت شده",
         },
         userId: 5963096,
         billNumber: "1761639053862",
@@ -680,7 +679,7 @@ function App() {
         paymentType: "cash",
         orderStatus: {
           uniqueId: "",
-          name: "",
+          name: "پرداخت شده",
         },
         userId: 5963096,
         billNumber: "1761638555494",
@@ -1111,7 +1110,7 @@ function App() {
         paymentType: "cash",
         orderStatus: {
           uniqueId: "",
-          name: "",
+          name: "تسویه",
         },
         userId: 5963096,
         billNumber: "1761638329553",
@@ -1542,7 +1541,7 @@ function App() {
         paymentType: "cash",
         orderStatus: {
           uniqueId: "",
-          name: "",
+          name: "عدم پرداخت",
         },
         userId: 5963096,
         billNumber: "1761481795435",
@@ -1973,7 +1972,7 @@ function App() {
         paymentType: "cash",
         orderStatus: {
           uniqueId: "",
-          name: "",
+          name: "پرداخت شده",
         },
         userId: 5963096,
         billNumber: "1761481362192",
@@ -2435,7 +2434,7 @@ function App() {
         paymentType: "cash",
         orderStatus: {
           uniqueId: "",
-          name: "",
+          name: "برگشت داده شده",
         },
         userId: 5963096,
         billNumber: "1761479826811",
@@ -2895,7 +2894,7 @@ function App() {
         paymentType: "cash",
         orderStatus: {
           uniqueId: "",
-          name: "",
+          name: "پرداخت شده",
         },
         userId: 5963096,
         billNumber: "1761478812224",
@@ -3355,7 +3354,7 @@ function App() {
         paymentType: "cash",
         orderStatus: {
           uniqueId: "",
-          name: "",
+          name: "پرداخت شده",
         },
         userId: 5963096,
         billNumber: "1761478006486",
@@ -3815,7 +3814,7 @@ function App() {
         paymentType: "cash",
         orderStatus: {
           uniqueId: "",
-          name: "",
+          name: "پرداخت شده",
         },
         userId: 5963096,
         billNumber: "1761477869382",
@@ -4037,11 +4036,51 @@ function App() {
       subInvoice: false,
     },
   ];
+  const actionButtons = [
+      {
+        title: "مشاهده فاکتور",
+        className: "fa fa-eye",
+        onClick: () => console.log('button clicked'),
+        visible: true,
+        disable: false,      
+      },
+      {
+        title: "عملیات دسته‌ای انتشار",
+        className: "fa fa-eye",
+        onClick: () => console.log('button clicked'),
+        visible: true,
+        disable: false,      
+      },
+      {
+        title: "عملیات دسته‌ای عدم انتشار ",
+        className: "fa fa-eye",
+        onClick: () => console.log('button clicked'),
+        visible: true,
+        disable: false,      
+      },
+      {
+        title: "استرداد فاکتور",
+        className: "fa fa-eye",
+        onClick: () => console.log('button clicked'),
+        visible: true,
+        disable: false,      
+      },
+      {
+        title: "پرداخت فاکتور",
+        className: "fa fa-eye",
+        onClick: () => console.log('button clicked'),
+        visible: true,
+        disable: false,      
+      },
+    ]
+ 
 
+  // columns of table
   const cols = [
+    
     {
       uniqueId: "price",
-      title: "عملیات",
+      title: "قیمت",
       key: "updated.user_name",
       width: "200",
       type: ContentType.Function,
@@ -4055,7 +4094,7 @@ function App() {
     {
       title: "توضیحات",
       uniqueId: "clientId",
-      key: "clientId",
+      key: "description",
       width: "200",
       type: ContentType.Text,
       
@@ -4063,7 +4102,7 @@ function App() {
     {
       uniqueId: "billNumber",
       title: "شناسه قبض",
-      key: "billNumber",
+      key: "metadata.billNumber",
       width: "200",
       type: ContentType.Number,
     },
@@ -4078,23 +4117,68 @@ function App() {
       uniqueId: "price1",
       title: "وضعیت سفارش",
       width: "200",
-      key: "orderStatus",
+      key: "metadata.orderStatus.name",
       type: ContentType.Text,
     },
     {
       uniqueId: "price2",
       title: "روش پرداخت",
       width: "200",
-      key: "paymentType",
+      key: "metadata.paymentType",
       type: ContentType.Text,
     },
     {
       uniqueId: "price4",
-      title: "تعداد اقلام",
+      title: "شماره تلفن",
       width: "200",
-      key: "itemNumber",
+      key: "cellphoneNumber",
       type: ContentType.Text,
     },
+    {
+      uniqueId: "price1",
+      title: "وضعیت سفارش",
+      width: "200",
+      key: "metadata.orderStatus.name",
+      type: ContentType.Text,
+    },
+    {
+      uniqueId: "price2",
+      title: "روش پرداخت",
+      width: "200",
+      key: "metadata.paymentType",
+      type: ContentType.Text,
+    },
+    {
+      uniqueId: "price4",
+      title: "شماره تلفن",
+      width: "200",
+      key: "cellphoneNumber",
+      type: ContentType.Text,
+    },
+    {
+      uniqueId: "price1",
+      title: "وضعیت سفارش",
+      width: "200",
+      key: "metadata.orderStatus.name",
+      type: ContentType.Text,
+    },
+    {
+      uniqueId: "price2",
+      title: "روش پرداخت",
+      width: "200",
+      key: "metadata.paymentType",
+      type: ContentType.Text,
+    },
+    {
+      uniqueId: "actions",
+      title: "عملیات",
+      type: ContentType.Button,
+      buttons: actionButtons,
+      width: "150"
+    }
+
+
+    
   ];
 
   const handleSelect = (selectedRows: unknown[]) => {
@@ -4109,8 +4193,6 @@ function App() {
         checkBox={true}
         onRowSelect={handleSelect}
       />
-      <TestTable />
-      <TestCheckbox />
     </>
   );
 }

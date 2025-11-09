@@ -1,0 +1,14 @@
+.action_button_wrapper {
+  display: flex;
+  justify-content: space-evenly;
+  align-items: center;
+  cursor: pointer;
+
+  button {
+    background-color: transparent;
+    border: none;
+  }
+  &:hover {
+    background-color: transparent;
+  }
+}

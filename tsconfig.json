@@ -16,7 +16,11 @@
     "typeRoots": [
       "./node_modules/@types",
       "./src/types"
-    ]
+    ],
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"]
+    }
   },
   "include": ["src", "vite.config.ts", "src/types/**/*"], 
   "exclude": ["node_modules", "dist", "**/*.test.ts", "**/*.spec.ts"]

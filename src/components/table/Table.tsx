@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useMemo, useRef } from "react";
-import _ from "lodash";
+import _, { uniqueId } from "lodash";
 import { TableColumn, TableProps, ContentType } from "../../types/index";
 import styles from "./table.module.scss";
 import { Table as ReactstrapTable } from "reactstrap";
 import Checkbox from "../checkBox";
+import ButtonComponent from "../button";
 
 const Table: React.FC<TableProps> = ({
   data,
@@ -16,6 +17,8 @@ const Table: React.FC<TableProps> = ({
     new Set()
   );
 
+  
+
   // selection of rows send to parent
   useEffect(() => {
     if (onRowSelect) {
@@ -27,67 +30,94 @@ const Table: React.FC<TableProps> = ({
     }
   }, [selectedRowIds, data, onRowSelect]);
 
-  const checkboxColumn: TableColumn = {
-    uniqueId: "__row_selector__",
-    key: "__row_selector__",
+  const numberColumn: TableColumn = {
+    uniqueId: "__number__selector__",
+    key: "__number__selector__",
     width: "50",
     type: ContentType.Function,
-    title: (
-      <Checkbox
-        checked={data.length > 0 && selectedRowIds.size === data.length}
-        indeterminate={
-          data.length > 0 &&
-          selectedRowIds.size > 0 &&
-          selectedRowIds.size < data.length
-        }
-        onChange={(checked: boolean) => {
-          console.log("ch:", checked);
-
-          setSelectedRowIds(
-            checked
-              ? new Set(
-                  data.map((row) => (row as any)?.id).filter((id) => id != null)
-                )
-              : new Set()
-          );
-        }}
-      />
-    ),
+    title: "#",
     htmlFunc: (row: any, rowIndex: number) => {
-      const rowId = row?.id;
-      return (
-        <Checkbox
-          uniqueId={`checkbox-${rowId}`}
-          checked={rowId !== undefined && selectedRowIds.has(rowId)}
-          onChange={(checked) => {
-            setSelectedRowIds((prev) => {
-              const next = new Set(prev);
-              const id = row?.id;
-              if (id === undefined || id === null) return next;
-              if (checked) {
-                next.add(id);
-              } else {
-                next.delete(id);
-              }
-              return next;
-            });
-          }}
-        />
-      );
+      console.log("rowIndex:", rowIndex);
+
+      return rowIndex + 1;
     },
   };
 
-  // final column
+  const checkboxColumn: TableColumn | null = checkBox
+    ? {
+        uniqueId: "__row_selector__",
+        key: "__row_selector__",
+        width: "50",
+        type: ContentType.Function,
+        title: (
+          <Checkbox
+            checked={data.length > 0 && selectedRowIds.size === data.length}
+            indeterminate={
+              data.length > 0 &&
+              selectedRowIds.size > 0 &&
+              selectedRowIds.size < data.length
+            }
+            onChange={(checked: boolean) => {
+              setSelectedRowIds(
+                checked
+                  ? new Set(
+                      data
+                        .map((row) => (row as any)?.id)
+                        .filter((id) => id != null)
+                    )
+                  : new Set()
+              );
+            }}
+          />
+        ),
+        htmlFunc: (row: any, rowIndex: number) => {
+          const rowId = row?.id;
+          return (
+            <Checkbox
+              uniqueId={`checkbox-${rowId}`}
+              checked={rowId !== undefined && selectedRowIds.has(rowId)}
+              onChange={(checked) => {
+                setSelectedRowIds((prev) => {
+                  const next = new Set(prev);
+                  const id = row?.id;
+                  if (id === undefined || id === null) return next;
+                  if (checked) {
+                    next.add(id);
+                  } else {
+                    next.delete(id);
+                  }
+                  return next;
+                });
+              }}
+            />
+          );
+        },
+      }
+    : null;
+
+
+
+
+
+  // final column for mapping and show data on cells
   const finalColumns = useMemo(() => {
-    return checkBox ? [checkboxColumn, ...cols] : cols;
-  }, [checkBox, cols, selectedRowIds]);
+    const base = [numberColumn, ...cols];
+    return checkBox && checkboxColumn
+      ? [checkboxColumn, ...base]
+      : base;
+  }, [checkBox, checkboxColumn, cols, selectedRowIds]);
 
   return (
+    // <div className={styles.table_wrapper}>
     <ReactstrapTable className={styles.tableContainer}>
       <thead className={styles.theader_container}>
         <tr className={styles.tr_container}>
           {finalColumns.map((colItem) => (
-            <th key={colItem.uniqueId} className={styles.th_container}>
+            <th
+              key={colItem.uniqueId}
+              className={styles.th_container}
+              style={{ width: `${colItem.width}px` }}
+            >
               {colItem.title}
             </th>
           ))}
@@ -107,8 +137,8 @@ const Table: React.FC<TableProps> = ({
               className={styles.tr_container}
             >
               {finalColumns.map((col) => {
+                
                 const val = col.key ? _.get(row, col.key) : null;
-
                 return (
                   <td key={col.uniqueId} className={styles.td_container}>
                     {(() => {
@@ -116,7 +146,6 @@ const Table: React.FC<TableProps> = ({
                       if (!col.type || col.type === ContentType.Text) {
                         return <span>{val ?? "-"}</span>;
                       }
-
                       // 2. عدد با کاما
                       if (col.type === ContentType.Number) {
                         return (
@@ -125,7 +154,6 @@ const Table: React.FC<TableProps> = ({
                           </span>
                         );
                       }
-
                       // 3. بج
                       if (col.type === ContentType.Badge) {
                         const variant = (col as any).badgeVariant || "info";
@@ -146,18 +174,13 @@ const Table: React.FC<TableProps> = ({
 
                       // 4. دکمه
                       if (col.type === ContentType.Button) {
-                        const buttonText =
-                          typeof (col as any).buttonText === "function"
-                            ? (col as any).buttonText(row)
-                            : (col as any).buttonText || "کلیک";
-                        return (
-                          <button
-                            onClick={() => (col as any).onButtonClick?.(row)}
-                            className="px-3 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 transition"
-                          >
-                            {buttonText}
-                          </button>
-                        );
+                        console.log('col sss:', col);
+                        
+                        return <ButtonComponent  
+                                  buttonList={col.buttons ?? []} 
+                                  data={data}
+                                />
+
                       }
 
                       // 5. تصویر
@@ -215,7 +238,8 @@ const Table: React.FC<TableProps> = ({
           ))
         )}
       </tbody>
-    </ReactstrapTable>
+      </ReactstrapTable>
+    // </div>
   );
 };
 
