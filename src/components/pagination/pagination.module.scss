@@ -1,0 +1,125 @@
+.table_wrapper {
+  background-color: #F7F7FB;
+}
+
+.customPagination {
+  .li_item_icon {
+    background-color: #fff;
+    button {
+      border: none;
+    }
+  }
+
+  .li_item {
+    // background-color: #fff;
+    color: #272937;
+    border-radius: 4px;
+    border: none;
+
+    .btn_li_item {
+      color: #272937;
+      font-size: 14px !important;
+      border-radius: 4px;
+      background-color: #fff;
+      border: none;
+      padding: 0.5rem 1rem;
+      z-index: 1;
+      transition: all 0.2s ease;
+      :focus {
+        box-shadow: none;
+      }
+    }
+
+    &:global(.page-item.active) .btn_li_item {
+      background-color: #dfefff !important;
+      color: #1991ff !important;
+      padding: 0.5rem 1rem;
+      border-radius: 4px;
+      border: none !important;
+      font-size: 14px !important;
+      
+    }
+
+    &:global(.page-item.active) .page-link:focus {
+      box-shadow: none;
+    }
+  }
+
+  ul {
+    display: inline-flex;
+    gap: 0;
+    background-color: #f7f7fb;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    flex-wrap: wrap; // برای ریسپانسیو بهتر
+    justify-content: center;
+    align-items: center;
+    border: 1px solid #EEEEEF;
+    border-radius: 8px;
+  }
+
+  // استایل هر li (آیتم صفحه)
+  & > li {
+    margin: 0;
+
+    & > button,
+    & > span {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 38px;
+      height: 38px;
+      padding: 0 8px;
+      border-radius: 8px !important; // اگه می‌خوای گرد بشه
+      font-weight: 500;
+      transition: all 0.2s ease;
+      border: none;
+      background-color: #F7F7FB;
+      color: #4a5568;
+    }
+
+    // حالت فعال
+    &.active > a,
+    &.active > span {
+      background-color: #F7F7FB;
+
+    }
+
+    // حالت غیرفعال
+    &.disabled > a,
+    &.disabled > span {
+      background-color: #f8f9fa;
+      color: #a0aec0;
+      cursor: not-allowed;
+      opacity: 0.6;
+    }
+  }
+
+  // برای ... (سه نقطه)
+  & > li.disabled > span {
+    background: transparent;
+    border: none;
+    color: #718096;
+    font-weight: normal;
+  }
+
+  .goToPage {
+
+  }
+}
+// }
+
+// اگه می‌خوای در موبایل کوچیک‌تر بشه
+@media (max-width: 576px) {
+  .customPagination {
+    gap: 2px;
+
+    & > li > a,
+    & > li > span {
+      min-width: 34px;
+      height: 34px;
+      font-size: 0.875rem;
+    }
+  }
+}

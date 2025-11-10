@@ -35,12 +35,6 @@ export interface TableColumn {
   excelFunc?: (row: unknown) => unknown;
   buttons?: buttonColProps[];
 }
-
-
-export interface PaginationProps {
-  total?: number;
-}
-
 export interface CheckboxProps<T = unknown> {
   checked?: boolean;
   defaultChecked?: boolean;
@@ -75,4 +69,16 @@ export interface actionColumn {
   disable: boolean;
   onClick: () => void;
 
+}
+
+export interface TablePaginationProps {
+  totalCount: number;        // تعداد کل رکوردها
+  pageNumber: number;        // صفحه فعلی (شروع از 1)
+  size: number;              // تعداد آیتم در هر صفحه
+  onPageChange: (page: number) => void;           // تغییر صفحه
+  onSizeChange?: (size: number) => void;          // تغییر سایز (اختیاری)
+  pageSizeOptions?: number[];                     // گزینه‌های سایز صفحه [10, 25, 50, 100]
+  showSizeChanger?: boolean;                      // نمایش سلکتور سایز؟
+  showTotal?: boolean;                            // نمایش "نمایش ۱–۱۰ از ۵۲" ؟
+  className?: string;
 }

@@ -11,4 +11,18 @@
   &:hover {
     background-color: transparent;
   }
+
+  .dropdown_header {
+    padding: 0.35rem 0.75rem;
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 18px;
+  }
+
+  .dropdownItem {
+    padding: 0.35rem 0.75rem;
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 20px;
+  }
 }
