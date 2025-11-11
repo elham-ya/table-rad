@@ -3,6 +3,11 @@
 }
 
 .customPagination {
+  display: inline-block;
+  background-color: #FFF;
+  padding: 5px 0;
+  border: 1px solid #EEEEEF;
+
   .li_item_icon {
     background-color: #fff;
     button {
@@ -11,7 +16,6 @@
   }
 
   .li_item {
-    // background-color: #fff;
     color: #272937;
     border-radius: 4px;
     border: none;
@@ -23,6 +27,7 @@
       background-color: #fff;
       border: none;
       padding: 0.5rem 1rem;
+      box-shadow: none;
       z-index: 1;
       transition: all 0.2s ease;
       :focus {
@@ -55,7 +60,7 @@
     flex-wrap: wrap; // برای ریسپانسیو بهتر
     justify-content: center;
     align-items: center;
-    border: 1px solid #EEEEEF;
+    
     border-radius: 8px;
   }
 
@@ -107,8 +112,25 @@
   .goToPage {
 
   }
+  .nowrap {
+  white-space: nowrap;
 }
-// }
+
+// اگه می‌خوای دراپ‌داون قشنگ‌تر بشه
+.goToPage {
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 13px;
+  padding: 4px 8px;
+
+  &:focus {
+    border-color: #1991ff;
+    box-shadow: 0 0 0 2px rgba(25, 145, 255, 0.2);
+  }
+}
+}
+
 
 // اگه می‌خوای در موبایل کوچیک‌تر بشه
 @media (max-width: 576px) {

@@ -9,7 +9,7 @@ import {
   Label,
 } from "reactstrap";
 import { TablePaginationProps } from "../../types/index";
-import  styles  from "./pagination.module.scss";
+import styles from "./pagination.module.scss";
 // import { ChevronLeft, ChevronRight } from 'react-feather'; // اختیاری: آیکون زیبا
 
 const TablePagination: React.FC<TablePaginationProps> = ({
@@ -78,34 +78,78 @@ const TablePagination: React.FC<TablePaginationProps> = ({
         {showTotal && (
           <Col md="4" className="mb-2 mb-md-0 text-right">
             <span className="text-muted small">
-              تعداد کل نتایج: {totalCount.toLocaleString('fa-IR')}
+              تعداد کل نتایج: {totalCount.toLocaleString("fa-IR")}
             </span>
           </Col>
         )}
         {/* صفحه‌بندی اصلی */}
         <Col md={showSizeChanger ? "4" : "8"} className="text-center">
-          <RSPagination className={`justify-content-center mb-0 ${styles.customPagination}`} size="sm">
-            {/* قبلی */}
-            <PaginationItem disabled={currentPage === 1} className={styles.li_item}>
-              <PaginationLink
-              className={styles.btn_li_item}
-                previous
-                onClick={() => handlePageClick(currentPage - 1)}
-                style={{
-                  cursor: currentPage === 1 ? "not-allowed" : "pointer",
-                  
-                }}
+          <div className="d-flex align-items-center justify-content-center gap-3 flex-wrap py-2">
+            {/* دراپ‌داون تعداد آیتم در صفحه - دقیقاً کنار دکمه اولین صفحه */}
+            {showSizeChanger && (
+              <div className="d-flex align-items-center">
+                <Input
+                  type="select"
+                  value={size}
+                  onChange={handleSizeChange}
+                  bsSize="sm"
+                  className={styles.goToPage}
+                  style={{
+                    width: "100px",
+                    height: "38px",
+                    fontSize: "13px",
+                    borderRadius: "6px",
+                    border: "1px solid #ddd",
+                    backgroundColor: "#fff",
+                  }}
+                >
+                  {pageSizeOptions.map((option) => (
+                    <option key={option} value={option}>
+                      {option} تایی
+                    </option>
+                  ))}
+                </Input>
+              </div>
+            )}
+            <RSPagination
+              className={`justify-content-center mb-0 ${styles.customPagination}`}
+              size="sm"
+            >
+              {/* اولین صفحه - دکمه جدید */}
+              <PaginationItem
+                disabled={currentPage === 1}
+                className={styles.li_item}
               >
-                »
-                {/* <ChevronLeft size={16} /> */}
-              </PaginationLink>
-            </PaginationItem>
+                <PaginationLink
+                  first
+                  onClick={() => handlePageClick(1)}
+                  className={styles.btn_li_item}
+                >
+                  «
+                </PaginationLink>
+              </PaginationItem>
 
-            {/* شماره صفحات */}
-            {getPageNumbers().map((page, index) =>
+              {/* قبلی */}
+              <PaginationItem
+                disabled={currentPage === 1}
+                className={styles.li_item}
+              >
+                <PaginationLink
+                  previous
+                  onClick={() => handlePageClick(currentPage - 1)}
+                  className={styles.btn_li_item}
+                >
+                  ‹
+                </PaginationLink>
+              </PaginationItem>
 
-              
-                <PaginationItem key={page} active={page === currentPage} className={styles.li_item}>
+              {/* شماره صفحات */}
+              {getPageNumbers().map((page, index) => (
+                <PaginationItem
+                  key={page}
+                  active={page === currentPage}
+                  className={styles.li_item}
+                >
                   <PaginationLink
                     onClick={() => handlePageClick(page as number)}
                     className={styles.btn_li_item}
@@ -113,51 +157,63 @@ const TablePagination: React.FC<TablePaginationProps> = ({
                     {page}
                   </PaginationLink>
                 </PaginationItem>
-              
-            )}
+              ))}
 
-            {/* بعدی */}
-            <PaginationItem disabled={currentPage === totalPages} className={styles.li_item}>
-              <PaginationLink
-              className={styles.btn_li_item}
-                next
-                onClick={() => handlePageClick(currentPage + 1)}
-                style={{
-                  cursor:
-                    currentPage === totalPages ? "not-allowed" : "pointer",
-                }}
+              {/* بعدی */}
+              <PaginationItem
+                disabled={currentPage === totalPages}
+                className={styles.li_item}
               >
-                »{/* <ChevronRight size={16} /> */}
-              </PaginationLink>
-            </PaginationItem>
-          </RSPagination>
+                <PaginationLink
+                  next
+                  onClick={() => handlePageClick(currentPage + 1)}
+                  className={styles.btn_li_item}
+                >
+                  ›
+                </PaginationLink>
+              </PaginationItem>
+
+              {/* آخرین صفحه  */}
+              <PaginationItem
+                disabled={currentPage === totalPages}
+                className={styles.li_item}
+              >
+                <PaginationLink
+                  last
+                  onClick={() => handlePageClick(totalPages)}
+                  className={styles.btn_li_item}
+                >
+                  »
+                </PaginationLink>
+              </PaginationItem>
+            </RSPagination>
+          </div>
         </Col>
 
         {/* تغییر سایز صفحه */}
-        {showSizeChanger && (
-          <Col md="4" className="text-md-end">
-            <div className="d-flex align-items-center justify-content-end gap-2">
-              <Label for="pageSize" className="mb-0 small text-muted ml-2">
-                برو به صفحه 
-              </Label>
-              <Input
-                type="select"
-                id="pageSize"
-                value={size}
-                onChange={handleSizeChange}
-                style={{ width: "auto", display: "inline-block" }}
-                bsSize="sm"
-                className={styles.goToPage}
-              >
-                {pageSizeOptions.map((option) => (
-                  <option key={option} value={option}>
-                    {option}
-                  </option>
-                ))}
-              </Input>
-            </div>
-          </Col>
-        )}
+
+        <Col md="4" className="text-md-end">
+          <div className="d-flex align-items-center justify-content-end gap-2">
+            <Label for="pageSize" className="mb-0 small text-muted ml-2">
+              برو به صفحه
+            </Label>
+            <Input
+              type="select"
+              id="pageSize"
+              value={size}
+              onChange={handleSizeChange}
+              style={{ width: "auto", display: "inline-block" }}
+              bsSize="sm"
+              className={styles.goToPage}
+            >
+              {pageSizeOptions.map((option) => (
+                <option key={option} value={option}>
+                  {option}
+                </option>
+              ))}
+            </Input>
+          </div>
+        </Col>
       </Row>
     </div>
   );

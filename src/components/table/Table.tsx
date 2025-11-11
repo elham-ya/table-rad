@@ -18,7 +18,7 @@ const Table: React.FC<TableProps> = ({
     new Set()
   );
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(25);
+  const [pageSize, setPageSize] = useState(10);
 
   // selection of rows send to parent
   useEffect(() => {
