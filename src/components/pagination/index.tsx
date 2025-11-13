@@ -1,4 +1,4 @@
-import React from "react";
+import React, {useEffect, useState} from "react";
 import {
   Pagination as RSPagination,
   PaginationItem,
@@ -26,8 +26,8 @@ const TablePagination: React.FC<TablePaginationProps> = ({
   const totalPages = Math.ceil(totalCount / size) || 1;
   const currentPage = Math.max(1, Math.min(pageNumber, totalPages));
 
-  const startItem = totalCount === 0 ? 0 : (currentPage - 1) * size + 1;
-  const endItem = Math.min(currentPage * size, totalCount);
+  // const startItem = totalCount === 0 ? 0 : (currentPage - 1) * size + 1;
+  // const endItem = Math.min(currentPage * size, totalCount);
 
   const handlePageClick = (page: number) => {
     if (page >= 1 && page <= totalPages && page !== currentPage) {
@@ -70,6 +70,31 @@ const TablePagination: React.FC<TablePaginationProps> = ({
     }
     return pages;
   };
+
+      useEffect(() => {
+        setValue(String(currentPage));
+    }, [currentPage]);
+
+   const [value, setValue] = useState(String(currentPage));
+
+    const submit = () => {
+        const n = parseInt(value.trim(), 10);
+        if (Number.isNaN(n)) return; // ignore invalid input
+        const page = Math.max(1, Math.min(totalPages || 1, n));
+        if (page !== currentPage && typeof onPageChange === "function") {
+            onPageChange(page);
+        } else {
+            // keep input normalized to a valid page
+            setValue(String(page));
+        }
+    };
+
+        const onKeyDown = (e:  React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === "Enter") {
+            submit();
+        }
+        // optional: prevent invalid chars (letters) on the fly
+    };
 
   return (
     <div className={`table-pagination ${className} ${styles.table_wrapper}`}>
@@ -144,7 +169,7 @@ const TablePagination: React.FC<TablePaginationProps> = ({
               </PaginationItem>
 
               {/* شماره صفحات */}
-              {getPageNumbers().map((page, index) => (
+              {getPageNumbers().map((page) => (
                 <PaginationItem
                   key={page}
                   active={page === currentPage}
@@ -193,25 +218,45 @@ const TablePagination: React.FC<TablePaginationProps> = ({
         {/* تغییر سایز صفحه */}
 
         <Col md="4" className="text-md-end">
-          <div className="d-flex align-items-center justify-content-end gap-2">
+          <div className="d-flex align-items-center justify-content-end gap-2"
+          style={{
+                        position: "relative",}}
+          >
             <Label for="pageSize" className="mb-0 small text-muted ml-2">
               برو به صفحه
             </Label>
             <Input
-              type="select"
+              type="text"
               id="pageSize"
               value={size}
               onChange={handleSizeChange}
-              style={{ width: "auto", display: "inline-block" }}
+              onKeyDown={onKeyDown}
               bsSize="sm"
               className={styles.goToPage}
-            >
-              {pageSizeOptions.map((option) => (
-                <option key={option} value={option}>
-                  {option}
-                </option>
-              ))}
-            </Input>
+              style={{   width: 60, boxSizing: "border-box", "z-index": 3 }}
+            ></Input>
+              <button
+                    type="button"
+                    onClick={submit}
+                    aria-label="Go to page"
+                    style={{
+                      width:20,
+                        position: "absolute",
+                        left: 2,
+                        top: 2,
+                        bottom: 2,
+                        padding: "0 1px",
+                        cursor: "pointer",
+                        border: "none",
+                        background: "transparent",
+                        fontSize: 12,
+                        color: "#007bff",
+                        zIndex: 4,
+                    }}
+                >
+              `{'>'}`
+                </button>
+            
           </div>
         </Col>
       </Row>
