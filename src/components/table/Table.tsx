@@ -12,6 +12,7 @@ const Table: React.FC<TableProps> = ({
   cols,
   checkBox = false,
   onRowSelect,
+  onPageChange,
 }) => {
   // just keeping index
   const [selectedRowIds, setSelectedRowIds] = useState<Set<string | number>>(
@@ -101,6 +102,17 @@ const Table: React.FC<TableProps> = ({
     const base = [numberColumn, ...cols];
     return checkBox && checkboxColumn ? [checkboxColumn, ...base] : base;
   }, [checkBox, checkboxColumn, cols, selectedRowIds]);
+
+
+  const handlePageChange = (pageNumber) => {
+    setPage(pageNumber);
+    // می‌توانید اینجا درخواست داده جدید را انجام دهید
+  }
+
+  const handleSizeChange = (pageSize) => {
+    setPageSize(pageSize);
+    // می‌توانید اینجا درخواست داده جدید را انجام دهید
+  }
 
   return (
     <div>
@@ -238,8 +250,8 @@ const Table: React.FC<TableProps> = ({
         totalCount={250}
         pageNumber={page}
         size={pageSize}
-        onPageChange={setPage}
-        onSizeChange={setPageSize}
+        onPageChange={handlePageChange}
+        onSizeChange={handleSizeChange}
         pageSizeOptions={[10, 25, 50, 100]}
         showTotal
         showSizeChanger

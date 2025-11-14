@@ -10,6 +10,7 @@
 
   .li_item_icon {
     background-color: #fff;
+
     button {
       border: none;
     }
@@ -30,6 +31,7 @@
       box-shadow: none;
       z-index: 1;
       transition: all 0.2s ease;
+
       :focus {
         box-shadow: none;
       }
@@ -42,7 +44,7 @@
       border-radius: 4px;
       border: none !important;
       font-size: 14px !important;
-      
+
     }
 
     &:global(.page-item.active) .page-link:focus {
@@ -60,16 +62,16 @@
     flex-wrap: wrap; // برای ریسپانسیو بهتر
     justify-content: center;
     align-items: center;
-    
+
     border-radius: 8px;
   }
 
   // استایل هر li (آیتم صفحه)
-  & > li {
+  &>li {
     margin: 0;
 
-    & > button,
-    & > span {
+    &>button,
+    &>span {
       display: flex;
       align-items: center;
       justify-content: center;
@@ -85,15 +87,15 @@
     }
 
     // حالت فعال
-    &.active > a,
-    &.active > span {
+    &.active>a,
+    &.active>span {
       background-color: #F7F7FB;
 
     }
 
     // حالت غیرفعال
-    &.disabled > a,
-    &.disabled > span {
+    &.disabled>a,
+    &.disabled>span {
       background-color: #f8f9fa;
       color: #a0aec0;
       cursor: not-allowed;
@@ -102,43 +104,118 @@
   }
 
   // برای ... (سه نقطه)
-  & > li.disabled > span {
+  &>li.disabled>span {
     background: transparent;
     border: none;
     color: #718096;
     font-weight: normal;
   }
 
-  .goToPage {
-
-  }
   .nowrap {
-  white-space: nowrap;
+    white-space: nowrap;
+  }
 }
 
-// اگه می‌خوای دراپ‌داون قشنگ‌تر بشه
-.goToPage {
+// style of size option selector
+.goToPageContainer {
+  position: relative;
+}
+
+.goToPageContainer :global(.form-control) {
+   width: 60px; 
   background-color: #fff;
   border: 1px solid #ddd;
   border-radius: 6px;
   font-size: 13px;
   padding: 4px 8px;
+  box-sizing: border-box; 
+  z-index: 3;
+}
+
+.goToPageContainer :global(.form-control):focus{
+  box-shadow: none;
+  border:none
+}
+
+.goToPage {
+  width: 60px; 
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 13px;
+  padding: 4px 8px;
+  box-sizing: border-box; 
+  z-index: 3;
 
   &:focus {
-    border-color: #1991ff;
-    box-shadow: 0 0 0 2px rgba(25, 145, 255, 0.2);
+    border-color: none;
+    box-shadow: none;
   }
 }
+
+.sizeChangerContainer {
+  display: inline-block;
+  font-size: 12px;
 }
 
+
+.sizeChangerContainer :global(.form-control) {
+  display: inline-block;
+  width: auto;
+  padding: 4px 8px;
+  font-size: 12px;
+  border-radius: 4px;
+  border: 1px solid #ddd;
+  background-color: #fff;
+  height: auto;
+
+
+}
+
+.sizeChangerContainer :global(.form-control):focus {
+  box-shadow: none;
+  border: none;
+  color: #333;
+  border-color: #1991ff;
+}
+
+
+
+select.selectSizeOption.form-control {
+  width: 100px;
+  height: 38px;
+  font-size: 13px;
+  border-radius: 6px;
+  border: 1px solid #ddd;
+  background-color: #fff;
+
+  :focus {
+    box-shadow: none;
+  }
+}
+
+.go_to_Page_btn {
+  width: 20px;
+  position: absolute;
+  left: 2;
+  top: 2;
+  bottom: 2;
+  padding: 0 1px;
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  font-size: 12px;
+  color: "#007bff";
+  z-index: 4;
+}
 
 // اگه می‌خوای در موبایل کوچیک‌تر بشه
 @media (max-width: 576px) {
   .customPagination {
     gap: 2px;
 
-    & > li > a,
-    & > li > span {
+    &>li>a,
+    &>li>span {
       min-width: 34px;
       height: 34px;
       font-size: 0.875rem;

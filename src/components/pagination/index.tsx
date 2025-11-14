@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from "react";
+import React, { useEffect, useState } from "react";
 import {
   Pagination as RSPagination,
   PaginationItem,
@@ -36,6 +36,8 @@ const TablePagination: React.FC<TablePaginationProps> = ({
   };
 
   const handleSizeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    console.log('e handleSizeChange:',e);
+    
     const newSize = Number(e.target.value);
     onSizeChange?.(newSize);
     // اختیاری: برو به صفحه ۱ وقتی سایز عوض میشه
@@ -54,47 +56,52 @@ const TablePagination: React.FC<TablePaginationProps> = ({
     } else {
       if (currentPage <= 3) {
         for (let i = 1; i <= 4; i++) pages.push(i);
-        // pages.push("...");
         pages.push(totalPages);
       } else if (currentPage >= totalPages - 2) {
         pages.push(1);
-        // pages.push("...");
         for (let i = totalPages - 3; i <= totalPages; i++) pages.push(i);
       } else {
         pages.push(1);
-        // pages.push("...");
         for (let i = currentPage - 1; i <= currentPage + 1; i++) pages.push(i);
-        // pages.push("...");
         pages.push(totalPages);
       }
     }
     return pages;
   };
 
-      useEffect(() => {
-        setValue(String(currentPage));
-    }, [currentPage]);
+  useEffect(() => {
+    setValue(String(""));
+  }, [currentPage]);
 
-   const [value, setValue] = useState(String(currentPage));
+  const [value, setValue] = useState(String(currentPage));
+console.log("value:", value);
 
-    const submit = () => {
-        const n = parseInt(value.trim(), 10);
-        if (Number.isNaN(n)) return; // ignore invalid input
-        const page = Math.max(1, Math.min(totalPages || 1, n));
-        if (page !== currentPage && typeof onPageChange === "function") {
-            onPageChange(page);
-        } else {
-            // keep input normalized to a valid page
-            setValue(String(page));
-        }
-    };
+  const handleGoToPageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    console.log('e handleGoToPageChange:', e.target.value);
+    onPageChange(Number(e.target.value));
+    setValue(e.target.value)
+  }
+  const submit = () => {
+    console.log(
+      "go to page"
+    );
+    
+    const n = parseInt(value.trim(), 10);
+    if (Number.isNaN(n)) return; // ignore invalid input
+    const page = Math.max(1, Math.min(totalPages || 1, n));
+    if (page !== currentPage && typeof onPageChange === "function") {
+      onPageChange(page);
+    } else {
+      // keep input normalized to a valid page
+      setValue(String(page));
+    }
+  };
 
-        const onKeyDown = (e:  React.KeyboardEvent<HTMLInputElement>) => {
-        if (e.key === "Enter") {
-            submit();
-        }
-        // optional: prevent invalid chars (letters) on the fly
-    };
+  const onKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      submit();
+    }
+  };
 
   return (
     <div className={`table-pagination ${className} ${styles.table_wrapper}`}>
@@ -110,26 +117,17 @@ const TablePagination: React.FC<TablePaginationProps> = ({
         {/* صفحه‌بندی اصلی */}
         <Col md={showSizeChanger ? "4" : "8"} className="text-center">
           <div className="d-flex align-items-center justify-content-center gap-3 flex-wrap py-2">
-            {/* دراپ‌داون تعداد آیتم در صفحه - دقیقاً کنار دکمه اولین صفحه */}
+            {/* دراپ‌داون تعداد آیتم در صفحه  */}
             {showSizeChanger && (
-              <div className="d-flex align-items-center">
+              <div className={`d-inline-flex align-items-center ${styles.sizeChangerContainer}`}>
                 <Input
                   type="select"
                   value={size}
                   onChange={handleSizeChange}
-                  bsSize="sm"
-                  className={styles.goToPage}
-                  style={{
-                    width: "100px",
-                    height: "38px",
-                    fontSize: "13px",
-                    borderRadius: "6px",
-                    border: "1px solid #ddd",
-                    backgroundColor: "#fff",
-                  }}
+                  className={styles.selectSizeOption}
                 >
                   {pageSizeOptions.map((option) => (
-                    <option key={option} value={option}>
+                    <option key={option} value={option} >
                       {option} تایی
                     </option>
                   ))}
@@ -218,9 +216,9 @@ const TablePagination: React.FC<TablePaginationProps> = ({
         {/* تغییر سایز صفحه */}
 
         <Col md="4" className="text-md-end">
-          <div className="d-flex align-items-center justify-content-end gap-2"
-          style={{
-                        position: "relative",}}
+          <div
+            className={`d-flex align-items-center justify-content-end gap-2 ${styles.goToPageContainer}`}
+            
           >
             <Label for="pageSize" className="mb-0 small text-muted ml-2">
               برو به صفحه
@@ -228,35 +226,21 @@ const TablePagination: React.FC<TablePaginationProps> = ({
             <Input
               type="text"
               id="pageSize"
-              value={size}
-              onChange={handleSizeChange}
+              value={pageNumber}
+              onChange={handleGoToPageChange}
               onKeyDown={onKeyDown}
-              bsSize="sm"
               className={styles.goToPage}
-              style={{   width: 60, boxSizing: "border-box", "z-index": 3 }}
+             
             ></Input>
-              <button
-                    type="button"
-                    onClick={submit}
-                    aria-label="Go to page"
-                    style={{
-                      width:20,
-                        position: "absolute",
-                        left: 2,
-                        top: 2,
-                        bottom: 2,
-                        padding: "0 1px",
-                        cursor: "pointer",
-                        border: "none",
-                        background: "transparent",
-                        fontSize: 12,
-                        color: "#007bff",
-                        zIndex: 4,
-                    }}
-                >
-              `{'>'}`
-                </button>
-            
+            <button
+              type="button"
+              onClick={submit}
+              aria-label="Go to page"
+              className={styles.go_to_Page_btn}
+              
+            >
+              `{">"}`
+            </button>
           </div>
         </Col>
       </Row>

@@ -1,6 +1,6 @@
 import { uniqueId } from "lodash";
 import TableView from "./components/table/Table";
-import { ContentType } from './types/index'
+import { ContentType } from "./types/index";
 
 function App() {
   const data = [
@@ -4037,47 +4037,45 @@ function App() {
     },
   ];
   const actionButtons = [
-      {
-        title: "مشاهده فاکتور",
-        className: "fa fa-eye",
-        onClick: () => console.log('button clicked'),
-        visible: true,
-        disable: false,      
-      },
-      {
-        title: "عملیات دسته‌ای انتشار",
-        className: "fa fa-eye",
-        onClick: () => console.log('button clicked'),
-        visible: true,
-        disable: false,      
-      },
-      {
-        title: "عملیات دسته‌ای عدم انتشار ",
-        className: "fa fa-eye",
-        onClick: () => console.log('button clicked'),
-        visible: true,
-        disable: false,      
-      },
-      {
-        title: "استرداد فاکتور",
-        className: "fa fa-eye",
-        onClick: () => console.log('button clicked'),
-        visible: true,
-        disable: false,      
-      },
-      {
-        title: "پرداخت فاکتور",
-        className: "fa fa-eye",
-        onClick: () => console.log('button clicked'),
-        visible: true,
-        disable: false,      
-      },
-    ]
- 
+    {
+      title: "مشاهده فاکتور",
+      className: "fa fa-eye",
+      onClick: () => console.log("button clicked"),
+      visible: true,
+      disable: false,
+    },
+    {
+      title: "عملیات دسته‌ای انتشار",
+      className: "fa fa-eye",
+      onClick: () => console.log("button clicked"),
+      visible: true,
+      disable: false,
+    },
+    {
+      title: "عملیات دسته‌ای عدم انتشار ",
+      className: "fa fa-eye",
+      onClick: () => console.log("button clicked"),
+      visible: true,
+      disable: false,
+    },
+    {
+      title: "استرداد فاکتور",
+      className: "fa fa-eye",
+      onClick: () => console.log("button clicked"),
+      visible: true,
+      disable: false,
+    },
+    {
+      title: "پرداخت فاکتور",
+      className: "fa fa-eye",
+      onClick: () => console.log("button clicked"),
+      visible: true,
+      disable: false,
+    },
+  ];
 
   // columns of table
   const cols = [
-    
     {
       uniqueId: "price",
       title: "قیمت",
@@ -4097,7 +4095,6 @@ function App() {
       key: "description",
       width: "200",
       type: ContentType.Text,
-      
     },
     {
       uniqueId: "billNumber",
@@ -4174,16 +4171,16 @@ function App() {
       title: "عملیات",
       type: ContentType.Button,
       buttons: actionButtons,
-      width: "150"
-    }
-
-
-    
+      width: "150",
+    },
   ];
 
   const handleSelect = (selectedRows: unknown[]) => {
     console.log("ردیف‌های انتخاب‌شده :", selectedRows);
   };
+
+  const handlePageChange = () => {}
+
   return (
     <>
       <TableView
@@ -4192,6 +4189,7 @@ function App() {
         totalCount={data.length}
         checkBox={true}
         onRowSelect={handleSelect}
+        onPageChange={handlePageChange}
       />
     </>
   );

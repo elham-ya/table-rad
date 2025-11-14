@@ -20,6 +20,7 @@ export interface TableProps {
   excelExport?: boolean;
   checkBox?: boolean;
   onRowSelect?: (selectedRows: unknown[]) => void;
+  onPageChange?:(pageNumber: number) => void;
 }
 
 export interface TableColumn {
