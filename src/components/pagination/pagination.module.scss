@@ -3,11 +3,13 @@
 }
 
 .customPagination {
-  display: inline-block;
+  display: inline-flex;
   background-color: #FFF;
-  padding: 5px 0;
-  border: 1px solid #EEEEEF;
-
+  padding: 0;
+  border: 1px solid #E5E5E7;
+  height:40px;
+  border-radius: 8px;
+  align-items: center;
   .li_item_icon {
     background-color: #fff;
 
@@ -22,12 +24,14 @@
     border: none;
 
     .btn_li_item {
+      width: 32px;
+      height: 32px;
       color: #272937;
       font-size: 14px !important;
       border-radius: 4px;
       background-color: #fff;
       border: none;
-      padding: 0.5rem 1rem;
+      padding: 0;
       box-shadow: none;
       z-index: 1;
       transition: all 0.2s ease;
@@ -38,13 +42,15 @@
     }
 
     &:global(.page-item.active) .btn_li_item {
+      width: 32px;
+      height: 32px;
       background-color: #dfefff !important;
-      color: #1991ff !important;
-      padding: 0.5rem 1rem;
+      color: #1991FF !important;
+      padding: 0;
       border-radius: 4px;
       border: none !important;
       font-size: 14px !important;
-
+      text-align: center;
     }
 
     &:global(.page-item.active) .page-link:focus {
@@ -119,22 +125,26 @@
 // style of size option selector
 .goToPageContainer {
   position: relative;
+  button:focus {
+    outline: none;
+  }
 }
 
 .goToPageContainer :global(.form-control) {
-   width: 60px; 
+  width: 90px; 
+  height: 40px;
   background-color: #fff;
-  border: 1px solid #ddd;
-  border-radius: 6px;
+  border: 1px solid #E5E5E7;
+  border-radius: 8px;
   font-size: 13px;
-  padding: 4px 8px;
+  padding: 3px 18px 3px 3px;
   box-sizing: border-box; 
   z-index: 3;
 }
 
 .goToPageContainer :global(.form-control):focus{
   box-shadow: none;
-  border:none
+  border: 1px solid #E5E5E7;
 }
 
 .goToPage {
@@ -155,21 +165,47 @@
 
 .sizeChangerContainer {
   display: inline-block;
-  font-size: 12px;
+  font-size: 14px;
+  position: relative;
+  height: 40px;
+  margin-left: 15px;
 }
 
+.sizeChangerContainer::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 11px;
+  transform: translateY(-50%);
+  pointer-events: none;                 /* click goes through to the select */
+  
+  width: 24px;
+  height: 24px;
+  background-image: url('../../assets/icons/ArrowDown.svg');   /* ← your SVG file */
+  background-repeat: no-repeat;
+  background-size: contain;
+  background-position: center;
+}
 
+// select style
 .sizeChangerContainer :global(.form-control) {
-  display: inline-block;
-  width: auto;
-  padding: 4px 8px;
-  font-size: 12px;
-  border-radius: 4px;
-  border: 1px solid #ddd;
+  display: block;
+  width: 100%;
+  padding: 6px 14px 6px 42px;
+  font-size: 14px;
+  border-radius: 8px;
+  border: 1px solid #E5E5E7;
   background-color: #fff;
-  height: auto;
+  height: inherit;
 
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+}
 
+/* Hide arrow in Internet Explorer (if you still care) */
+.sizeChangerContainer :global(.form-control)::-ms-expand {
+  display: none;
 }
 
 .sizeChangerContainer :global(.form-control):focus {
@@ -178,7 +214,6 @@
   color: #333;
   border-color: #1991ff;
 }
-
 
 
 select.selectSizeOption.form-control {
@@ -195,18 +230,21 @@ select.selectSizeOption.form-control {
 }
 
 .go_to_Page_btn {
-  width: 20px;
+  width: 30px;
   position: absolute;
-  left: 2;
-  top: 2;
-  bottom: 2;
+  left: 14px;
+  top: 0;
+  bottom: 0;
   padding: 0 1px;
   cursor: pointer;
   border: none;
   background: transparent;
   font-size: 12px;
-  color: "#007bff";
   z-index: 4;
+  img {
+    width: 38px;
+    height: 38px;
+  }
 }
 
 // اگه می‌خوای در موبایل کوچیک‌تر بشه

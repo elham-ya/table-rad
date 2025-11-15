@@ -10,6 +10,7 @@ import {
 } from "reactstrap";
 import { TablePaginationProps } from "../../types/index";
 import styles from "./pagination.module.scss";
+import GotoPageIcon from '../../assets/icons/ItemArrow.svg';
 // import { ChevronLeft, ChevronRight } from 'react-feather'; // اختیاری: آیکون زیبا
 
 const TablePagination: React.FC<TablePaginationProps> = ({
@@ -28,6 +29,7 @@ const TablePagination: React.FC<TablePaginationProps> = ({
 
   // const startItem = totalCount === 0 ? 0 : (currentPage - 1) * size + 1;
   // const endItem = Math.min(currentPage * size, totalCount);
+console.log('totalCount:',totalCount);
 
   const handlePageClick = (page: number) => {
     if (page >= 1 && page <= totalPages && page !== currentPage) {
@@ -127,8 +129,8 @@ console.log("value:", value);
                   className={styles.selectSizeOption}
                 >
                   {pageSizeOptions.map((option) => (
-                    <option key={option} value={option} >
-                      {option} تایی
+                    <option key={option} value={option}>
+                      نمایش {option} تایی
                     </option>
                   ))}
                 </Input>
@@ -218,7 +220,6 @@ console.log("value:", value);
         <Col md="4" className="text-md-end">
           <div
             className={`d-flex align-items-center justify-content-end gap-2 ${styles.goToPageContainer}`}
-            
           >
             <Label for="pageSize" className="mb-0 small text-muted ml-2">
               برو به صفحه
@@ -237,9 +238,8 @@ console.log("value:", value);
               onClick={submit}
               aria-label="Go to page"
               className={styles.go_to_Page_btn}
-              
             >
-              `{">"}`
+              <img src={GotoPageIcon}  />
             </button>
           </div>
         </Col>

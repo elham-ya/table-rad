@@ -104,12 +104,12 @@ const Table: React.FC<TableProps> = ({
   }, [checkBox, checkboxColumn, cols, selectedRowIds]);
 
 
-  const handlePageChange = (pageNumber) => {
+  const handlePageChange = (pageNumber:number) => {
     setPage(pageNumber);
     // می‌توانید اینجا درخواست داده جدید را انجام دهید
   }
 
-  const handleSizeChange = (pageSize) => {
+  const handleSizeChange = (pageSize:number) => {
     setPageSize(pageSize);
     // می‌توانید اینجا درخواست داده جدید را انجام دهید
   }
@@ -247,7 +247,7 @@ const Table: React.FC<TableProps> = ({
         </tbody>
       </ReactstrapTable>
       <TablePagination
-        totalCount={250}
+        totalCount={240}
         pageNumber={page}
         size={pageSize}
         onPageChange={handlePageChange}
