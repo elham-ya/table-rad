@@ -1,0 +1,58 @@
+.modal_wrapper {
+  display: block;
+  .modal_itemheader {
+    align-items: center;
+    padding: 0.5rem 0.5rem;
+    button {
+      margin: 0;
+      padding: 0.5rem;
+    }
+    h5 {
+      font-size: 16px;
+    }
+  }
+  .save_btn {
+    background-color: #0369CD;
+  }
+  .cancel_btn {
+    background-color: #F2F2F2;
+    color: #0C0E10;
+    border: none;
+  }
+  .search_wrapper {
+    position: relative;
+    input {
+      border: 1px solid #DAE4F1;
+      border-radius: 8px;
+      padding-right:50px; 
+    }
+    .search_btn {
+      width: 40px;
+      position: absolute;
+      right: 0;
+      top: 0;
+      bottom: 0;
+      outline: none;
+      border: none;
+      background-color: transparent;
+    }
+  }
+
+  .setting_icons {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .first_field_wrapper {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .input_badge_wrapper {
+    
+  }
+
+}

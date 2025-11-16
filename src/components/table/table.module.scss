@@ -24,7 +24,7 @@ body {
 
 .tableContainer {
   width: 100%;
-  border: 1px solid $table-border;
+  // border: 1px solid $table-border;
   padding: 0;
   border-radius: 10px;
   border-spacing: 0;
@@ -40,9 +40,11 @@ body {
   padding: 12px 8px;
   border-bottom: 1px solid $table-border;
   border-right: 1px solid $table-border;
-  border-top: none;
+  border-top: 1px solid $table-border;
+  // border-top: none;
   &:last-child {
     border-top-left-radius: 10px; 
+    border-left: 1px solid $table-border;
   }
   &:first-child {
     border-top-right-radius: 10px;
@@ -55,6 +57,16 @@ body {
 
 .tr_container {
   border-radius: 10px 0 0 0;
+  &:last-child {
+    .td_container {
+      &:last-child{
+        border-radius: 0 0 0 10px;
+      }
+      &:first-child{
+        border-radius: 0 0 10px 0;
+      }
+    }
+  }
 }
 
 .tableContainer .td_container{
@@ -64,6 +76,10 @@ body {
   border-bottom: 1px solid $table-border;
   border-right: 1px solid $table-border;
   border-top: none;
+
+  &:last-child {
+    border-left: 1px solid $table-border;
+  }
 }
 
 .sidebar_right {
@@ -80,9 +96,37 @@ body {
   overflow-y: auto;
 }
 
-// .tr_container .td_container:first-child, .theader_container  .th_container:first-child{
-//   position: sticky; 
-//   top: 0;
-//   right: 0;  
-//   background-color: white;
-// }
+//  button and modal setting style
+
+.modal_Setting {
+  .btn_setting {
+    background-color: transparent;
+    border: none;
+    &:hover {
+      color: #fff;
+      background-color: transparent;
+      border-color: transparent;
+      border: none;
+    }
+    &:focus {
+      box-shadow: none;
+      background-color: transparent;
+      border: none;
+      border-color: transparent;
+    }
+    &:active {
+      box-shadow: none;
+      background-color: transparent;
+      border: none;
+      border-color: transparent;
+    }
+    &:focus-visible {
+      outline: none;
+      box-shadow: none;
+      background-color: transparent;
+      border: none;
+      border-color: transparent;
+    }
+  }
+
+}
