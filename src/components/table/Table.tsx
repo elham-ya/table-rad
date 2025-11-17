@@ -139,6 +139,7 @@ const Table: React.FC<TableProps> = ({
         <SettingModal
           isOpen={settingModal}
           toggle={toggleSetting}
+          columns={cols}
         />
       </Col>
       <Col xs="12">

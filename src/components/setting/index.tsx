@@ -16,6 +16,7 @@ import ColumnItem from './columnItem'
 export default function SettingModal({
   isOpen = false,
   toggle = () => {},
+  columns = [],
 }) {
 
 
@@ -34,8 +35,8 @@ export default function SettingModal({
                   </button>
                 </div>
               </Col>
-              <Col xs='12'>
-                <ColumnItem />
+              <Col xs='12' className='py-3'>
+                <ColumnItem columns={columns} />
               </Col>
             </Row>
           </ModalBody>
