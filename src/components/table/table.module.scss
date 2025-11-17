@@ -1,29 +1,8 @@
 @use '../../styles/variables' as *;
 
-body {
-    padding: 50px;
-    direction: rtl;
-}
-
-// .table_wrapper {
-
-//   width: 100%;
-//   max-width: 1200px;          
-//   margin: 50px auto;
-//   border: 2px solid #333;
-//   border-radius: 8px;
-//   overflow-x: auto;           
-//   overflow-y: auto;           
-//   max-height: 500px;          
-//   background: white;
-//   z-index: 2;
-// }
-
-
-
 
 .tableContainer {
-  width: 100%;
+  max-width: 100%;
   // border: 1px solid $table-border;
   padding: 0;
   border-radius: 10px;
@@ -114,6 +93,7 @@ body {
       border: none;
       border-color: transparent;
     }
+    
     &:active {
       box-shadow: none;
       background-color: transparent;

@@ -21,6 +21,7 @@ export interface TableProps {
   checkBox?: boolean;
   onRowSelect?: (selectedRows: unknown[]) => void;
   onPageChange?:(pageNumber: number) => void;
+  onSizeChange?:(pageNumber: number) => void;
 }
 
 export interface TableColumn {

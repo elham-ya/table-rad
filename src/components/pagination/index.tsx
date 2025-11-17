@@ -27,9 +27,7 @@ const TablePagination: React.FC<TablePaginationProps> = ({
   const totalPages = Math.ceil(totalCount / size) || 1;
   const currentPage = Math.max(1, Math.min(pageNumber, totalPages));
 
-  // const startItem = totalCount === 0 ? 0 : (currentPage - 1) * size + 1;
-  // const endItem = Math.min(currentPage * size, totalCount);
-console.log('totalCount:',totalCount);
+  console.log('totalCount:',totalCount);
 
   const handlePageClick = (page: number) => {
     if (page >= 1 && page <= totalPages && page !== currentPage) {
@@ -42,7 +40,7 @@ console.log('totalCount:',totalCount);
     
     const newSize = Number(e.target.value);
     onSizeChange?.(newSize);
-    // اختیاری: برو به صفحه ۱ وقتی سایز عوض میشه
+    //  برو به صفحه ۱ وقتی سایز عوض میشه
     if (currentPage !== 1) {
       onPageChange(1);
     }
@@ -76,7 +74,7 @@ console.log('totalCount:',totalCount);
   }, [currentPage]);
 
   const [value, setValue] = useState(String(currentPage));
-console.log("value:", value);
+
 
   const handleGoToPageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     console.log('e handleGoToPageChange:', e.target.value);
@@ -84,10 +82,6 @@ console.log("value:", value);
     setValue(e.target.value)
   }
   const submit = () => {
-    console.log(
-      "go to page"
-    );
-    
     const n = parseInt(value.trim(), 10);
     if (Number.isNaN(n)) return; // ignore invalid input
     const page = Math.max(1, Math.min(totalPages || 1, n));

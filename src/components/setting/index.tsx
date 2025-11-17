@@ -11,14 +11,14 @@ import {
 } from "reactstrap";
 import SearchIcon from '../../assets/icons/IconSearch.svg'
 import styles from './setting.module.scss';
-import ColumnItem from './columnItem'
+import ColumnItem from './columnItem';
 
 export default function SettingModal({
   isOpen = false,
   toggle = () => {},
   columns = [],
+  value = []
 }) {
-
 
   return (
     <Row>

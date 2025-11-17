@@ -1,11 +1,13 @@
 {
   "name": "table-rad",
-  "private": true,
-  "version": "1.0.0",
+  "version": "0.0.1-alpha",
   "type": "module",
   "main": "dist/index.js",
   "module": "dist/index.esm.js",
   "types": "dist/index.d.ts",
+   "engines": {
+    "node": ">=18.16.0"
+  },
   "files": [
     "dist"
   ],

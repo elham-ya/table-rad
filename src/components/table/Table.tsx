@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from "react";
-import _, { uniqueId } from "lodash";
+import _, { size, uniqueId } from "lodash";
 import { TableColumn, TableProps, ContentType } from "../../types/index";
 import styles from "./table.module.scss";
 import {
@@ -24,6 +24,7 @@ const Table: React.FC<TableProps> = ({
   checkBox = false,
   onRowSelect,
   onPageChange,
+  onSizeChange,
 }) => {
   // just keeping index
   const [selectedRowIds, setSelectedRowIds] = useState<Set<string | number>>(
@@ -117,11 +118,13 @@ const Table: React.FC<TableProps> = ({
 
   const handlePageChange = (pageNumber: number) => {
     setPage(pageNumber);
+    onPageChange?.(pageNumber);
     // می‌توانید اینجا درخواست داده جدید را انجام دهید
   };
 
   const handleSizeChange = (pageSize: number) => {
     setPageSize(pageSize);
+    onSizeChange?.(pageSize)
     // می‌توانید اینجا درخواست داده جدید را انجام دهید
   };
 
@@ -140,6 +143,7 @@ const Table: React.FC<TableProps> = ({
           isOpen={settingModal}
           toggle={toggleSetting}
           columns={cols}
+          value={data}
         />
       </Col>
       <Col xs="12">
