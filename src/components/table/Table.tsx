@@ -143,7 +143,6 @@ const Table: React.FC<TableProps> = ({
           isOpen={settingModal}
           toggle={toggleSetting}
           columns={cols}
-          value={data}
         />
       </Col>
       <Col xs="12">

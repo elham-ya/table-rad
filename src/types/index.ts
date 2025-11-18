@@ -84,3 +84,13 @@ export interface TablePaginationProps {
   showTotal?: boolean;                            // نمایش "نمایش ۱–۱۰ از ۵۲" ؟
   className?: string;
 }
+
+export interface SettingModalProps {
+  isOpen: boolean;
+  toggle: () => void;
+  columns:TableColumn[]
+}
+
+export interface columnItemProps {
+  post:TableColumn[]
+}

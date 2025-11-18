@@ -85,6 +85,8 @@
   }
   .drag_icon {
     margin-left: 20px;
+    cursor: grab;            
+  user-select: none;
   }
 
   .t_px_input {
@@ -119,4 +121,14 @@
     text-align: left;
   }
 
+  .dargableItem_wrapper {
+    background-color: #F7F7F7;
+    border-radius: 12px;
+    box-shadow: 0px 1px 3px 0px #1018281A,
+            0px 1px 2px -1px #1018281A;
+
+    &:hover {
+      box-shadow: 0px 4px 6px -1px #1018281A, 0px 2px 4px -2px #1018281A;
+    }
+  }
 }

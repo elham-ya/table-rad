@@ -12,18 +12,18 @@ import {
 import SearchIcon from '../../assets/icons/IconSearch.svg'
 import styles from './setting.module.scss';
 import ColumnItem from './columnItem';
+import { SettingModalProps } from '../../types/index'
 
-export default function SettingModal({
+const SettingModal: React.FC<SettingModalProps> = ({
   isOpen = false,
   toggle = () => {},
   columns = [],
-  value = []
-}) {
+}) => {
 
   return (
     <Row>
       <Col xs='12'>
-        <Modal isOpen={isOpen} size='lg' toggle={toggle} className={styles.modal_wrapper}>
+        <Modal isOpen={isOpen} size='lg' toggle={toggle} backdrop='static' className={styles.modal_wrapper}>
           <ModalHeader toggle={toggle} className={styles.modal_itemheader}>تنظیمات ستون</ModalHeader>
           <ModalBody>
             <Row>
@@ -35,8 +35,10 @@ export default function SettingModal({
                   </button>
                 </div>
               </Col>
-              <Col xs='12' className='py-3'>
-                <ColumnItem columns={columns} />
+              <Col xs='12' className='py-2'>
+                <ColumnItem post={columns} />
+                <ColumnItem post={columns} />
+                <ColumnItem post={columns} />
               </Col>
             </Row>
           </ModalBody>
@@ -53,3 +55,5 @@ export default function SettingModal({
     </Row>
   );
 };
+
+export default SettingModal;
