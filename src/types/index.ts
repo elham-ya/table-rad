@@ -25,8 +25,8 @@ export interface TableProps {
 }
 
 export interface TableColumn {
-  uniqueId?: string;
-  title?: React.ReactNode;
+  uniqueId: string ;
+  title: React.ReactNode;
   key?: string;
   width?: string;
   type?: ContentType;
@@ -91,6 +91,8 @@ export interface SettingModalProps {
   columns:TableColumn[]
 }
 
-export interface columnItemProps {
-  post:TableColumn[]
+export interface SortableItemProps {
+  id: string;
+  key: string;
+  title: React.ReactNode
 }
