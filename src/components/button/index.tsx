@@ -18,7 +18,7 @@ import EditIcon from "../../assets/icons/IconEdit.svg";
 import DotIcon from "../../assets/icons/IconDot.svg";
 
 const ButtonComponent: React.FC<ButtonProps> = ({ data, buttonList }) => {
-  console.log("buttonList:", buttonList);
+  // console.log("buttonList:", buttonList);
   
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const toggle = () => setDropdownOpen((prevState) => !prevState);
@@ -26,7 +26,7 @@ const ButtonComponent: React.FC<ButtonProps> = ({ data, buttonList }) => {
   const listofbuttons = buttonList.filter((btn) => {
     return btn.visible === true;
   });
-  console.log("listofbuttons:", listofbuttons);
+  // console.log("listofbuttons:", listofbuttons);
   return (
     <div className={styles.action_button_wrapper}>
       <Button

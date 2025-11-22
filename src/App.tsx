@@ -3,6 +3,7 @@ import TableView from "./components/table/Table";
 import { ContentType } from "./types/index";
 
 function App() {
+
   const data = [
     {
       id: 4647415,
@@ -4088,6 +4089,8 @@ function App() {
       excelFunc: () => {
         return 1000000;
       },
+      visible: true,
+      excel: true
     },
     {
       title: "توضیحات",
@@ -4095,6 +4098,8 @@ function App() {
       key: "description",
       width: "200",
       type: ContentType.Text,
+      visible: true,
+      excel: true
     },
     {
       uniqueId: "billNumber",
@@ -4102,6 +4107,8 @@ function App() {
       key: "metadata.billNumber",
       width: "200",
       type: ContentType.Number,
+      visible: true,
+      excel: true
     },
     {
       uniqueId: "price37",
@@ -4109,6 +4116,8 @@ function App() {
       width: "200",
       key: "customerInfo",
       type: ContentType.Text,
+      visible: true,
+      excel: true
     },
     {
       uniqueId: "price2",
@@ -4116,6 +4125,8 @@ function App() {
       width: "200",
       key: "metadata.orderStatus.name",
       type: ContentType.Text,
+      visible: true,
+      excel: true
     },
     {
       uniqueId: "price22",
@@ -4123,6 +4134,8 @@ function App() {
       width: "200",
       key: "metadata.paymentType",
       type: ContentType.Text,
+      visible: true,
+      excel: true
     },
     {
       uniqueId: "price4",
@@ -4130,6 +4143,8 @@ function App() {
       width: "200",
       key: "cellphoneNumber",
       type: ContentType.Text,
+      visible: true,
+      excel: true
     },
     {
       uniqueId: "price1",
@@ -4137,6 +4152,8 @@ function App() {
       width: "200",
       key: "metadata.orderStatus.name",
       type: ContentType.Text,
+      visible: true,
+      excel: true
     },
     {
       uniqueId: "price20",
@@ -4144,6 +4161,8 @@ function App() {
       width: "200",
       key: "metadata.paymentType",
       type: ContentType.Text,
+      visible: true,
+      excel: true
     },
     {
       uniqueId: "price45",
@@ -4151,6 +4170,8 @@ function App() {
       width: "200",
       key: "cellphoneNumber",
       type: ContentType.Text,
+      visible: true,
+      excel: true
     },
     {
       uniqueId: "price3",
@@ -4158,6 +4179,8 @@ function App() {
       width: "200",
       key: "metadata.orderStatus.name",
       type: ContentType.Text,
+      visible: true,
+      excel: true
     },
     {
       uniqueId: "price27",
@@ -4165,6 +4188,8 @@ function App() {
       width: "200",
       key: "metadata.paymentType",
       type: ContentType.Text,
+      visible: true,
+      excel: true
     },
     {
       uniqueId: "actions",
@@ -4172,6 +4197,8 @@ function App() {
       type: ContentType.Button,
       buttons: actionButtons,
       width: "150",
+      visible: true,
+      excel: true
     },
   ];
 
@@ -4179,19 +4206,29 @@ function App() {
     console.log("ردیف‌های انتخاب‌شده :", selectedRows);
   };
 
-  const handlePageChange = () => {}
+  const handlePageChange = (_pageNumber: number) => {
+    // dispatch getlist by new pageNumber
+  }
+
+  const config = {
+    'Access-Token': '4206504876-a562739B330f48ea90058e22f2248df7.XzIwMjUxMQ',
+    'Client-Id': '17959574q2f0347718971594ccd86f3f4',
+    url : `https://api.sandpod.ir/srv/cms-sandbox/api/core/users/setting`,
+  }
 
   return (
-    <>
+    
       <TableView
+        id="invoiceList"
         data={data}
         cols={cols}
         totalCount={data.length}
         checkBox={true}
         onRowSelect={handleSelect}
         onPageChange={handlePageChange}
+        requestConfig={config}
       />
-    </>
+    
   );
 }
 

@@ -12,8 +12,14 @@ const ContentTypeValues = {
 export type ContentType = typeof ContentTypeValues[keyof typeof ContentTypeValues];
 export const ContentType = ContentTypeValues;
 
+type AppConfig = {
+  "Access-Token": string ;
+  "Client-Id": string;
+  url: string; 
+};
 
 export interface TableProps {
+  id: string;
   data: unknown[];
   cols: TableColumn[];
   totalCount?: number;
@@ -22,6 +28,7 @@ export interface TableProps {
   onRowSelect?: (selectedRows: unknown[]) => void;
   onPageChange?:(pageNumber: number) => void;
   onSizeChange?:(pageNumber: number) => void;
+  requestConfig: AppConfig
 }
 
 export interface TableColumn {
@@ -36,6 +43,8 @@ export interface TableColumn {
   | ((row: unknown) => React.ReactNode)
   excelFunc?: (row: unknown) => unknown;
   buttons?: buttonColProps[];
+  visible: boolean;
+  excel: boolean
 }
 export interface CheckboxProps<T = unknown> {
   checked?: boolean;
@@ -88,7 +97,8 @@ export interface TablePaginationProps {
 export interface SettingModalProps {
   isOpen: boolean;
   toggle: () => void;
-  columns:TableColumn[]
+  columns:TableColumn[];
+  handleSaveConfig: (data: TableColumn[]) => void
 }
 
 export interface SortableItemProps {
@@ -96,3 +106,35 @@ export interface SortableItemProps {
   key: string;
   title: React.ReactNode
 }
+
+interface GeneralSettings {
+  cashDeskQrPrintType: string[];
+  managementQrPrintType: string[];
+  cashDeskInvoicePrintType: string;
+  managementInvoicePrintType: string;
+  tables: any[]
+}
+
+export interface SettingProps {
+  generalSettings: GeneralSettings;
+}
+
+export interface ApiResponse {
+  referenceNumber: number;
+  hasError: boolean;
+  errorCode: number;
+  refId: string;
+  message: any[];
+  count: number;
+  aggregations: number;
+  result: Array<{
+    setting: SettingProps;
+    created: { at: number; user_name: string; ssoId: number };
+    updated: { at: number; user_name: string; ssoId: number };
+    post_unique: string;
+  }>;
+  metaData: any[];
+}
+
+
+

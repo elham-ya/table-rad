@@ -1,6 +1,12 @@
 import React, { useState, useEffect, useMemo, useRef } from "react";
 import _, { size, uniqueId } from "lodash";
-import { TableColumn, TableProps, ContentType } from "../../types/index";
+import {
+  TableColumn,
+  TableProps,
+  ContentType,
+  ApiResponse,
+  SettingProps,
+} from "../../types/index";
 import styles from "./table.module.scss";
 import {
   Table as ReactstrapTable,
@@ -15,16 +21,18 @@ import {
 import Checkbox from "../checkBox";
 import ButtonComponent from "../button";
 import TablePagination from "../pagination";
-import SettingModal from '../setting'
+import SettingModal from "../setting";
 import SettingButtonIcon from "../../assets/icons/SettingButton.svg";
 
 const Table: React.FC<TableProps> = ({
+  id,
   data,
   cols,
   checkBox = false,
   onRowSelect,
   onPageChange,
   onSizeChange,
+  requestConfig,
 }) => {
   // just keeping index
   const [selectedRowIds, setSelectedRowIds] = useState<Set<string | number>>(
@@ -33,6 +41,8 @@ const Table: React.FC<TableProps> = ({
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [settingModal, setSettingModal] = useState(false);
+  const [configData, setConfigData] = useState<ApiResponse | null>(null);
+  const [newCols, setNewCols] = useState<TableColumn[]>([]);
 
   // selection of rows send to parent
   useEffect(() => {
@@ -45,6 +55,91 @@ const Table: React.FC<TableProps> = ({
     }
   }, [selectedRowIds, data, onRowSelect]);
 
+    console.log('requestConfig:', requestConfig);
+
+  useEffect(() => {
+    if (requestConfig?.url && requestConfig["Access-Token"]) {
+      getSettingData();
+    }
+  }, [requestConfig]);
+
+  const getSettingData = async () => {
+    if (!requestConfig || !requestConfig.url || !requestConfig["Access-Token"] || !requestConfig["Client-Id"]) {
+      console.warn("requestConfig ناقص است یا وجود ندارد. درخواست تنظیمات ارسال نشد.", requestConfig);
+      return;
+    }
+    try {
+      const res = await fetch(requestConfig.url, {
+        method: "GET",
+        headers: {
+          "Access-Token": requestConfig["Access-Token"],
+          "Client-Id": requestConfig["Client-Id"],
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!res.ok) {
+        throw new Error(`Error: ${res.statusText}`);
+      }
+
+      const data = await res.json();
+
+      setConfigData(data);
+    } catch (error) {
+      console.log("error fetching data:", error);
+    }
+  };
+
+  const sendSettingData = async (params: any) => {
+    try {
+      const res = await fetch(requestConfig.url, {
+        method: "POST",
+        headers: {
+          "Access-Token": `${requestConfig["Access-Token"]}`,
+          "Client-Id": requestConfig["Client-Id"],
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(params),
+      });
+
+      if (!res.ok) {
+        throw new Error(`http error! status:${res.status}`);
+      }
+
+      const data = await res.json();
+      return data;
+    } catch (err) {
+      console.log("Post request faild!:", err);
+      return null;
+    }
+  };
+
+  const getSetting = (tableId = id) => {
+    if (!configData?.result[0]) {
+      return null;
+    }
+    const { setting } = configData.result[0];
+
+    if (Object.hasOwn(setting, "tables")) {
+
+      let _tableId =  setting.generalSettings.tables.filter((item) => {
+        item.id === id
+      }).id;
+
+      console.log('_tableId:',_tableId);
+      
+
+      // getSettingData(_tableId)
+    } else {
+      return null;
+    }
+  };
+
+  //newCols
+  const setSetting = (tableId = id, params: SettingProps) => {
+    sendSettingData(params);
+  };
+
   const numberColumn: TableColumn = {
     uniqueId: "__number__selector__",
     key: "__number__selector__",
@@ -52,10 +147,10 @@ const Table: React.FC<TableProps> = ({
     type: ContentType.Function,
     title: "#",
     htmlFunc: (row: any, rowIndex: number) => {
-      console.log("rowIndex:", rowIndex);
-
       return rowIndex + 1;
     },
+    visible: true,
+    excel: false,
   };
 
   const checkboxColumn: TableColumn | null = checkBox
@@ -107,6 +202,8 @@ const Table: React.FC<TableProps> = ({
             />
           );
         },
+        visible: true,
+        excel: false,
       }
     : null;
 
@@ -124,12 +221,49 @@ const Table: React.FC<TableProps> = ({
 
   const handleSizeChange = (pageSize: number) => {
     setPageSize(pageSize);
-    onSizeChange?.(pageSize)
+    onSizeChange?.(pageSize);
     // می‌توانید اینجا درخواست داده جدید را انجام دهید
   };
 
   const toggleSetting = () => {
     setSettingModal(!settingModal);
+  };
+
+  const habdleSubmitModal = (data: TableColumn[]) => {
+    console.log('submitttttt');
+    
+    // new cols or unchanged config for table columns is here.
+    // we add it to config that received from api
+    setNewCols(data);
+    // here new cols and default setting is merged and send to service
+    if (!configData?.result[0]) {
+      return <div>در حال بارگذاری تنظیمات...</div>;
+    }
+    const { setting } = configData.result[0];
+
+    if (Object.hasOwn(setting, "tables")) {
+      // we have default setting for table get from API,
+      // so we have to merge it with user setting. and api setting is overwrited by newCols
+
+      // find related table
+      let currentTable = setting.generalSettings.tables.filter((item) => {
+        item.id === id;
+      });
+
+      console.log('currentTable:',currentTable);
+      
+
+      // make new config to send server
+      let params = {...setting, tables:[...currentTable, ...data] };
+
+      // setSetting(id, params);
+    } else {
+      let params = {
+        ...setting,
+        tables: [...data],
+      };
+      // setSetting(id, params);
+    }
   };
 
   return (
@@ -143,6 +277,7 @@ const Table: React.FC<TableProps> = ({
           isOpen={settingModal}
           toggle={toggleSetting}
           columns={cols}
+          handleSaveConfig={(data) => habdleSubmitModal(data)}
         />
       </Col>
       <Col xs="12">
@@ -213,8 +348,6 @@ const Table: React.FC<TableProps> = ({
 
                           // 4. دکمه
                           if (col.type === ContentType.Button) {
-                            console.log("col sss:", col);
-
                             return (
                               <ButtonComponent
                                 buttonList={col.buttons ?? []}

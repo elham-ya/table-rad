@@ -33,6 +33,7 @@ const SettingModal: React.FC<SettingModalProps> = ({
   isOpen = false,
   toggle = () => {},
   columns = [],
+  handleSaveConfig
 }) => {
   const [items, setItems] = useState(columns);
   useEffect(() => {
@@ -56,15 +57,16 @@ const SettingModal: React.FC<SettingModalProps> = ({
       const newIndex = prevItems.findIndex((i) => i.uniqueId === over.id);
       const newOrder = arrayMove(prevItems, oldIndex, newIndex);
 
-      console.log("ترتیب جدید ستون‌ها:", newOrder);
+      // console.log("ترتیب جدید ستون‌ها:", newOrder);
 
       //  فقط آی‌دی‌ها :
-      console.log("فقط آی‌دی‌ها:", newOrder.map(item => item.uniqueId));
+      // console.log("فقط آی‌دی‌ها:", newOrder.map(item => item.uniqueId));
 
       return newOrder;
     });
   }
 };
+console.log('items after movement:',items);
 
   return (
     <Row>
@@ -123,7 +125,7 @@ const SettingModal: React.FC<SettingModalProps> = ({
             <Button
               color="primary"
               className={styles.save_btn}
-              onClick={toggle}
+              onClick={() => handleSaveConfig(items)}
             >
               تایید
             </Button>

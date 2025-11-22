@@ -27,7 +27,7 @@ const TablePagination: React.FC<TablePaginationProps> = ({
   const totalPages = Math.ceil(totalCount / size) || 1;
   const currentPage = Math.max(1, Math.min(pageNumber, totalPages));
 
-  console.log('totalCount:',totalCount);
+  // console.log('totalCount:',totalCount);
 
   const handlePageClick = (page: number) => {
     if (page >= 1 && page <= totalPages && page !== currentPage) {
@@ -36,7 +36,7 @@ const TablePagination: React.FC<TablePaginationProps> = ({
   };
 
   const handleSizeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    console.log('e handleSizeChange:',e);
+    // console.log('e handleSizeChange:',e);
     
     const newSize = Number(e.target.value);
     onSizeChange?.(newSize);
@@ -77,7 +77,7 @@ const TablePagination: React.FC<TablePaginationProps> = ({
 
 
   const handleGoToPageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    console.log('e handleGoToPageChange:', e.target.value);
+    // console.log('e handleGoToPageChange:', e.target.value);
     onPageChange(Number(e.target.value));
     setValue(e.target.value)
   }
