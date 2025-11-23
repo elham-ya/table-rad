@@ -33,40 +33,48 @@ const SettingModal: React.FC<SettingModalProps> = ({
   isOpen = false,
   toggle = () => {},
   columns = [],
-  handleSaveConfig
+  handleSaveConfig,
 }) => {
   const [items, setItems] = useState(columns);
   useEffect(() => {
-    setItems(columns); // وقتی prop تغییر کرد، state رو آپدیت کن
+    setItems(columns); 
   }, [columns]);
+
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
-        distance: 5, // حداقل ۵ پیکسل حرکت کنه تا درگ شروع بشه (جلوگیری از کلیک اشتباه)
+        distance: 3, // حداقل 3 پیکسل حرکت کنه تا درگ شروع بشه (جلوگیری از کلیک اشتباه)
       },
     }),
     useSensor(KeyboardSensor)
   );
+  console.log("items:", items);
 
- const handleDragEnd = (event: DragEndEvent) => {
-  const { active, over } = event;
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
 
-  if (over && active.id !== over.id) {
-    setItems((prevItems) => {
-      const oldIndex = prevItems.findIndex((i) => i.uniqueId === active.id);
-      const newIndex = prevItems.findIndex((i) => i.uniqueId === over.id);
-      const newOrder = arrayMove(prevItems, oldIndex, newIndex);
+    if (over && active.id !== over.id) {
+      setItems((prevItems) => {
+        const oldIndex = prevItems.findIndex((i) => i.uniqueId === active.id);
+        const newIndex = prevItems.findIndex((i) => i.uniqueId === over.id);
+        const newOrder = arrayMove(prevItems, oldIndex, newIndex);
+        return newOrder;
+      });
+    }
+  };
 
-      // console.log("ترتیب جدید ستون‌ها:", newOrder);
-
-      //  فقط آی‌دی‌ها :
-      // console.log("فقط آی‌دی‌ها:", newOrder.map(item => item.uniqueId));
-
-      return newOrder;
-    });
-  }
-};
-console.log('items after movement:',items);
+  const handleChangeTitle = (title: string, index: number) => {
+    console.log("444", title, index);
+  };
+  const handleChangeWidth = (width: string, index: number) => {
+    console.log("333", width, index);
+  };
+  const handleChangeVisibility = (flag: boolean, index: number) => {
+    console.log("222", flag, index);
+  };
+  const handleChangeExcelExport = (flag: boolean, index: number) => {
+    console.log("111", flag, index);
+  };
 
   return (
     <Row>
@@ -98,15 +106,18 @@ console.log('items after movement:',items);
                   onDragEnd={handleDragEnd}
                 >
                   <SortableContext
-                    items={items.map((i) => i.uniqueId)} // ← اینجا items (state) رو بده
+                    items={items.map((i) => i.uniqueId)}
                     strategy={verticalListSortingStrategy}
                   >
-                    {/* اینجا هم از items.map استفاده کن نه columns.map */}
                     {items.map((field) => (
                       <SortableItem
                         key={field.uniqueId}
                         id={field.uniqueId}
-                        title={field.title}
+                        row={field}
+                        onChangeTitle={handleChangeTitle}
+                        onChangeWidth={handleChangeWidth}
+                        onChangeVisibility={handleChangeVisibility}
+                        onChangeExcelExport={handleChangeExcelExport}
                       />
                     ))}
                   </SortableContext>
@@ -125,7 +136,10 @@ console.log('items after movement:',items);
             <Button
               color="primary"
               className={styles.save_btn}
-              onClick={() => handleSaveConfig(items)}
+              onClick={() => {
+                handleSaveConfig(items);
+                toggle();
+              }}
             >
               تایید
             </Button>

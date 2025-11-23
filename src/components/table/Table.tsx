@@ -55,15 +55,16 @@ const Table: React.FC<TableProps> = ({
     }
   }, [selectedRowIds, data, onRowSelect]);
 
-    console.log('requestConfig:', requestConfig);
+    console.log('configData:', configData);
 
   useEffect(() => {
     if (requestConfig?.url && requestConfig["Access-Token"]) {
-      getSettingData();
+      requestGetSetting();
     }
   }, [requestConfig]);
 
-  const getSettingData = async () => {
+  // get all settings
+  const requestGetSetting = async () => {
     if (!requestConfig || !requestConfig.url || !requestConfig["Access-Token"] || !requestConfig["Client-Id"]) {
       console.warn("requestConfig ناقص است یا وجود ندارد. درخواست تنظیمات ارسال نشد.", requestConfig);
       return;
@@ -77,6 +78,7 @@ const Table: React.FC<TableProps> = ({
           "Content-Type": "application/json",
         },
       });
+      
 
       if (!res.ok) {
         throw new Error(`Error: ${res.statusText}`);
@@ -86,11 +88,13 @@ const Table: React.FC<TableProps> = ({
 
       setConfigData(data);
     } catch (error) {
-      console.log("error fetching data:", error);
+      console.log("error fetching setting:", error);
     }
   };
 
-  const sendSettingData = async (params: any) => {
+  const requestSetSetting = async (tableId = id, params: any) => {
+    console.log('yyyy');
+    
     try {
       const res = await fetch(requestConfig.url, {
         method: "POST",
@@ -119,26 +123,76 @@ const Table: React.FC<TableProps> = ({
       return null;
     }
     const { setting } = configData.result[0];
-
     if (Object.hasOwn(setting, "tables")) {
-
-      let _tableId =  setting.generalSettings.tables.filter((item) => {
-        item.id === id
-      }).id;
-
-      console.log('_tableId:',_tableId);
-      
-
-      // getSettingData(_tableId)
+      return setting?.tables.find((item) => {
+        item.id === tableId
+      });
     } else {
       return null;
     }
   };
 
   //newCols
-  const setSetting = (tableId = id, params: SettingProps) => {
-    sendSettingData(params);
+  const setSetting = (tableId = id, params: any) => {
+    console.log('ddd');
+    
+    requestSetSetting(tableId, params);
   };
+
+  const habdleSubmitModal = (data: TableColumn[]) => {
+    console.log('data on submit:', data);
+    
+    // new cols or unchanged config for table columns is here.
+    // we add it to config that received from api
+    setNewCols(data);
+    // here new cols and default setting is merged and send to service
+    if (!configData?.result[0]) {
+      return null;
+    }
+    const { setting } = configData.result[0];
+
+    if (Object.hasOwn(setting, "tables")) {
+      // we have default setting for table get from API,
+      // so we have to merge it with user setting. and api setting is overwrited by newCols
+
+      // find related table
+      let currentTable = getSetting(id);
+      console.log('currentTable:', currentTable);
+      
+      // make new config to send server
+      
+      let params = {
+                    ...setting,
+                    tables: [ ...setting?.tables ,
+                      {
+                        id: id,
+                        columns: [
+                        ...currentTable, ...data
+                        ]
+                      }] 
+                   };
+
+      setSetting(id, {
+        'setting': {
+          ...params
+        }
+      });
+    } else {
+     
+      let params = {
+        ...setting,
+        tables: [
+          {id: id, columns: [...data] }
+        ],
+      };
+      setSetting(id, {
+        'setting': {
+          ...params
+        }
+      });
+    }
+  };
+
 
   const numberColumn: TableColumn = {
     uniqueId: "__number__selector__",
@@ -227,43 +281,6 @@ const Table: React.FC<TableProps> = ({
 
   const toggleSetting = () => {
     setSettingModal(!settingModal);
-  };
-
-  const habdleSubmitModal = (data: TableColumn[]) => {
-    console.log('submitttttt');
-    
-    // new cols or unchanged config for table columns is here.
-    // we add it to config that received from api
-    setNewCols(data);
-    // here new cols and default setting is merged and send to service
-    if (!configData?.result[0]) {
-      return <div>در حال بارگذاری تنظیمات...</div>;
-    }
-    const { setting } = configData.result[0];
-
-    if (Object.hasOwn(setting, "tables")) {
-      // we have default setting for table get from API,
-      // so we have to merge it with user setting. and api setting is overwrited by newCols
-
-      // find related table
-      let currentTable = setting.generalSettings.tables.filter((item) => {
-        item.id === id;
-      });
-
-      console.log('currentTable:',currentTable);
-      
-
-      // make new config to send server
-      let params = {...setting, tables:[...currentTable, ...data] };
-
-      // setSetting(id, params);
-    } else {
-      let params = {
-        ...setting,
-        tables: [...data],
-      };
-      // setSetting(id, params);
-    }
   };
 
   return (

@@ -104,7 +104,11 @@ export interface SettingModalProps {
 export interface SortableItemProps {
   id: string;
   key: string;
-  title: React.ReactNode
+  row: any;
+  onChangeTitle: (x: string,y:number) => void;
+  onChangeWidth:(x: string,y:number) => void;
+  onChangeVisibility:(x: boolean,y:number) => void;
+  onChangeExcelExport:(x: boolean,y:number) => void;
 }
 
 interface GeneralSettings {
@@ -112,11 +116,12 @@ interface GeneralSettings {
   managementQrPrintType: string[];
   cashDeskInvoicePrintType: string;
   managementInvoicePrintType: string;
-  tables: any[]
+  
 }
 
 export interface SettingProps {
   generalSettings: GeneralSettings;
+  tables: any[]
 }
 
 export interface ApiResponse {
