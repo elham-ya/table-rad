@@ -1,6 +1,5 @@
-import React, { useState, useEffect, useMemo, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import {
-  Table as ReactstrapTable,
   Row,
   Col,
   Button,
@@ -29,6 +28,7 @@ import styles from "./setting.module.scss";
 import SortableItem from "./sortableItem";
 import { SettingModalProps } from "../../types/index";
 
+
 const SettingModal: React.FC<SettingModalProps> = ({
   isOpen = false,
   toggle = () => {},
@@ -36,8 +36,9 @@ const SettingModal: React.FC<SettingModalProps> = ({
   handleSaveConfig,
 }) => {
   const [items, setItems] = useState(columns);
+
   useEffect(() => {
-    setItems(columns); 
+    setItems(columns);
   }, [columns]);
 
   const sensors = useSensors(
@@ -48,7 +49,6 @@ const SettingModal: React.FC<SettingModalProps> = ({
     }),
     useSensor(KeyboardSensor)
   );
-  console.log("items:", items);
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
@@ -63,18 +63,78 @@ const SettingModal: React.FC<SettingModalProps> = ({
     }
   };
 
+  const [columnsConfig, setColumnsConfig] = useState<Array<Partial<{
+    index: number; 
+    title: string; 
+    width: string; 
+    visible: boolean; 
+    excel: boolean;
+  }>>>([]);
+
   const handleChangeTitle = (title: string, index: number) => {
-    console.log("444", title, index);
+    console.log("title change:", title, index);
+    setColumnsConfig(prev => {
+      const updated = [...prev];
+
+      console.log('updated:',updated);
+      
+      
+      if (!updated[index]) {
+        updated[index] = { index: index, title: title };
+      } else {
+        updated[index] = { ...updated[index], title };
+      }
+      
+      return updated;
+    });
   };
+
+  console.log('columnsConfig:',columnsConfig);
+  
   const handleChangeWidth = (width: string, index: number) => {
-    console.log("333", width, index);
+    console.log("width change", width, index);
+    setColumnsConfig(prev => {
+      const updated = [...prev];
+
+      if(!updated[index]) {
+        updated[index] = { index: index, width: width };
+      } else {
+        updated[index] = { ...updated[index], width}
+      }
+
+      return updated
+    })
   };
   const handleChangeVisibility = (flag: boolean, index: number) => {
-    console.log("222", flag, index);
+    console.log("visible change", flag, index);
+
+    setColumnsConfig( prev => {
+      const updated  = [...prev];
+
+      if(!updated[index]) {
+        updated[index] = { index: index, visible: flag };
+      } else {
+        updated[index] = { ...updated[index], visible: flag }
+      }
+
+      return updated;
+    })
   };
   const handleChangeExcelExport = (flag: boolean, index: number) => {
-    console.log("111", flag, index);
+    console.log("excel export change:", flag, index);
+
+    setColumnsConfig( prev => {
+      const updated  = [...prev]; 
+
+      if(!updated[index]) {
+        updated[index] = { index: index, excel: flag };
+      } else{
+        updated[index] = { ...updated[index], excel: flag }
+      }
+
+      return updated;})
   };
+
 
   return (
     <Row>
@@ -148,6 +208,6 @@ const SettingModal: React.FC<SettingModalProps> = ({
       </Col>
     </Row>
   );
-};
+}
 
 export default SettingModal;

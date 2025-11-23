@@ -32,6 +32,7 @@ export interface TableProps {
 }
 
 export interface TableColumn {
+  index: number;
   uniqueId: string ;
   title: React.ReactNode;
   key?: string;
@@ -101,10 +102,21 @@ export interface SettingModalProps {
   handleSaveConfig: (data: TableColumn[]) => void
 }
 
+interface rowProps {
+  excel: boolean; 
+  index: number; 
+  key: string;
+  title: string;
+  type: string;
+  uniqueId: string;
+  visible : boolean;
+  width: string;
+}
+
 export interface SortableItemProps {
   id: string;
   key: string;
-  row: any;
+  row: rowProps;
   onChangeTitle: (x: string,y:number) => void;
   onChangeWidth:(x: string,y:number) => void;
   onChangeVisibility:(x: boolean,y:number) => void;
@@ -121,7 +133,7 @@ interface GeneralSettings {
 
 export interface SettingProps {
   generalSettings: GeneralSettings;
-  tables: any[]
+  tables: unknown[]
 }
 
 export interface ApiResponse {
@@ -129,7 +141,7 @@ export interface ApiResponse {
   hasError: boolean;
   errorCode: number;
   refId: string;
-  message: any[];
+  message: unknown[];
   count: number;
   aggregations: number;
   result: Array<{
@@ -138,7 +150,7 @@ export interface ApiResponse {
     updated: { at: number; user_name: string; ssoId: number };
     post_unique: string;
   }>;
-  metaData: any[];
+  metaData: unknown[];
 }
 
 

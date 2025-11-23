@@ -1,11 +1,10 @@
-import React, { useState, useEffect, useMemo, useRef } from "react";
-import _, { size, uniqueId } from "lodash";
+import React, { useState, useEffect, useMemo } from "react";
+import _ from "lodash";
 import {
   TableColumn,
   TableProps,
   ContentType,
   ApiResponse,
-  SettingProps,
 } from "../../types/index";
 import styles from "./table.module.scss";
 import {
@@ -13,10 +12,6 @@ import {
   Row,
   Col,
   Button,
-  Modal,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
 } from "reactstrap";
 import Checkbox from "../checkBox";
 import ButtonComponent from "../button";
@@ -92,9 +87,7 @@ const Table: React.FC<TableProps> = ({
     }
   };
 
-  const requestSetSetting = async (tableId = id, params: any) => {
-    console.log('yyyy');
-    
+  const requestSetSetting = async ( params: any) => {
     try {
       const res = await fetch(requestConfig.url, {
         method: "POST",
@@ -133,11 +126,11 @@ const Table: React.FC<TableProps> = ({
   };
 
   //newCols
-  const setSetting = (tableId = id, params: any) => {
-    console.log('ddd');
+  // const setSetting = (tableId = id, params: any) => {
+  //   console.log('ddd');
     
-    requestSetSetting(tableId, params);
-  };
+  //   requestSetSetting(tableId, params);
+  // };
 
   const habdleSubmitModal = (data: TableColumn[]) => {
     console.log('data on submit:', data);
@@ -156,14 +149,14 @@ const Table: React.FC<TableProps> = ({
       // so we have to merge it with user setting. and api setting is overwrited by newCols
 
       // find related table
-      let currentTable = getSetting(id);
+      const currentTable = getSetting(id);
       console.log('currentTable:', currentTable);
       
       // make new config to send server
       
-      let params = {
+      const params = {
                     ...setting,
-                    tables: [ ...setting?.tables ,
+                    tables: [ ...setting.tables ,
                       {
                         id: id,
                         columns: [
@@ -172,20 +165,19 @@ const Table: React.FC<TableProps> = ({
                       }] 
                    };
 
-      setSetting(id, {
+      requestSetSetting( {
         'setting': {
           ...params
         }
       });
     } else {
-     
-      let params = {
+      const params = {
         ...setting,
         tables: [
           {id: id, columns: [...data] }
         ],
       };
-      setSetting(id, {
+      requestSetSetting( {
         'setting': {
           ...params
         }

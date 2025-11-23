@@ -1,6 +1,5 @@
-import React, { useState, useEffect, useMemo, useRef } from "react";
+import React, { useState } from "react";
 import {
-  Table as ReactstrapTable,
   Row,
   Col,
   Input,
@@ -12,11 +11,10 @@ import { CSS } from "@dnd-kit/utilities";
 import { SortableItemProps } from "../../types/index";
 import styles from "./setting.module.scss";
 import IconFilter from "../../assets/icons/IconFilter.svg";
-import IconExcelActive from "../../assets/icons/IconButtonExcelActive.svg";
-import IconVisibleActive from "../../assets/icons/IconButtonActiveVisible.svg";
+
 
 const SortableItem = React.forwardRef<HTMLDivElement, SortableItemProps>(
-  ({ id, key, row, onChangeTitle, onChangeWidth, onChangeVisibility, onChangeExcelExport }, ref) => {
+  ({ id, row, onChangeTitle, onChangeWidth, onChangeVisibility, onChangeExcelExport }, ref) => {
     const {
       attributes,
       listeners,
@@ -25,18 +23,15 @@ const SortableItem = React.forwardRef<HTMLDivElement, SortableItemProps>(
       transition,
       isDragging,
     } = useSortable({ id });
-
-    console.log('row:',row);
-
-    const [fieldWidth, setFieldWidth] = useState(row.width)
     const style = {
       transform: CSS.Transform.toString(transform),
       transition,
     };
 
+    const [fieldWidth, setFieldWidth] = useState(row.width)
     const [excelExport, setExcelExport] = useState(row.excel);
     const [visible, setVisible] = useState(row.visible);
-
+    
     const IconExcel = ({ isActive }: { isActive: boolean }) => (
       isActive ? (
         <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -107,19 +102,14 @@ const SortableItem = React.forwardRef<HTMLDivElement, SortableItemProps>(
       onChangeTitle(event.target.value, row.index) 
     }
 
-    const handleChangeExcelExport = (
-      event: React.MouseEvent<HTMLButtonElement>
-    ) => {
+    const handleChangeExcelExport = () => {
       setExcelExport(!excelExport);
-     onChangeExcelExport(excelExport, row.index)
+      onChangeExcelExport(!excelExport, row.index)
     };
 
-    const handleChangeFieldVisibility = (
-      event: React.MouseEvent<HTMLButtonElement>
-    ) => {
+    const handleChangeFieldVisibility = () => {
       setVisible(!visible)
-      onChangeVisibility(visible, row.index)
-    
+      onChangeVisibility(!visible, row.index)
     };
 
     return (
