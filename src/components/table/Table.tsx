@@ -50,7 +50,7 @@ const Table: React.FC<TableProps> = ({
     }
   }, [selectedRowIds, data, onRowSelect]);
 
-    console.log('configData:', configData);
+    // console.log('configData:', configData);
 
   useEffect(() => {
     if (requestConfig?.url && requestConfig["Access-Token"]) {

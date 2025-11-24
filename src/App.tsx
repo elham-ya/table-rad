@@ -1,4 +1,3 @@
-import { uniqueId } from "lodash";
 import TableView from "./components/table/Table";
 import { ContentType } from "./types/index";
 
@@ -4095,8 +4094,8 @@ function App() {
     },
     {
       index: 1,
-      title: "توضیحات",
       uniqueId: "clientId",
+      title: "توضیحات",
       key: "description",
       width: "200",
       type: ContentType.Text,
@@ -4110,7 +4109,7 @@ function App() {
       key: "metadata.billNumber",
       width: "200",
       type: ContentType.Number,
-      visible: true,
+      visible: false,
       excel: true
     },
     {
@@ -4121,7 +4120,7 @@ function App() {
       key: "customerInfo",
       type: ContentType.Text,
       visible: true,
-      excel: true
+      excel: false
     },
     {
       index: 4,
@@ -4131,7 +4130,7 @@ function App() {
       key: "metadata.orderStatus.name",
       type: ContentType.Text,
       visible: true,
-      excel: true
+      excel: false
     },
     {
       index: 5,

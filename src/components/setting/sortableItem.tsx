@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Row,
   Col,
@@ -28,10 +28,20 @@ const SortableItem = React.forwardRef<HTMLDivElement, SortableItemProps>(
       transition,
     };
 
-    const [fieldWidth, setFieldWidth] = useState(row.width)
-    const [excelExport, setExcelExport] = useState(row.excel);
-    const [visible, setVisible] = useState(row.visible);
+    const [inputValue, setInputValue] = useState({
+      title: "",
+      width: row.width,
+      excel: row.excel,
+      visible: row.visible
+    })
+    const [badgeValue, setBadgeValue] = useState(row.title);
     
+    useEffect(() => {
+      if(row && row.title) {
+        setBadgeValue(row.title)
+      }
+    } , [])
+
     const IconExcel = ({ isActive }: { isActive: boolean }) => (
       isActive ? (
         <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -94,22 +104,35 @@ const SortableItem = React.forwardRef<HTMLDivElement, SortableItemProps>(
     };
 
     const handleChangeWidth = (event: React.ChangeEvent<HTMLInputElement>) => {
-      setFieldWidth(event.target.value)
+      setInputValue((prev) => ({
+        ...prev,
+        width: event.target.value
+      }))
       onChangeWidth(event.target.value, row.index)
     };
 
     const handleChangeTitle = (event: React.ChangeEvent<HTMLInputElement>) => {
+      setInputValue((prev) => ({
+        ...prev,
+        title: event.target.value
+      }))
       onChangeTitle(event.target.value, row.index) 
     }
 
     const handleChangeExcelExport = () => {
-      setExcelExport(!excelExport);
-      onChangeExcelExport(!excelExport, row.index)
+      setInputValue((prev) => ({
+        ...prev,
+        excel: !inputValue.excel
+      }))
+      onChangeExcelExport(!inputValue.excel, row.index)
     };
 
     const handleChangeFieldVisibility = () => {
-      setVisible(!visible)
-      onChangeVisibility(!visible, row.index)
+      setInputValue((prev) => ({
+        ...prev,
+        visible: !inputValue.visible
+      }))
+      onChangeVisibility(!inputValue.visible, row.index)
     };
 
     return (
@@ -138,11 +161,11 @@ const SortableItem = React.forwardRef<HTMLDivElement, SortableItemProps>(
                   name="field"
                   className={styles.inputItem_title}
                   placeholder="نام فیلد"
-                  disabled={!visible && !excelExport}
+                  disabled={!inputValue.visible && !inputValue.excel}
                   onChange={handleChangeTitle}
                 />
                 <Badge className={styles.badgeItem} color="light" pill>
-                  { row.title }
+                  { badgeValue }
                 </Badge>
               </div>
             </div>
@@ -159,8 +182,8 @@ const SortableItem = React.forwardRef<HTMLDivElement, SortableItemProps>(
                 type="text"
                 className={styles.column_input_width}
                 onChange={handleChangeWidth}
-                value={fieldWidth}
-                disabled={!visible && !excelExport}
+                value={inputValue.width}
+                disabled={!inputValue.visible && !inputValue.excel}
               ></Input>
               <span>px</span>
             </div>
@@ -168,10 +191,10 @@ const SortableItem = React.forwardRef<HTMLDivElement, SortableItemProps>(
           <Col xs="2" className="d-flex align-items-center justify-content-end">
             <div className={styles.setting_icons}>
               <button onClick={handleChangeExcelExport}>
-                <IconExcel isActive={excelExport} />
+                <IconExcel isActive={inputValue.excel} />
               </button>
               <button onClick={handleChangeFieldVisibility}>
-                <IconVisible isActive={visible}  />
+                <IconVisible isActive={inputValue.visible}  />
               </button>
             </div>
           </Col>
