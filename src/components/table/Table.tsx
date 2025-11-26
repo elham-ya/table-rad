@@ -37,7 +37,7 @@ const Table: React.FC<TableProps> = ({
   const [pageSize, setPageSize] = useState(10);
   const [settingModal, setSettingModal] = useState(false);
   const [configData, setConfigData] = useState<ApiResponse | null>(null);
-  const [newCols, setNewCols] = useState<TableColumn[]>([]);
+
 
   // selection of rows send to parent
   useEffect(() => {
@@ -49,8 +49,6 @@ const Table: React.FC<TableProps> = ({
       onRowSelect(selectedData);
     }
   }, [selectedRowIds, data, onRowSelect]);
-
-    // console.log('configData:', configData);
 
   useEffect(() => {
     if (requestConfig?.url && requestConfig["Access-Token"]) {
@@ -73,118 +71,15 @@ const Table: React.FC<TableProps> = ({
           "Content-Type": "application/json",
         },
       });
-      
-
       if (!res.ok) {
         throw new Error(`Error: ${res.statusText}`);
       }
-
       const data = await res.json();
-
       setConfigData(data);
     } catch (error) {
       console.log("error fetching setting:", error);
     }
   };
-
-  const requestSetSetting = async ( params: any) => {
-    try {
-      const res = await fetch(requestConfig.url, {
-        method: "POST",
-        headers: {
-          "Access-Token": `${requestConfig["Access-Token"]}`,
-          "Client-Id": requestConfig["Client-Id"],
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(params),
-      });
-
-      if (!res.ok) {
-        throw new Error(`http error! status:${res.status}`);
-      }
-
-      const data = await res.json();
-      return data;
-    } catch (err) {
-      console.log("Post request faild!:", err);
-      return null;
-    }
-  };
-
-  const getSetting = (tableId = id) => {
-    if (!configData?.result[0]) {
-      return null;
-    }
-    const { setting } = configData.result[0];
-    if (Object.hasOwn(setting, "tables")) {
-      return setting?.tables.find((item) => {
-        item.id === tableId
-      });
-    } else {
-      return null;
-    }
-  };
-
-  //newCols
-  // const setSetting = (tableId = id, params: any) => {
-  //   console.log('ddd');
-    
-  //   requestSetSetting(tableId, params);
-  // };
-
-  const habdleSubmitModal = (data: TableColumn[]) => {
-    console.log('data on submit:', data);
-    
-    // new cols or unchanged config for table columns is here.
-    // we add it to config that received from api
-    setNewCols(data);
-    // here new cols and default setting is merged and send to service
-    if (!configData?.result[0]) {
-      return null;
-    }
-    const { setting } = configData.result[0];
-
-    if (Object.hasOwn(setting, "tables")) {
-      // we have default setting for table get from API,
-      // so we have to merge it with user setting. and api setting is overwrited by newCols
-
-      // find related table
-      const currentTable = getSetting(id);
-      console.log('currentTable:', currentTable);
-      
-      // make new config to send server
-      
-      const params = {
-                    ...setting,
-                    tables: [ ...setting.tables ,
-                      {
-                        id: id,
-                        columns: [
-                        ...currentTable, ...data
-                        ]
-                      }] 
-                   };
-
-      requestSetSetting( {
-        'setting': {
-          ...params
-        }
-      });
-    } else {
-      const params = {
-        ...setting,
-        tables: [
-          {id: id, columns: [...data] }
-        ],
-      };
-      requestSetSetting( {
-        'setting': {
-          ...params
-        }
-      });
-    }
-  };
-
 
   const numberColumn: TableColumn = {
     uniqueId: "__number__selector__",
@@ -262,13 +157,13 @@ const Table: React.FC<TableProps> = ({
   const handlePageChange = (pageNumber: number) => {
     setPage(pageNumber);
     onPageChange?.(pageNumber);
-    // می‌توانید اینجا درخواست داده جدید را انجام دهید
+    
   };
 
   const handleSizeChange = (pageSize: number) => {
     setPageSize(pageSize);
     onSizeChange?.(pageSize);
-    // می‌توانید اینجا درخواست داده جدید را انجام دهید
+   
   };
 
   const toggleSetting = () => {
@@ -283,10 +178,12 @@ const Table: React.FC<TableProps> = ({
           <img width={30} src={SettingButtonIcon} />
         </Button>
         <SettingModal
+          tableName={id}
           isOpen={settingModal}
           toggle={toggleSetting}
           columns={cols}
-          handleSaveConfig={(data) => habdleSubmitModal(data)}
+          apiConfigData={configData}
+          requestConfig={requestConfig}
         />
       </Col>
       <Col xs="12">
@@ -325,11 +222,9 @@ const Table: React.FC<TableProps> = ({
                     return (
                       <td key={col.uniqueId} className={styles.td_container}>
                         {(() => {
-                          // 1. متن ساده
                           if (!col.type || col.type === ContentType.Text) {
                             return <span>{val ?? "-"}</span>;
                           }
-                          // 2. عدد با کاما
                           if (col.type === ContentType.Number) {
                             return (
                               <span className="font-mono">
@@ -337,7 +232,6 @@ const Table: React.FC<TableProps> = ({
                               </span>
                             );
                           }
-                          // 3. بج
                           if (col.type === ContentType.Badge) {
                             const variant = (col as any).badgeVariant || "info";
                             const badgeStyles: Record<string, string> = {
@@ -354,8 +248,6 @@ const Table: React.FC<TableProps> = ({
                               </span>
                             );
                           }
-
-                          // 4. دکمه
                           if (col.type === ContentType.Button) {
                             return (
                               <ButtonComponent
@@ -364,8 +256,6 @@ const Table: React.FC<TableProps> = ({
                               />
                             );
                           }
-
-                          // 5. تصویر
                           if (col.type === ContentType.Image) {
                             return val ? (
                               <img
@@ -377,8 +267,6 @@ const Table: React.FC<TableProps> = ({
                               <div className="w-10 h-10 bg-gray-200 border-2 border-dashed rounded" />
                             );
                           }
-
-                          // 6. نقشه
                           if (col.type === ContentType.Map) {
                             return val ? (
                               <a
@@ -393,24 +281,18 @@ const Table: React.FC<TableProps> = ({
                               "-"
                             );
                           }
-
-                          // 7. تابع سفارشی
                           if (col.type === ContentType.Function) {
                             if (col.htmlFunc) {
-                              // اگر دو آرگومان داره
                               if (
                                 typeof col.htmlFunc === "function" &&
                                 col.htmlFunc.length === 2
                               ) {
                                 return (col.htmlFunc as any)(row, rowIndex);
                               }
-                              // فقط یک آرگومان
                               return (col.htmlFunc as any)(row);
                             }
                             return "-";
                           }
-
-                          // پیش‌فرض
                           return <span>{val ?? "-"}</span>;
                         })()}
                       </td>

@@ -26,17 +26,22 @@ import {
 import SearchIcon from "../../assets/icons/IconSearch.svg";
 import styles from "./setting.module.scss";
 import SortableItem from "./sortableItem";
-import { SettingModalProps } from "../../types/index";
+import {
+  SettingModalProps,
+  TableColumn,
+  FinalColumnProps,
+} from "../../types/index";
 
 const SettingModal: React.FC<SettingModalProps> = ({
+  tableName='',
   isOpen = false,
   toggle = () => {},
   columns = [],
-  handleSaveConfig,
+  // handleSaveConfig,
+  requestConfig,
+  apiConfigData,
 }) => {
-
   const [items, setItems] = useState(columns);
-  console.log("items:", items)
 
   useEffect(() => {
     setItems(columns);
@@ -53,86 +58,150 @@ const SettingModal: React.FC<SettingModalProps> = ({
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
-
     if (over && active.id !== over.id) {
       setItems((prevItems) => {
         const oldIndex = prevItems.findIndex((i) => i.uniqueId === active.id);
         const newIndex = prevItems.findIndex((i) => i.uniqueId === over.id);
-        const newOrder = arrayMove(prevItems, oldIndex, newIndex);
+        let newOrder = arrayMove(prevItems, oldIndex, newIndex);
+        console.log("newOrder:", newOrder);
         return newOrder;
       });
     }
   };
 
-  const handleChangeTitle = (title: string, index: number) => {
+  const updateContentChange = (
+    uniqueId: string,
+    updates: Partial<TableColumn>
+  ) => {
+    setItems((prev) => {
+      const existingIndex = prev.findIndex((c) => c.uniqueId === uniqueId);
 
-    // console.log('items ch ti:', items);
-    //  index
+      if (existingIndex === -1) {
+        const newItem: TableColumn = {
+          uniqueId,
+          title: updates.title ?? "",
+          width: updates.width ?? "",
+          visible: updates.visible ?? true,
+          excel: updates.excel ?? true,
+          key: prev[existingIndex].key 
+        };
 
-    // items[index].title = title;
+        return [...prev, newItem];
+      } else {
+        const updated = {
+          ...prev[existingIndex],
+          ...updates,
+        };
+
+        return prev.map((col, index) =>
+          index === existingIndex ? updated : col
+        );
+      }
+    });
+  };
+
+  const handleChangeTitle = (title: string, uniqueId: string) => {
+    updateContentChange(uniqueId, { title });
+  };
+
+  const handleChangeWidth = (width: string, uniqueId: string) => {
+    updateContentChange(uniqueId, { width });
+  };
+
+  const handleChangeVisibility = (flag: boolean, uniqueId: string) => {
+    updateContentChange(uniqueId, { visible: flag });
+  };
+
+  const handleChangeExcelExport = (flag: boolean, uniqueId: string) => {
+    updateContentChange(uniqueId, { excel: flag });
+  };
+
+  const requestSetSetting = async (params: any) => {
+    try {
+      const res = await fetch(requestConfig.url, {
+        method: "POST",
+        headers: {
+          "Access-Token": `${requestConfig["Access-Token"]}`,
+          "Client-Id": requestConfig["Client-Id"],
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(params),
+      });
+
+      if (!res.ok) {
+        throw new Error(`http error! status:${res.status}`);
+      }
+
+      const data = await res.json();
+      return data;
+    } catch (err) {
+      console.log("Post request faild!:", err);
+      return null;
+    }
+  };
+
+  console.log("apiConfigData***:", apiConfigData);
+
+  const getSetting = (tableId = tableName) => {
+    if (!apiConfigData?.result[0] || !!apiConfigData?.result[0].setting) {
+      return null;
+    }
+    const { setting } = apiConfigData.result[0];
+
+    if (Object.hasOwn(setting, "tables")) {
+      return setting?.tables.find((table: FinalColumnProps) => table.id === tableId);
+    } else {
+      return [];
+    }
+  };
+
+  const handleSave = () => {
+
+    const changedColumns = items.filter((col) => col.visible === true || col.excel === true);
+
+    const currentTable = getSetting(tableName) || [];
+        
+    const finalColumns: FinalColumnProps = 
+      {
+        id: tableName,
+        columns: [...currentTable, ...changedColumns]
+      };
     
-    setItems((prev) => {
-      console.log("prev change title:", prev);
+    // apiConfigData from api
+    console.log("finalColumns:", finalColumns);
 
-      const updated = [...prev];
+    if (!apiConfigData?.result[0]) {
+      return null;
+    }
+    const { setting } = apiConfigData.result[0];
+    if (Object.hasOwn(setting, "tables")) {
+      console.log('i am here!');
+      
+      // find related table
+      requestSetSetting(
+        {
+        setting: {
+          ...apiConfigData.result[0].setting,
+          tables: [
+            ...apiConfigData.result[0].setting.tables,
+            finalColumns,
+          ],
+        },
+      });
+    } else {
+      console.log('no tables object');
+      
+      // requestSetSetting( {
+      //   'setting': {
+      //     ...params
+      //   }
+      // });
+    }
 
-      console.log("updated[index]:", updated[index]);
-
-      if (!updated[index]) {
-        updated[index] = { ...updated[index],index: index, title: title };
-      } else {
-        updated[index] = { ...updated[index], title };
-      }
-
-      return updated;
-    });
+    // toggle();
   };
 
-
-  const handleChangeWidth = (width: string, index: number) => {
-    setItems((prev) => {
-      console.log("prev change width:", prev);
-      const updated = [...prev];
-
-      if (!updated[index]) {
-        updated[index] = { index: index, width: width };
-      } else {
-        updated[index] = { ...updated[index], width };
-      }
-
-      return updated;
-    });
-  };
-
-  const handleChangeVisibility = (flag: boolean, index: number) => {
-    setItems((prev) => {
-      console.log("prev change visible:", prev);
-      const updated = [...prev];
-
-      if (!updated[index]) {
-        updated[index] = { index: index, visible: flag };
-      } else {
-        updated[index] = { ...updated[index], visible: flag };
-      }
-
-      return updated;
-    });
-  };
-
-  const handleChangeExcelExport = (flag: boolean, index: number) => {
-    setItems((prev) => {
-      console.log("prev change excel:", prev);
-      const updated = [...prev];
-
-      if (!updated[index]) {
-        updated[index] = { index: index, excel: flag };
-      } else {
-        updated[index] = { ...updated[index], excel: flag };
-      }
-
-      return updated;
-    });
-  };
+  console.log("items:", items);
 
   return (
     <Row>
@@ -195,8 +264,7 @@ const SettingModal: React.FC<SettingModalProps> = ({
               color="primary"
               className={styles.save_btn}
               onClick={() => {
-                handleSaveConfig(items);
-                toggle();
+                handleSave();
               }}
             >
               تایید

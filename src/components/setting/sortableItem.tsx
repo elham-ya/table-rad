@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from "react";
+import { useDraggable } from '@dnd-kit/core';
+
 import {
   Row,
   Col,
@@ -11,7 +13,6 @@ import { CSS } from "@dnd-kit/utilities";
 import { SortableItemProps } from "../../types/index";
 import styles from "./setting.module.scss";
 import IconFilter from "../../assets/icons/IconFilter.svg";
-
 
 const SortableItem = React.forwardRef<HTMLDivElement, SortableItemProps>(
   ({ id, row, onChangeTitle, onChangeWidth, onChangeVisibility, onChangeExcelExport }, ref) => {
@@ -27,6 +28,8 @@ const SortableItem = React.forwardRef<HTMLDivElement, SortableItemProps>(
       transform: CSS.Transform.toString(transform),
       transition,
     };
+
+
 
     const [inputValue, setInputValue] = useState({
       title: "",
@@ -103,12 +106,13 @@ const SortableItem = React.forwardRef<HTMLDivElement, SortableItemProps>(
       else if (ref) ref.current = node;
     };
 
+
     const handleChangeWidth = (event: React.ChangeEvent<HTMLInputElement>) => {
       setInputValue((prev) => ({
         ...prev,
         width: event.target.value
       }))
-      onChangeWidth(event.target.value, row.index)
+      onChangeWidth(event.target.value, row.uniqueId)
     };
 
     const handleChangeTitle = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -116,7 +120,7 @@ const SortableItem = React.forwardRef<HTMLDivElement, SortableItemProps>(
         ...prev,
         title: event.target.value
       }))
-      onChangeTitle(event.target.value, row.index) 
+      onChangeTitle(event.target.value, row.uniqueId) 
     }
 
     const handleChangeExcelExport = () => {
@@ -124,7 +128,7 @@ const SortableItem = React.forwardRef<HTMLDivElement, SortableItemProps>(
         ...prev,
         excel: !inputValue.excel
       }))
-      onChangeExcelExport(!inputValue.excel, row.index)
+      onChangeExcelExport(!inputValue.excel, row.uniqueId)
     };
 
     const handleChangeFieldVisibility = () => {
@@ -132,7 +136,7 @@ const SortableItem = React.forwardRef<HTMLDivElement, SortableItemProps>(
         ...prev,
         visible: !inputValue.visible
       }))
-      onChangeVisibility(!inputValue.visible, row.index)
+      onChangeVisibility(!inputValue.visible, row.uniqueId)
     };
 
     return (

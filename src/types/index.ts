@@ -32,10 +32,9 @@ export interface TableProps {
 }
 
 export interface TableColumn {
-  index: number;
   uniqueId: string ;
   title: React.ReactNode;
-  key?: string;
+  key: string;
   width?: string;
   type?: ContentType;
   htmlFunc?:
@@ -80,7 +79,6 @@ export interface actionColumn {
   visible: boolean;
   disable: boolean;
   onClick: () => void;
-
 }
 
 export interface TablePaginationProps {
@@ -96,31 +94,32 @@ export interface TablePaginationProps {
 }
 
 export interface SettingModalProps {
+  tableName: string;
   isOpen: boolean;
   toggle: () => void;
   columns:TableColumn[];
-  handleSaveConfig: (data: TableColumn[]) => void
+  // handleSaveConfig: (data: TableColumn[]) => void;
+  requestConfig: AppConfig;
+  apiConfigData: any
 }
-
 interface rowProps {
+    uniqueId: string;
+    title: React.ReactNode;
+    key: string;
+    width?: string;
   excel: boolean; 
-  index: number; 
-  key: string;
-  title: string;
-  type: string;
-  uniqueId: string;
+  type?: ContentType;
   visible : boolean;
-  width: string;
 }
 
 export interface SortableItemProps {
   id: string;
   key: string;
   row: rowProps;
-  onChangeTitle: (x: string,y:number) => void;
-  onChangeWidth:(x: string,y:number) => void;
-  onChangeVisibility:(x: boolean,y:number) => void;
-  onChangeExcelExport:(x: boolean,y:number) => void;
+  onChangeTitle: (x: string, y:string) => void;
+  onChangeWidth: (x: string, y:string) => void;
+  onChangeVisibility: (x: boolean, y:string) => void;
+  onChangeExcelExport: (x: boolean, y:string) => void;
 }
 
 interface GeneralSettings {
@@ -153,5 +152,13 @@ export interface ApiResponse {
   metaData: unknown[];
 }
 
+interface Column {
+  [key: string] : any;
+}
 
+export interface FinalColumnProps {
+  id: string;
+  columns: Column[];
+
+}
 
