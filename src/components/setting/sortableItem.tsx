@@ -1,6 +1,4 @@
 import React, { useEffect, useState } from "react";
-import { useDraggable } from '@dnd-kit/core';
-
 import {
   Row,
   Col,
@@ -15,7 +13,7 @@ import styles from "./setting.module.scss";
 import IconFilter from "../../assets/icons/IconFilter.svg";
 
 const SortableItem = React.forwardRef<HTMLDivElement, SortableItemProps>(
-  ({ id, row, onChangeTitle, onChangeWidth, onChangeVisibility, onChangeExcelExport }, ref) => {
+  ({ id, tableId, row, config, onChangeTitle, onChangeWidth, onChangeVisibility, onChangeExcelExport }, ref) => {
     const {
       attributes,
       listeners,
@@ -24,25 +22,48 @@ const SortableItem = React.forwardRef<HTMLDivElement, SortableItemProps>(
       transition,
       isDragging,
     } = useSortable({ id });
+
     const style = {
       transform: CSS.Transform.toString(transform),
       transition,
     };
 
-
-
     const [inputValue, setInputValue] = useState({
       title: "",
-      width: row.width,
+      width: row.width || '200',
       excel: row.excel,
       visible: row.visible
     })
+
     const [badgeValue, setBadgeValue] = useState(row.title);
+
+    console.log('apiConfigData:',config);
+    console.log('row:',row);
+    console.log('inputValue:',inputValue);
     
     useEffect(() => {
+      const allTables = config.result[0].setting;
       if(row && row.title) {
         setBadgeValue(row.title)
       }
+
+      if(config.result[0] && config.result[0].setting.tables[tableId]) {
+        setInputValue((prev) => ({
+          ...prev,
+          title: allTables.tables[tableId].columns.find(x => x.uniqueId == row.uniqueId)?.title,
+          width: allTables.tables[tableId].columns.find(x => x.uniqueId == row.uniqueId)?.width,
+          excel: allTables.tables[tableId].columns.find( x => x.uniqueId === row.uniqueId)?.excel,
+          visible: allTables.tables[tableId].columns.find( x => x.uniqueId === row.uniqueId)?.visible,
+        }))
+      } else {
+        setInputValue((prev) => ({
+          ...prev,
+          title: "" ,
+          width: row.width || '200',
+          excel: row.excel,
+          visible: row.visible,
+        }))
+      } 
     } , [])
 
     const IconExcel = ({ isActive }: { isActive: boolean }) => (
@@ -106,7 +127,6 @@ const SortableItem = React.forwardRef<HTMLDivElement, SortableItemProps>(
       else if (ref) ref.current = node;
     };
 
-
     const handleChangeWidth = (event: React.ChangeEvent<HTMLInputElement>) => {
       setInputValue((prev) => ({
         ...prev,
@@ -114,11 +134,13 @@ const SortableItem = React.forwardRef<HTMLDivElement, SortableItemProps>(
       }))
       onChangeWidth(event.target.value, row.uniqueId)
     };
+    
 
     const handleChangeTitle = (event: React.ChangeEvent<HTMLInputElement>) => {
       setInputValue((prev) => ({
         ...prev,
-        title: event.target.value
+        title: event.target.value,
+        // newtitle: event.target.value
       }))
       onChangeTitle(event.target.value, row.uniqueId) 
     }
@@ -167,6 +189,7 @@ const SortableItem = React.forwardRef<HTMLDivElement, SortableItemProps>(
                   placeholder="نام فیلد"
                   disabled={!inputValue.visible && !inputValue.excel}
                   onChange={handleChangeTitle}
+                  value={inputValue.title}
                 />
                 <Badge className={styles.badgeItem} color="light" pill>
                   { badgeValue }

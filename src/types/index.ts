@@ -100,13 +100,14 @@ export interface SettingModalProps {
   columns:TableColumn[];
   // handleSaveConfig: (data: TableColumn[]) => void;
   requestConfig: AppConfig;
-  apiConfigData: any
+  apiConfigData: any;
+  onGetData: (data:any) => void
 }
 interface rowProps {
-    uniqueId: string;
-    title: React.ReactNode;
-    key: string;
-    width?: string;
+  uniqueId: string;
+  title: any ;
+  key: string;
+  width?: string;
   excel: boolean; 
   type?: ContentType;
   visible : boolean;
@@ -120,6 +121,8 @@ export interface SortableItemProps {
   onChangeWidth: (x: string, y:string) => void;
   onChangeVisibility: (x: boolean, y:string) => void;
   onChangeExcelExport: (x: boolean, y:string) => void;
+  config: any;
+  tableId: string
 }
 
 interface GeneralSettings {
@@ -152,13 +155,11 @@ export interface ApiResponse {
   metaData: unknown[];
 }
 
-interface Column {
-  [key: string] : any;
-}
-
-export interface FinalColumnProps {
-  id: string;
+type Column = Record<string, any>;
+export interface TableSchema {
   columns: Column[];
-
 }
+
+export type FinalColumnProps =Record<string, TableSchema>;
+ 
 

@@ -30,16 +30,17 @@ import {
   SettingModalProps,
   TableColumn,
   FinalColumnProps,
+  TableSchema,
 } from "../../types/index";
 
 const SettingModal: React.FC<SettingModalProps> = ({
-  tableName='',
+  tableName = "",
   isOpen = false,
   toggle = () => {},
-  columns = [],
-  // handleSaveConfig,
+  columns = [], // columns is default cols by developer
   requestConfig,
-  apiConfigData,
+  apiConfigData, // columns come from calling api
+  onGetData, // changed data
 }) => {
   const [items, setItems] = useState(columns);
 
@@ -56,6 +57,42 @@ const SettingModal: React.FC<SettingModalProps> = ({
     useSensor(KeyboardSensor)
   );
 
+  const getSetting = (tableId = tableName) => {
+    if (!apiConfigData?.result[0]) {
+      return null;
+    }
+    const { setting } = apiConfigData.result[0];
+    if (Object.hasOwn(setting, "tables")) {
+      return setting?.tables[tableId];
+    } else {
+      return null;
+    }
+  };
+
+  const mergeLists = (apiList: [], devList: []) => {
+    if (!apiList || apiList.length === 0) return [...devList];
+    if (!devList || devList.length === 0) return [...apiList];
+
+    const apiIds = new Set(apiList.map((item) => item.uniqueId));
+
+    const onlyInDev = devList.filter((item) => !apiIds.has(item.uniqueId));
+
+    if (apiList.length >= devList.length) {
+      return [...apiList];
+    }
+
+    return [...apiList, ...onlyInDev];
+  };
+
+  const targetTable = getSetting(tableName);
+
+  useEffect(() => {
+    if (targetTable !== null && targetTable?.columns) {
+      const mergedItems = mergeLists(targetTable.columns, items);
+      setItems(mergedItems);
+    }
+  }, [targetTable]);
+
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
     if (over && active.id !== over.id) {
@@ -63,7 +100,6 @@ const SettingModal: React.FC<SettingModalProps> = ({
         const oldIndex = prevItems.findIndex((i) => i.uniqueId === active.id);
         const newIndex = prevItems.findIndex((i) => i.uniqueId === over.id);
         let newOrder = arrayMove(prevItems, oldIndex, newIndex);
-        console.log("newOrder:", newOrder);
         return newOrder;
       });
     }
@@ -83,7 +119,7 @@ const SettingModal: React.FC<SettingModalProps> = ({
           width: updates.width ?? "",
           visible: updates.visible ?? true,
           excel: updates.excel ?? true,
-          key: prev[existingIndex].key 
+          key: prev[existingIndex].key,
         };
 
         return [...prev, newItem];
@@ -131,77 +167,52 @@ const SettingModal: React.FC<SettingModalProps> = ({
       if (!res.ok) {
         throw new Error(`http error! status:${res.status}`);
       }
-
       const data = await res.json();
-      return data;
+      onGetData(data);
     } catch (err) {
       console.log("Post request faild!:", err);
       return null;
     }
   };
 
-  console.log("apiConfigData***:", apiConfigData);
-
-  const getSetting = (tableId = tableName) => {
-    if (!apiConfigData?.result[0] || !!apiConfigData?.result[0].setting) {
-      return null;
-    }
-    const { setting } = apiConfigData.result[0];
-
-    if (Object.hasOwn(setting, "tables")) {
-      return setting?.tables.find((table: FinalColumnProps) => table.id === tableId);
-    } else {
-      return [];
-    }
-  };
-
   const handleSave = () => {
+    const changedColumns = items.filter(
+      (col) => col.visible === true || col.excel === true
+    );
 
-    const changedColumns = items.filter((col) => col.visible === true || col.excel === true);
+    const finalColumns: FinalColumnProps = {
+      [tableName]: {
+        columns: [...changedColumns],
+      },
+    };
 
-    const currentTable = getSetting(tableName) || [];
-        
-    const finalColumns: FinalColumnProps = 
-      {
-        id: tableName,
-        columns: [...currentTable, ...changedColumns]
-      };
-    
     // apiConfigData from api
-    console.log("finalColumns:", finalColumns);
-
     if (!apiConfigData?.result[0]) {
-      return null;
+      toggle();
+      return;
     }
-    const { setting } = apiConfigData.result[0];
-    if (Object.hasOwn(setting, "tables")) {
-      console.log('i am here!');
-      
+    const currentSetting = apiConfigData.result[0].setting;
+    if (currentSetting.tables && typeof currentSetting.tables === "object") {
       // find related table
-      requestSetSetting(
-        {
+      requestSetSetting({
         setting: {
           ...apiConfigData.result[0].setting,
-          tables: [
-            ...apiConfigData.result[0].setting.tables,
-            finalColumns,
-          ],
+          tables: {
+            ...(apiConfigData.result[0].setting.tables || {}),
+            ...finalColumns,
+          },
         },
       });
     } else {
-      console.log('no tables object');
-      
-      // requestSetSetting( {
-      //   'setting': {
-      //     ...params
-      //   }
-      // });
+      requestSetSetting({
+        setting: {
+          ...currentSetting,
+          tables: {},
+        },
+      });
     }
-
-    // toggle();
+    toggle();
   };
-
-  console.log("items:", items);
 
   return (
     <Row>
@@ -240,11 +251,13 @@ const SettingModal: React.FC<SettingModalProps> = ({
                       <SortableItem
                         key={field.uniqueId}
                         id={field.uniqueId}
+                        tableId={tableName}
                         row={field}
                         onChangeTitle={handleChangeTitle}
                         onChangeWidth={handleChangeWidth}
                         onChangeVisibility={handleChangeVisibility}
                         onChangeExcelExport={handleChangeExcelExport}
+                        config={apiConfigData}
                       />
                     ))}
                   </SortableContext>

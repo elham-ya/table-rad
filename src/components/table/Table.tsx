@@ -56,6 +56,10 @@ const Table: React.FC<TableProps> = ({
     }
   }, [requestConfig]);
 
+  useEffect(() => {
+    
+  },[configData])
+
   // get all settings
   const requestGetSetting = async () => {
     if (!requestConfig || !requestConfig.url || !requestConfig["Access-Token"] || !requestConfig["Client-Id"]) {
@@ -170,6 +174,15 @@ const Table: React.FC<TableProps> = ({
     setSettingModal(!settingModal);
   };
 
+  const handleGetDataAfterChange = (data: any) => {
+    console.log('handleGetDataAfterChange data:', data);
+    // const changedConfig= data.result[0].setting.tables[id]
+    setConfigData(data);
+  }
+
+  console.log('***configData***:',configData);
+  
+
   return (
     <Row>
       <Col xs="6"></Col>
@@ -184,6 +197,7 @@ const Table: React.FC<TableProps> = ({
           columns={cols}
           apiConfigData={configData}
           requestConfig={requestConfig}
+          onGetData={handleGetDataAfterChange}
         />
       </Col>
       <Col xs="12">
