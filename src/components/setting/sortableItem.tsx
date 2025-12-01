@@ -35,7 +35,7 @@ const SortableItem = React.forwardRef<HTMLDivElement, SortableItemProps>(
       visible: row.visible
     })
 
-    const [badgeValue, setBadgeValue] = useState(row.title);
+    const [badgeValue, setBadgeValue] = useState('');
 
     console.log('apiConfigData:',config);
     console.log('row:',row);
@@ -43,8 +43,10 @@ const SortableItem = React.forwardRef<HTMLDivElement, SortableItemProps>(
     
     useEffect(() => {
       const allTables = config.result[0].setting;
-      if(row && row.title) {
-        setBadgeValue(row.title)
+      if(row && row.defaultTitle) {
+        setBadgeValue(row.defaultTitle)
+      } else {
+        setBadgeValue('')
       }
 
       if(config.result[0] && config.result[0].setting.tables[tableId]) {

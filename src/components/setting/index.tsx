@@ -90,6 +90,8 @@ const SettingModal: React.FC<SettingModalProps> = ({
     if (targetTable !== null && targetTable?.columns) {
       const mergedItems = mergeLists(targetTable.columns, items);
       setItems(mergedItems);
+console.log('mergedItems:', mergedItems);
+
     }
   }, [targetTable]);
 
@@ -180,9 +182,28 @@ const SettingModal: React.FC<SettingModalProps> = ({
       (col) => col.visible === true || col.excel === true
     );
 
+    console.log('columns:', columns);
+    console.log('changedColumns:', changedColumns);
+    
+    
+    const newCommonColumns = changedColumns
+      .map(changedCol => {
+        const originalCol = columns.find(col => col.uniqueId === changedCol.uniqueId);
+        if (!originalCol) return null;
+        if (originalCol.title !== changedCol.title) {
+          return {
+            ...changedCol,              
+            defaultTitle: originalCol.title  
+          };
+        }
+        return changedCol;
+      }).filter(Boolean); 
+    
+console.log('newCommonColumns:',newCommonColumns);
+
     const finalColumns: FinalColumnProps = {
       [tableName]: {
-        columns: [...changedColumns],
+        columns: [...newCommonColumns],
       },
     };
 
@@ -214,6 +235,8 @@ const SettingModal: React.FC<SettingModalProps> = ({
     toggle();
   };
 
+  console.log('items===:' , items);
+  
   return (
     <Row>
       <Col xs="12">

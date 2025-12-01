@@ -38,6 +38,7 @@ const Table: React.FC<TableProps> = ({
   const [settingModal, setSettingModal] = useState(false);
   const [configData, setConfigData] = useState<ApiResponse | null>(null);
 
+  console.log('configData for table:', configData);
 
   // selection of rows send to parent
   useEffect(() => {
@@ -55,10 +56,6 @@ const Table: React.FC<TableProps> = ({
       requestGetSetting();
     }
   }, [requestConfig]);
-
-  useEffect(() => {
-    
-  },[configData])
 
   // get all settings
   const requestGetSetting = async () => {
@@ -154,9 +151,22 @@ const Table: React.FC<TableProps> = ({
 
   // final column for mapping and show data on cells
   const finalColumns = useMemo(() => {
-    const base = [numberColumn, ...cols];
+    let base = [];
+    const apiCol = 
+    (configData !== null && configData.result[0]) ? configData.result[0].setting.tables[id].columns : [];
+    
+    if(apiCol.length > 0) {
+      base = [numberColumn, ...apiCol];
+    } else {
+       base = [numberColumn, ...cols];
+    }
+    
     return checkBox && checkboxColumn ? [checkboxColumn, ...base] : base;
-  }, [checkBox, checkboxColumn, cols, selectedRowIds]);
+
+  }, [checkBox, checkboxColumn, cols, selectedRowIds, configData]);
+
+    console.log('finalColumns:', finalColumns);
+    
 
   const handlePageChange = (pageNumber: number) => {
     setPage(pageNumber);
@@ -176,11 +186,8 @@ const Table: React.FC<TableProps> = ({
 
   const handleGetDataAfterChange = (data: any) => {
     console.log('handleGetDataAfterChange data:', data);
-    // const changedConfig= data.result[0].setting.tables[id]
     setConfigData(data);
   }
-
-  console.log('***configData***:',configData);
   
 
   return (

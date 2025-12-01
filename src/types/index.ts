@@ -33,6 +33,7 @@ export interface TableProps {
 
 export interface TableColumn {
   uniqueId: string ;
+  defaultTitle?: string | React.ReactNode;
   title: React.ReactNode;
   key: string;
   width?: string;
@@ -106,6 +107,7 @@ export interface SettingModalProps {
 interface rowProps {
   uniqueId: string;
   title: any ;
+  defaultTitle: any ;
   key: string;
   width?: string;
   excel: boolean; 
