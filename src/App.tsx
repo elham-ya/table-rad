@@ -4079,7 +4079,7 @@ function App() {
     {
       uniqueId: "price",
       title: "قیمت",
-      key: "invoice.updated.price",
+      key: "payableAmount",
       width: "200",
       type: ContentType.Function,
       htmlFunc: () => {
@@ -4094,7 +4094,7 @@ function App() {
     {
       uniqueId: "description",
       title: "توضیحات",
-      key: "invoice.metadata.description",
+      key: "description",
       width: "300",
       type: ContentType.Text,
       visible: true,
@@ -4113,7 +4113,7 @@ function App() {
       uniqueId: "customerInfo",
       title: "اطلاعات مشتری",
       width: "200",
-      key: "customerInfo",
+      key: "userSrv.name",
       type: ContentType.Text,
       visible: true,
       excel: false
@@ -4210,7 +4210,7 @@ function App() {
   }
 
   const config = {
-    'Access-Token': '8413009752-18cca355dc874215A603eb1bc838b29c.XzIwMjUxMg',
+    'Access-Token': '5258131095-2b675d9de61346d382F238742b373237.XzIwMjUxMg',
     'Client-Id': '17959574q2f0347718971594ccd86f3f4',
     url : `https://api.sandpod.ir/srv/cms-sandbox/api/core/users/setting`,
   }

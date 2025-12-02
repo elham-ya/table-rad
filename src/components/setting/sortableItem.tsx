@@ -8,7 +8,7 @@ import {
 } from "reactstrap";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { SortableItemProps } from "../../types/index";
+import { SortableItemProps, rowProps } from "../../types/index";
 import styles from "./setting.module.scss";
 import IconFilter from "../../assets/icons/IconFilter.svg";
 
@@ -35,27 +35,23 @@ const SortableItem = React.forwardRef<HTMLDivElement, SortableItemProps>(
       visible: row.visible
     })
 
-    const [badgeValue, setBadgeValue] = useState('');
-
-    console.log('apiConfigData:',config);
-    console.log('row:',row);
-    console.log('inputValue:',inputValue);
+    const [badgeValue, setBadgeValue] = useState(row.title);
     
     useEffect(() => {
       const allTables = config.result[0].setting;
       if(row && row.defaultTitle) {
         setBadgeValue(row.defaultTitle)
       } else {
-        setBadgeValue('')
+        setBadgeValue(row.title)
       }
 
       if(config.result[0] && config.result[0].setting.tables[tableId]) {
         setInputValue((prev) => ({
           ...prev,
-          title: allTables.tables[tableId].columns.find(x => x.uniqueId == row.uniqueId)?.title,
-          width: allTables.tables[tableId].columns.find(x => x.uniqueId == row.uniqueId)?.width,
-          excel: allTables.tables[tableId].columns.find( x => x.uniqueId === row.uniqueId)?.excel,
-          visible: allTables.tables[tableId].columns.find( x => x.uniqueId === row.uniqueId)?.visible,
+          title: allTables.tables[tableId].columns.find((x: rowProps) => x.uniqueId == row.uniqueId)?.title,
+          width: allTables.tables[tableId].columns.find((x: rowProps) => x.uniqueId == row.uniqueId)?.width,
+          excel: allTables.tables[tableId].columns.find( (x: rowProps) => x.uniqueId === row.uniqueId)?.excel,
+          visible: allTables.tables[tableId].columns.find( (x: rowProps) => x.uniqueId === row.uniqueId)?.visible,
         }))
       } else {
         setInputValue((prev) => ({
@@ -142,7 +138,6 @@ const SortableItem = React.forwardRef<HTMLDivElement, SortableItemProps>(
       setInputValue((prev) => ({
         ...prev,
         title: event.target.value,
-        // newtitle: event.target.value
       }))
       onChangeTitle(event.target.value, row.uniqueId) 
     }

@@ -69,7 +69,8 @@ const SettingModal: React.FC<SettingModalProps> = ({
     }
   };
 
-  const mergeLists = (apiList: [], devList: []) => {
+  const mergeLists = (apiList: TableColumn[], devList: TableColumn[]) => {
+    
     if (!apiList || apiList.length === 0) return [...devList];
     if (!devList || devList.length === 0) return [...apiList];
 
@@ -77,11 +78,13 @@ const SettingModal: React.FC<SettingModalProps> = ({
 
     const onlyInDev = devList.filter((item) => !apiIds.has(item.uniqueId));
 
+    const noVisible =  onlyInDev.map((item) => ({...item , excel: false, visible: false})); 
+
     if (apiList.length >= devList.length) {
       return [...apiList];
     }
 
-    return [...apiList, ...onlyInDev];
+    return [...apiList, ...noVisible];
   };
 
   const targetTable = getSetting(tableName);
@@ -90,7 +93,7 @@ const SettingModal: React.FC<SettingModalProps> = ({
     if (targetTable !== null && targetTable?.columns) {
       const mergedItems = mergeLists(targetTable.columns, items);
       setItems(mergedItems);
-console.log('mergedItems:', mergedItems);
+      console.log('items at useEffect:', items);
 
     }
   }, [targetTable]);
@@ -104,6 +107,8 @@ console.log('mergedItems:', mergedItems);
         let newOrder = arrayMove(prevItems, oldIndex, newIndex);
         return newOrder;
       });
+      console.log('items in drag:', items);
+      
     }
   };
 
@@ -113,7 +118,6 @@ console.log('mergedItems:', mergedItems);
   ) => {
     setItems((prev) => {
       const existingIndex = prev.findIndex((c) => c.uniqueId === uniqueId);
-
       if (existingIndex === -1) {
         const newItem: TableColumn = {
           uniqueId,
@@ -123,19 +127,20 @@ console.log('mergedItems:', mergedItems);
           excel: updates.excel ?? true,
           key: prev[existingIndex].key,
         };
-
         return [...prev, newItem];
       } else {
         const updated = {
           ...prev[existingIndex],
           ...updates,
         };
-
         return prev.map((col, index) =>
           index === existingIndex ? updated : col
         );
       }
     });
+
+    console.log('items updateContentChange:',items);
+    
   };
 
   const handleChangeTitle = (title: string, uniqueId: string) => {
@@ -155,6 +160,8 @@ console.log('mergedItems:', mergedItems);
   };
 
   const requestSetSetting = async (params: any) => {
+    console.log('params:',params);
+    
     try {
       const res = await fetch(requestConfig.url, {
         method: "POST",
@@ -182,7 +189,7 @@ console.log('mergedItems:', mergedItems);
       (col) => col.visible === true || col.excel === true
     );
 
-    console.log('columns:', columns);
+    // console.log('columns:', columns);
     console.log('changedColumns:', changedColumns);
     
     
@@ -199,7 +206,7 @@ console.log('mergedItems:', mergedItems);
         return changedCol;
       }).filter(Boolean); 
     
-console.log('newCommonColumns:',newCommonColumns);
+    console.log('newCommonColumns:',newCommonColumns);
 
     const finalColumns: FinalColumnProps = {
       [tableName]: {
@@ -235,7 +242,7 @@ console.log('newCommonColumns:',newCommonColumns);
     toggle();
   };
 
-  console.log('items===:' , items);
+  console.log('items in component:' , items);
   
   return (
     <Row>

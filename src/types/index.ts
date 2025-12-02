@@ -32,8 +32,8 @@ export interface TableProps {
 }
 
 export interface TableColumn {
-  uniqueId: string ;
-  defaultTitle?: string | React.ReactNode;
+  uniqueId: string;
+  defaultTitle?: string;
   title: React.ReactNode;
   key: string;
   width?: string;
@@ -63,7 +63,6 @@ export interface CheckboxProps<T = unknown> {
 }
 
 export type CheckboxChangeEvent = React.ChangeEvent<HTMLInputElement>;
-
 export interface buttonColProps {
   title?: string;
   className?: string;
@@ -75,46 +74,41 @@ export interface ButtonProps {
   data: unknown[];
   buttonList: buttonColProps[];
 }
-
 export interface actionColumn {
   visible: boolean;
   disable: boolean;
   onClick: () => void;
 }
-
 export interface TablePaginationProps {
-  totalCount: number;        // تعداد کل رکوردها
-  pageNumber: number;        // صفحه فعلی (شروع از 1)
-  size: number;              // تعداد آیتم در هر صفحه
-  onPageChange: (page: number) => void;           // تغییر صفحه
-  onSizeChange?: (size: number) => void;          // تغییر سایز (اختیاری)
-  pageSizeOptions?: number[];                     // گزینه‌های سایز صفحه [10, 25, 50, 100]
-  showSizeChanger?: boolean;                      // نمایش سلکتور سایز؟
-  showTotal?: boolean;                            // نمایش "نمایش ۱–۱۰ از ۵۲" ؟
+  totalCount: number;       
+  pageNumber: number;        
+  size: number;              
+  onPageChange: (page: number) => void; 
+  onSizeChange?: (size: number) => void;  
+  pageSizeOptions?: number[];  
+  showSizeChanger?: boolean; 
+  showTotal?: boolean;  
   className?: string;
 }
-
 export interface SettingModalProps {
   tableName: string;
   isOpen: boolean;
   toggle: () => void;
   columns:TableColumn[];
-  // handleSaveConfig: (data: TableColumn[]) => void;
   requestConfig: AppConfig;
   apiConfigData: any;
   onGetData: (data:any) => void
 }
-interface rowProps {
+export interface rowProps {
   uniqueId: string;
-  title: any ;
-  defaultTitle: any ;
+  title: React.ReactNode;
+  defaultTitle?: string;
   key: string;
   width?: string;
   excel: boolean; 
   type?: ContentType;
   visible : boolean;
 }
-
 export interface SortableItemProps {
   id: string;
   key: string;
@@ -126,40 +120,43 @@ export interface SortableItemProps {
   config: any;
   tableId: string
 }
-
 interface GeneralSettings {
   cashDeskQrPrintType: string[];
   managementQrPrintType: string[];
   cashDeskInvoicePrintType: string;
   managementInvoicePrintType: string;
-  
 }
 
+type ColumnProps = Record<string, any>; 
+
+type TableConfig = {
+  columns?: ColumnProps[];
+  [key: string]: any;
+};
+
+type Tables = Record<string, TableConfig>;
 export interface SettingProps {
   generalSettings: GeneralSettings;
-  tables: unknown[]
+  tables: Tables
 }
-
 export interface ApiResponse {
-  referenceNumber: number;
+  aggregations: number;
   hasError: boolean;
   errorCode: number;
   refId: string;
   message: unknown[];
   count: number;
-  aggregations: number;
+  metaData: unknown[];
+  referenceNumber: number;
   result: Array<{
     setting: SettingProps;
     created: { at: number; user_name: string; ssoId: number };
     updated: { at: number; user_name: string; ssoId: number };
     post_unique: string;
   }>;
-  metaData: unknown[];
 }
-
-type Column = Record<string, any>;
 export interface TableSchema {
-  columns: Column[];
+  columns: (ColumnProps | null)[];
 }
 
 export type FinalColumnProps =Record<string, TableSchema>;
