@@ -10,8 +10,7 @@ import {
 } from "reactstrap";
 import { TablePaginationProps } from "../../types/index";
 import styles from "./pagination.module.scss";
-import GotoPageIcon from '../../assets/icons/ItemArrow.svg';
-// import { ChevronLeft, ChevronRight } from 'react-feather'; // اختیاری: آیکون زیبا
+import GotoPageIcon from "../../assets/icons/ItemArrow.svg";
 
 const TablePagination: React.FC<TablePaginationProps> = ({
   totalCount = 0,
@@ -27,7 +26,6 @@ const TablePagination: React.FC<TablePaginationProps> = ({
   const totalPages = Math.ceil(totalCount / size) || 1;
   const currentPage = Math.max(1, Math.min(pageNumber, totalPages));
 
-  // console.log('totalCount:',totalCount);
 
   const handlePageClick = (page: number) => {
     if (page >= 1 && page <= totalPages && page !== currentPage) {
@@ -36,17 +34,14 @@ const TablePagination: React.FC<TablePaginationProps> = ({
   };
 
   const handleSizeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    // console.log('e handleSizeChange:',e);
-    
+    console.log("e handleSizeChange:", e);
     const newSize = Number(e.target.value);
     onSizeChange?.(newSize);
-    //  برو به صفحه ۱ وقتی سایز عوض میشه
     if (currentPage !== 1) {
       onPageChange(1);
     }
   };
 
-  // تولید آرایه صفحات برای نمایش (مثل 1,2,3,...,10)
   const getPageNumbers = () => {
     const pages: (number | string)[] = [];
     const maxVisible = 5;
@@ -75,12 +70,11 @@ const TablePagination: React.FC<TablePaginationProps> = ({
 
   const [value, setValue] = useState(String(currentPage));
 
-
   const handleGoToPageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    // console.log('e handleGoToPageChange:', e.target.value);
+    console.log("e handleGoToPageChange:", e.target.value);
     onPageChange(Number(e.target.value));
-    setValue(e.target.value)
-  }
+    setValue(e.target.value);
+  };
   const submit = () => {
     const n = parseInt(value.trim(), 10);
     if (Number.isNaN(n)) return; // ignore invalid input
@@ -102,7 +96,6 @@ const TablePagination: React.FC<TablePaginationProps> = ({
   return (
     <div className={`table-pagination ${className} ${styles.table_wrapper}`}>
       <Row className="align-items-center justify-content-between py-2">
-        {/* نمایش تعداد کل و بازه */}
         {showTotal && (
           <Col md="4" className="mb-2 mb-md-0 text-right">
             <span className="text-muted small">
@@ -110,12 +103,12 @@ const TablePagination: React.FC<TablePaginationProps> = ({
             </span>
           </Col>
         )}
-        {/* صفحه‌بندی اصلی */}
         <Col md={showSizeChanger ? "4" : "8"} className="text-center">
           <div className="d-flex align-items-center justify-content-center gap-3 flex-wrap py-2">
-            {/* دراپ‌داون تعداد آیتم در صفحه  */}
             {showSizeChanger && (
-              <div className={`d-inline-flex align-items-center ${styles.sizeChangerContainer}`}>
+              <div
+                className={`d-inline-flex align-items-center ${styles.sizeChangerContainer}`}
+              >
                 <Input
                   type="select"
                   value={size}
@@ -134,7 +127,6 @@ const TablePagination: React.FC<TablePaginationProps> = ({
               className={`justify-content-center mb-0 ${styles.customPagination}`}
               size="sm"
             >
-              {/* اولین صفحه - دکمه جدید */}
               <PaginationItem
                 disabled={currentPage === 1}
                 className={styles.li_item}
@@ -147,8 +139,6 @@ const TablePagination: React.FC<TablePaginationProps> = ({
                   «
                 </PaginationLink>
               </PaginationItem>
-
-              {/* قبلی */}
               <PaginationItem
                 disabled={currentPage === 1}
                 className={styles.li_item}
@@ -161,8 +151,6 @@ const TablePagination: React.FC<TablePaginationProps> = ({
                   ‹
                 </PaginationLink>
               </PaginationItem>
-
-              {/* شماره صفحات */}
               {getPageNumbers().map((page) => (
                 <PaginationItem
                   key={page}
@@ -177,8 +165,6 @@ const TablePagination: React.FC<TablePaginationProps> = ({
                   </PaginationLink>
                 </PaginationItem>
               ))}
-
-              {/* بعدی */}
               <PaginationItem
                 disabled={currentPage === totalPages}
                 className={styles.li_item}
@@ -191,8 +177,6 @@ const TablePagination: React.FC<TablePaginationProps> = ({
                   ›
                 </PaginationLink>
               </PaginationItem>
-
-              {/* آخرین صفحه  */}
               <PaginationItem
                 disabled={currentPage === totalPages}
                 className={styles.li_item}
@@ -208,9 +192,6 @@ const TablePagination: React.FC<TablePaginationProps> = ({
             </RSPagination>
           </div>
         </Col>
-
-        {/* تغییر سایز صفحه */}
-
         <Col md="4" className="text-md-end">
           <div
             className={`d-flex align-items-center justify-content-end gap-2 ${styles.goToPageContainer}`}
@@ -225,7 +206,6 @@ const TablePagination: React.FC<TablePaginationProps> = ({
               onChange={handleGoToPageChange}
               onKeyDown={onKeyDown}
               className={styles.goToPage}
-             
             ></Input>
             <button
               type="button"
@@ -233,7 +213,7 @@ const TablePagination: React.FC<TablePaginationProps> = ({
               aria-label="Go to page"
               className={styles.go_to_Page_btn}
             >
-              <img src={GotoPageIcon}  />
+              <img src={GotoPageIcon} />
             </button>
           </div>
         </Col>

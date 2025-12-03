@@ -186,7 +186,6 @@ const Table: React.FC<TableProps> = ({
   };
 
   const handleGetDataAfterChange = (data: any) => {
-    console.log("handleGetDataAfterChange data:", data);
     setConfigData(data);
   };
 
@@ -214,15 +213,19 @@ const Table: React.FC<TableProps> = ({
           <ReactstrapTable className={styles.tableContainer}>
             <thead className={styles.theader_container}>
               <tr className={styles.tr_container}>
-                {finalColumns.map((colItem) => (
-                  <th
-                    key={colItem.uniqueId}
-                    className={styles.th_container}
-                    style={{ width: `${colItem.width}px` }}
-                  >
-                    {colItem.title}
-                  </th>
-                ))}
+                {finalColumns.map((colItem) => {
+                  return (
+                    colItem.visible && (
+                      <th
+                        key={colItem.uniqueId}
+                        className={styles.th_container}
+                        style={{ width: `${colItem.width}px` }}
+                      >
+                        {colItem.title}
+                      </th>
+                    )
+                  );
+                })}
               </tr>
             </thead>
             <tbody>
@@ -243,85 +246,90 @@ const Table: React.FC<TableProps> = ({
                   >
                     {finalColumns.map((col) => {
                       const val = col.key ? _.get(row, col.key) : null;
-                      return (
-                        <td key={col.uniqueId} className={styles.td_container}>
-                          {(() => {
-                            if (!col.type || col.type === ContentType.Text) {
-                              return <span>{val ?? "-"}</span>;
-                            }
-                            if (col.type === ContentType.Number) {
-                              return (
-                                <span className="font-mono">
-                                  {val?.toLocaleString?.() ?? "-"}
-                                </span>
-                              );
-                            }
-                            if (col.type === ContentType.Badge) {
-                              const variant =
-                                (col as any).badgeVariant || "info";
-                              const badgeStyles: Record<string, string> = {
-                                success: "bg-green-100 text-green-800",
-                                warning: "bg-yellow-100 text-yellow-800",
-                                danger: "bg-red-100 text-red-800",
-                                info: "bg-blue-100 text-blue-800",
-                              };
-                              return (
-                                <span
-                                  className={`px-2 py-1 rounded-full text-xs font-medium ${badgeStyles[variant]}`}
-                                >
-                                  {val ?? "-"}
-                                </span>
-                              );
-                            }
-                            if (col.type === ContentType.Button) {
-                              return (
-                                <ButtonComponent
-                                  buttonList={col.buttons ?? []}
-                                  data={data}
-                                />
-                              );
-                            }
-                            if (col.type === ContentType.Image) {
-                              return val ? (
-                                <img
-                                  src={val as string}
-                                  alt="تصویر"
-                                  className="w-10 h-10 object-cover rounded"
-                                />
-                              ) : (
-                                <div className="w-10 h-10 bg-gray-200 border-2 border-dashed rounded" />
-                              );
-                            }
-                            if (col.type === ContentType.Map) {
-                              return val ? (
-                                <a
-                                  href={`https://www.google.com/maps?q=${val}`}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="text-blue-600 underline text-xs"
-                                >
-                                  نمایش روی نقشه
-                                </a>
-                              ) : (
-                                "-"
-                              );
-                            }
-                            if (col.type === ContentType.Function) {
-                              if (col.htmlFunc) {
-                                if (
-                                  typeof col.htmlFunc === "function" &&
-                                  col.htmlFunc.length === 2
-                                ) {
-                                  return (col.htmlFunc as any)(row, rowIndex);
-                                }
-                                return (col.htmlFunc as any)(row);
+                      if (col.visible) {
+                        return (
+                          <td
+                            key={col.uniqueId}
+                            className={styles.td_container}
+                          >
+                            {(() => {
+                              if (col.type === ContentType.Text) {
+                                return <span>{val ?? "-"}</span>;
                               }
-                              return "-";
-                            }
-                            return <span>{val ?? "-"}</span>;
-                          })()}
-                        </td>
-                      );
+                              if (col.type === ContentType.Number) {
+                                return (
+                                  <span className="font-mono">
+                                    {val?.toLocaleString?.() ?? "-"}
+                                  </span>
+                                );
+                              }
+                              if (col.type === ContentType.Badge) {
+                                const variant =
+                                  (col as any).badgeVariant || "info";
+                                const badgeStyles: Record<string, string> = {
+                                  success: "bg-green-100 text-green-800",
+                                  warning: "bg-yellow-100 text-yellow-800",
+                                  danger: "bg-red-100 text-red-800",
+                                  info: "bg-blue-100 text-blue-800",
+                                };
+                                return (
+                                  <span
+                                    className={`px-2 py-1 rounded-full text-xs font-medium ${badgeStyles[variant]}`}
+                                  >
+                                    {val ?? "-"}
+                                  </span>
+                                );
+                              }
+                              if (col.type === ContentType.Button) {
+                                return (
+                                  <ButtonComponent
+                                    buttonList={col.buttons ?? []}
+                                    data={data}
+                                  />
+                                );
+                              }
+                              if (col.type === ContentType.Image) {
+                                return val ? (
+                                  <img
+                                    src={val as string}
+                                    alt="تصویر"
+                                    className="w-10 h-10 object-cover rounded"
+                                  />
+                                ) : (
+                                  <div className="w-10 h-10 bg-gray-200 border-2 border-dashed rounded" />
+                                );
+                              }
+                              if (col.type === ContentType.Map) {
+                                return val ? (
+                                  <a
+                                    href={`https://www.google.com/maps?q=${val}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-blue-600 underline text-xs"
+                                  >
+                                    نمایش روی نقشه
+                                  </a>
+                                ) : (
+                                  "-"
+                                );
+                              }
+                              if (col.type === ContentType.Function) {
+                                if (col.htmlFunc) {
+                                  if (
+                                    typeof col.htmlFunc === "function" &&
+                                    col.htmlFunc.length === 2
+                                  ) {
+                                    return (col.htmlFunc as any)(row, rowIndex);
+                                  }
+                                  return (col.htmlFunc as any)(row);
+                                }
+                                return "-";
+                              }
+                              return <span>{val ?? "-"}</span>;
+                            })()}
+                          </td>
+                        );
+                      }
                     })}
                   </tr>
                 ))
