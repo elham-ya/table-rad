@@ -156,7 +156,7 @@ const Table: React.FC<TableProps> = ({
   const finalColumns = useMemo(() => {
     let base = [];
     const apiCol =
-      configData !== null && configData.result[0].setting
+      configData !== null && configData.result.length > 0
         ? configData.result[0].setting.tables[id].columns
         : [];
 
