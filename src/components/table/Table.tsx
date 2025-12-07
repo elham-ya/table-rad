@@ -34,6 +34,8 @@ const Table: React.FC<TableProps> = ({
   const [configData, setConfigData] = useState<ApiResponse | null>(null);
 
   console.log("configData for table:", configData);
+                                                                                                                                                                                                          console.log("developer cols for table:", cols);
+  console.log("requestConfig:", requestConfig);
 
   // selection of rows send to parent
   useEffect(() => {
@@ -157,7 +159,7 @@ const Table: React.FC<TableProps> = ({
     let base = [];
     const apiCol =
       configData !== null && configData.result.length > 0
-        ? configData.result[0].setting.tables[id].columns
+        ? configData.result[0].setting.tables[id]?.columns
         : [];
 
     if (apiCol !== undefined && apiCol.length > 0) {
@@ -221,6 +223,7 @@ const Table: React.FC<TableProps> = ({
                         className={styles.th_container}
                         style={{ width: `${colItem.width}px` }}
                       >
+                        {console.log('colItem:', colItem)}
                         {colItem.title}
                       </th>
                     )
