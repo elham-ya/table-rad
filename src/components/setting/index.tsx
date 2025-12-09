@@ -107,8 +107,6 @@ const SettingModal: React.FC<SettingModalProps> = ({
         let newOrder = arrayMove(prevItems, oldIndex, newIndex);
         return newOrder;
       });
-      console.log('items in drag:', items);
-      
     }
   };
 
@@ -137,10 +135,7 @@ const SettingModal: React.FC<SettingModalProps> = ({
           index === existingIndex ? updated : col
         );
       }
-    });
-
-    console.log('items updateContentChange:',items);
-    
+    });   
   };
 
   const handleChangeTitle = (title: string, uniqueId: string) => {
@@ -189,8 +184,11 @@ const SettingModal: React.FC<SettingModalProps> = ({
       (col) => col.visible === true || col.excel === true
     );
 
-    // console.log('columns:', columns);
     console.log('changedColumns:', changedColumns);
+    if(changedColumns && changedColumns.length <= 0) {
+      toggle();
+      return;
+    }
     
     
     const newCommonColumns = changedColumns
@@ -226,7 +224,7 @@ const SettingModal: React.FC<SettingModalProps> = ({
         setting: {
           ...apiConfigData.result[0].setting,
           tables: {
-            ...(apiConfigData.result[0].setting.tables || {}),
+            ...(apiConfigData.result[0].setting.tables),
             ...finalColumns,
           },
         },
@@ -235,7 +233,11 @@ const SettingModal: React.FC<SettingModalProps> = ({
       requestSetSetting({
         setting: {
           ...currentSetting,
-          tables: {},
+          tables: {
+            x: {
+              columns:[]
+            }
+          },
         },
       });
     }
@@ -259,14 +261,14 @@ const SettingModal: React.FC<SettingModalProps> = ({
           </ModalHeader>
           <ModalBody>
             <Row>
-              <Col xs="12" className={`${styles.search_setting}`}>
+              {/* <Col xs="12" className={`${styles.search_setting}`}>
                 <div className={styles.search_wrapper}>
                   <Input name="search" type="text" placeholder="جستجو..." />
                   <button className={styles.search_btn}>
                     <img src={SearchIcon} />
                   </button>
                 </div>
-              </Col>
+              </Col> */}
               <Col xs="12" className="py-2">
                 <DndContext
                   sensors={sensors}

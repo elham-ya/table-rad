@@ -5,7 +5,8 @@ const ContentTypeValues = {
   Text: "text",
   Badge: "badge",
   Number: "number",
-  Function: "function"
+  Function: "function",
+  Price: "price"
 
 }  as const;
 
@@ -35,7 +36,7 @@ export interface TableColumn {
   uniqueId: string;
   defaultTitle?: string;
   title: React.ReactNode;
-  key: string;
+  key?: string;
   width?: string;
   type?: ContentType;
   htmlFunc?:

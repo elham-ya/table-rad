@@ -23,6 +23,7 @@ const Table: React.FC<TableProps> = ({
   onPageChange,
   onSizeChange,
   requestConfig,
+  totalCount = 0
 }) => {
   // just keeping index
   const [selectedRowIds, setSelectedRowIds] = useState<Set<string | number>>(
@@ -33,8 +34,8 @@ const Table: React.FC<TableProps> = ({
   const [settingModal, setSettingModal] = useState(false);
   const [configData, setConfigData] = useState<ApiResponse | null>(null);
 
-  console.log("configData for table:", configData);
-                                                                                                                                                                                                          console.log("developer cols for table:", cols);
+  console.log("configData for table:", configData);  
+  console.log("developer cols for table:", cols);
   console.log("requestConfig:", requestConfig);
 
   // selection of rows send to parent
@@ -104,7 +105,7 @@ const Table: React.FC<TableProps> = ({
     ? {
         uniqueId: "__row_selector__",
         key: "__row_selector__",
-        width: "50",
+        width: "20",
         type: ContentType.Function,
         title: (
           <Checkbox
@@ -131,7 +132,7 @@ const Table: React.FC<TableProps> = ({
           const rowId = row?.id;
           return (
             <Checkbox
-              uniqueId={`checkbox-${rowId}`}
+              uniqueId={rowId}
               checked={rowId !== undefined && selectedRowIds.has(rowId)}
               onChange={(checked) => {
                 setSelectedRowIds((prev) => {
@@ -223,7 +224,6 @@ const Table: React.FC<TableProps> = ({
                         className={styles.th_container}
                         style={{ width: `${colItem.width}px` }}
                       >
-                        {console.log('colItem:', colItem)}
                         {colItem.title}
                       </th>
                     )
@@ -259,10 +259,17 @@ const Table: React.FC<TableProps> = ({
                               if (col.type === ContentType.Text) {
                                 return <span>{val ?? "-"}</span>;
                               }
-                              if (col.type === ContentType.Number) {
+                              if (col.type === ContentType.Price) {
                                 return (
                                   <span className="font-mono">
                                     {val?.toLocaleString?.() ?? "-"}
+                                  </span>
+                                );
+                              }
+                              if (col.type === ContentType.Number) {
+                                return (
+                                  <span className="font-mono">
+                                    {val ?? "-"}
                                   </span>
                                 );
                               }
@@ -322,8 +329,11 @@ const Table: React.FC<TableProps> = ({
                                     typeof col.htmlFunc === "function" &&
                                     col.htmlFunc.length === 2
                                   ) {
+                                    console.log('11',col.htmlFunc, row, rowIndex);
+                                    
                                     return (col.htmlFunc as any)(row, rowIndex);
                                   }
+                                  console.log('222',col.htmlFunc, row);
                                   return (col.htmlFunc as any)(row);
                                 }
                                 return "-";
@@ -342,7 +352,7 @@ const Table: React.FC<TableProps> = ({
         </Col>
         <Col xs="12">
           <TablePagination
-            totalCount={240}
+            totalCount={totalCount}
             pageNumber={page}
             size={pageSize}
             onPageChange={handlePageChange}

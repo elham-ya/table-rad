@@ -48,7 +48,8 @@ const SortableItem = React.forwardRef<HTMLDivElement, SortableItemProps>(
       if(config.result[0] && config.result[0].setting.tables[tableId]) {
         setInputValue((prev) => ({
           ...prev,
-          title: allTables.tables[tableId].columns.find((x: rowProps) => x.uniqueId == row.uniqueId)?.title,
+          title: allTables.tables[tableId].columns.find((x: rowProps) => x.uniqueId == row.uniqueId)?.defaultTitle ? 
+            allTables.tables[tableId].columns.find((x: rowProps) => x.uniqueId == row.uniqueId)?.defaultTitle : '',
           width: allTables.tables[tableId].columns.find((x: rowProps) => x.uniqueId == row.uniqueId)?.width,
           excel: allTables.tables[tableId].columns.find( (x: rowProps) => x.uniqueId === row.uniqueId)?.excel,
           visible: allTables.tables[tableId].columns.find( (x: rowProps) => x.uniqueId === row.uniqueId)?.visible,
