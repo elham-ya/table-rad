@@ -325,12 +325,14 @@ const Table: React.FC<TableProps> = ({
                               }
                               if (col.type === ContentType.Function) {
                                 if (col.htmlFunc) {
+                                  console.log('col.htmlFunc.length:', col.htmlFunc.length);
+                                  
                                   if (
                                     typeof col.htmlFunc === "function" &&
                                     col.htmlFunc.length === 2
                                   ) {
-                                    console.log('11',col.htmlFunc, row, rowIndex);
                                     
+                                    console.log('11',col.htmlFunc, row, rowIndex);
                                     return (col.htmlFunc as any)(row, rowIndex);
                                   }
                                   console.log('222',col.htmlFunc, row);
