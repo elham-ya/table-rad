@@ -234,7 +234,7 @@ const SettingModal: React.FC<SettingModalProps> = ({
         setting: {
           ...currentSetting,
           tables: {
-            x: {
+            [tableName]: {
               columns:[]
             }
           },

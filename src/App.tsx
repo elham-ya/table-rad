@@ -4082,12 +4082,12 @@ function App() {
       key: "payableAmount",
       width: "200",
       type: ContentType.Function,
-      // htmlFunc: () => {
-      //   return "1,000,000 rial";
-      // },
-      excelFunc: () => {
-        return 1000000;
+      htmlFunc: () => {
+        return "1,000,000 rial";
       },
+      // excelFunc: () => {
+      //   return 1000000;
+      // },
       visible: true,
       excel: true
     },
@@ -4210,7 +4210,7 @@ function App() {
   }
 
   const config = {
-    'Access-Token': '8413009752-1707aAd2ef8f4866bc844c6542659489.XzIwMjUxMg',
+    'Access-Token': '9464635971-5f1249e3551643389bd37299E5cab348.XzIwMjUxMg',
     'Client-Id': '17959574q2f0347718971594ccd86f3f4',
     url : `https://api.sandpod.ir/srv/cms-sandbox/api/core/users/setting`,
   }

@@ -1,5 +1,5 @@
-const ContentTypeValues = {
-  Button : "button", 
+export const ContentType = {
+  Button: "button",
   Image: "img",
   Map: "map",
   Text: "text",
@@ -7,16 +7,14 @@ const ContentTypeValues = {
   Number: "number",
   Function: "function",
   Price: "price"
+} as const;
 
-}  as const;
-
-export type ContentType = typeof ContentTypeValues[keyof typeof ContentTypeValues];
-export const ContentType = ContentTypeValues;
+export type ContentType = string;
 
 type AppConfig = {
-  "Access-Token": string ;
+  "Access-Token": string;
   "Client-Id": string;
-  url: string; 
+  url: string;
 };
 
 export interface TableProps {
@@ -40,14 +38,19 @@ export interface TableColumn {
   width?: string;
   type?: ContentType;
   htmlFunc?:
-  | React.FC<unknown>
-  | ((row: unknown, index: number) => React.ReactNode)
-  | ((row: unknown) => React.ReactNode)
-  | string
-  | number
-  | boolean
-  | null
-  | undefined;
+    | React.FC<unknown>
+    | ((row: unknown, index: number) => React.ReactNode
+    | string
+    | number
+    | boolean
+    | null
+    | undefined)
+    | ((row: unknown) => React.ReactNode
+    | string
+    | number
+    | boolean
+    | null
+    | undefined)
   excelFunc?: (row: unknown) => unknown;
   buttons?: buttonColProps[];
   visible: boolean;
@@ -109,7 +112,7 @@ export interface rowProps {
   uniqueId: string;
   title: React.ReactNode;
   defaultTitle?: string;
-  key: string;
+  key?: string;
   width?: string;
   excel: boolean; 
   type?: ContentType;
@@ -117,7 +120,7 @@ export interface rowProps {
 }
 export interface SortableItemProps {
   id: string;
-  key: string;
+  key?: string;
   row: rowProps;
   onChangeTitle: (x: string, y:string) => void;
   onChangeWidth: (x: string, y:string) => void;

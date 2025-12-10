@@ -23,7 +23,7 @@ const Table: React.FC<TableProps> = ({
   onPageChange,
   onSizeChange,
   requestConfig,
-  totalCount = 0
+  totalCount = 0,
 }) => {
   // just keeping index
   const [selectedRowIds, setSelectedRowIds] = useState<Set<string | number>>(
@@ -34,7 +34,7 @@ const Table: React.FC<TableProps> = ({
   const [settingModal, setSettingModal] = useState(false);
   const [configData, setConfigData] = useState<ApiResponse | null>(null);
 
-  console.log("configData for table:", configData);  
+  console.log("configData for table:", configData);
   console.log("developer cols for table:", cols);
   console.log("requestConfig:", requestConfig);
 
@@ -163,6 +163,8 @@ const Table: React.FC<TableProps> = ({
         ? configData.result[0].setting.tables[id]?.columns
         : [];
 
+    console.log("apiCol from settings:", apiCol);
+
     if (apiCol !== undefined && apiCol.length > 0) {
       base = [numberColumn, ...apiCol];
     } else {
@@ -170,8 +172,113 @@ const Table: React.FC<TableProps> = ({
     }
 
     return checkBox && checkboxColumn ? [checkboxColumn, ...base] : base;
+
   }, [checkBox, checkboxColumn, cols, selectedRowIds, configData]);
 
+  //   const finalColumns = useMemo(() => {
+  //   const defaultColumns = [numberColumn, ...(checkBox ? [checkboxColumn] : []), ...cols];
+  //   if (configData && configData.result[0]?.setting?.tables?.[id]?.columns) {
+  //     const savedColumns = configData.result[0].setting.tables[id].columns;
+
+  //     return defaultColumns.map(col => {
+  //       const saved = savedColumns.find(s => s.uniqueId === col.uniqueId);
+  //       if (saved) {
+  //         return { ...col, visible: saved.visible ?? true, width: saved.width };
+  //       }
+  //       return col;
+  //     });
+  //   }
+
+  //   return defaultColumns;
+  // }, [checkBox, checkboxColumn, cols, configData, id]);
+
+  // const finalColumns = useMemo(() => {
+    
+  //   const prefixColumns: TableColumn[] = [numberColumn];
+
+  //   if (checkBox && checkboxColumn) {
+  //     prefixColumns.unshift(checkboxColumn);
+  //   }
+
+  //   prefixColumns.push(numberColumn);
+
+  //   const baseColumns = [...prefixColumns, ...cols];
+
+  //   const savedTableConfig = configData?.result?.[0]?.setting?.tables?.[id];
+
+  //   if (savedTableConfig?.columns && Array.isArray(savedTableConfig.columns)) {
+  //     const savedColumns = savedTableConfig.columns; // come from server
+
+  //     console.log("server Columns:", savedColumns);
+
+  //     return baseColumns.map((col) => {
+  //       if (!col || !col.uniqueId) return col;
+
+  //       const savedCol = savedColumns.find(
+  //         (saved: any) => saved?.uniqueId === col.uniqueId
+  //       );
+
+  //       if (!savedCol) return col;
+
+  //       console.log("savedCol:", savedCol);
+
+  //       if (savedCol && savedCol !== undefined) {
+  //         return {
+  //           ...col,
+  //           visible: savedCol.visible ?? true,
+  //           width: savedCol.width ?? col.width,
+  //           title: savedCol.title ?? col.title,
+  //           excel: savedCol.excel ?? col.excel,
+  //         };
+  //       }
+
+  //       return baseColumns;
+  //     });
+  //   }
+  //   return baseColumns.filter(
+  //     (col): col is TableColumn => col != null && col.visible !== false
+  //   );
+  // }, [cols, checkBox, checkboxColumn, configData, id]);
+
+
+//   const finalColumns = useMemo(() => {
+//   // پیش‌ستون‌ها: اول چک‌باکس (اگر باشه)، بعد شماره
+//   const prefixColumns: TableColumn[] = [numberColumn];
+//   if (checkBox && checkboxColumn) {
+//     prefixColumns.unshift(checkboxColumn); // چک‌باکس اول
+//   }
+
+//   // ستون‌های اصلی + پیش‌ستون‌ها
+//   const baseColumns: TableColumn[] = [...prefixColumns, ...cols];
+
+//   // تنظیمات ذخیره‌شده از API
+//   const savedTableConfig = configData?.result?.[0]?.setting?.tables?.[id];
+
+//   if (savedTableConfig?.columns && Array.isArray(savedTableConfig.columns)) {
+//     const savedColumns = savedTableConfig.columns;
+
+//     return baseColumns.map(col => {
+//       if (!col?.uniqueId) return col;
+
+//       const saved = savedColumns.find((s: any) => s?.uniqueId === col.uniqueId);
+//       if (!saved) return col;
+
+//       return {
+//         ...col,
+//         visible: saved.visible ?? true,
+//         width: saved.width ?? col.width,
+//         title: saved.title ?? col.title,
+//         excel: saved.excel ?? col.excel ?? true,
+//       };
+//     });
+//   }
+
+//   // اگر تنظیمات API نبود یا خالی بود
+//   return baseColumns;
+// }, [cols, checkBox, id, configData]); 
+
+  console.log("cols from props:", cols);
+  
   console.log("finalColumns at parent:", finalColumns);
 
   const handlePageChange = (pageNumber: number) => {
@@ -256,24 +363,36 @@ const Table: React.FC<TableProps> = ({
                             className={styles.td_container}
                           >
                             {(() => {
-                              if (col.type === ContentType.Text) {
+                              if (
+                                col.type === ContentType.Text ||
+                                col.type === "text"
+                              ) {
                                 return <span>{val ?? "-"}</span>;
                               }
-                              if (col.type === ContentType.Price) {
+                              if (
+                                col.type === ContentType.Price ||
+                                col.type === "price"
+                              ) {
                                 return (
                                   <span className="font-mono">
                                     {val?.toLocaleString?.() ?? "-"}
                                   </span>
                                 );
                               }
-                              if (col.type === ContentType.Number) {
+                              if (
+                                col.type === ContentType.Number ||
+                                col.type === "number"
+                              ) {
                                 return (
                                   <span className="font-mono">
                                     {val ?? "-"}
                                   </span>
                                 );
                               }
-                              if (col.type === ContentType.Badge) {
+                              if (
+                                col.type === ContentType.Badge ||
+                                col.type === "badge"
+                              ) {
                                 const variant =
                                   (col as any).badgeVariant || "info";
                                 const badgeStyles: Record<string, string> = {
@@ -290,7 +409,10 @@ const Table: React.FC<TableProps> = ({
                                   </span>
                                 );
                               }
-                              if (col.type === ContentType.Button) {
+                              if (
+                                col.type === ContentType.Button ||
+                                col.type === "button"
+                              ) {
                                 return (
                                   <ButtonComponent
                                     buttonList={col.buttons ?? []}
@@ -298,7 +420,10 @@ const Table: React.FC<TableProps> = ({
                                   />
                                 );
                               }
-                              if (col.type === ContentType.Image) {
+                              if (
+                                col.type === ContentType.Image ||
+                                col.type === "img"
+                              ) {
                                 return val ? (
                                   <img
                                     src={val as string}
@@ -309,7 +434,10 @@ const Table: React.FC<TableProps> = ({
                                   <div className="w-10 h-10 bg-gray-200 border-2 border-dashed rounded" />
                                 );
                               }
-                              if (col.type === ContentType.Map) {
+                              if (
+                                col.type === ContentType.Map ||
+                                col.type === "map"
+                              ) {
                                 return val ? (
                                   <a
                                     href={`https://www.google.com/maps?q=${val}`}
@@ -323,23 +451,67 @@ const Table: React.FC<TableProps> = ({
                                   "-"
                                 );
                               }
-                              if (col.type === ContentType.Function) {
-                                if (col.htmlFunc) {
-                                  console.log('col.htmlFunc.length:', col.htmlFunc.length);
-                                  
-                                  if (
-                                    typeof col.htmlFunc === "function" &&
-                                    col.htmlFunc.length === 2
-                                  ) {
-                                    
-                                    console.log('11',col.htmlFunc, row, rowIndex);
-                                    return (col.htmlFunc as any)(row, rowIndex);
+
+                              console.log(
+                                "DEBUG col.type:",
+                                col.type,
+                                typeof col.type,
+                                JSON.stringify(col.type)
+                              );
+                              if (
+                                String(col.type || "")
+                                  .trim()
+                                  .toLowerCase() === "function" &&
+                                typeof col.htmlFunc === "function"
+                              ) {
+                                console.log("col.htmlFunc:", col.htmlFunc);
+                                let cellContent: React.ReactNode = (
+                                  <span>--</span>
+                                );
+                                if (typeof col.htmlFunc === "function") {
+                                  try {
+                                    if (col.htmlFunc.length === 2) {
+                                      cellContent = (col.htmlFunc as any)(
+                                        row,
+                                        rowIndex
+                                      );
+                                    } else {
+                                      cellContent = (col.htmlFunc as any)(row);
+                                    }
+                                  } catch (error) {
+                                    console.error(
+                                      "خطا در اجرای htmlFunc:",
+                                      error,
+                                      col.uniqueId
+                                    );
+                                    cellContent = (
+                                      <span className="text-red-600">خطا!</span>
+                                    );
                                   }
-                                  console.log('222',col.htmlFunc, row);
-                                  return (col.htmlFunc as any)(row);
+                                } else {
+                                  cellContent = <span>{val ?? "-"}</span>;
                                 }
-                                return "-";
+                                return cellContent;
                               }
+
+                              // if (col.type === ContentType.Function) {
+                              //   if (col.htmlFunc) {
+                              //     console.log('col.htmlFunc.length:', col.htmlFunc.length);
+
+                              //     if (
+                              //       typeof col.htmlFunc === "function" &&
+                              //       col.htmlFunc.length === 2
+                              //     ) {
+
+                              //       console.log('11',col.htmlFunc, row, rowIndex);
+                              //       return (col.htmlFunc as any)(row, rowIndex);
+                              //     }
+                              //     console.log('222',col.htmlFunc, row);
+                              //     return (col.htmlFunc as any)(row);
+                              //   }
+                              //   return "-";
+                              // }
+
                               return <span>{val ?? "-"}</span>;
                             })()}
                           </td>

@@ -27,9 +27,10 @@ const SortableItem = React.forwardRef<HTMLDivElement, SortableItemProps>(
       transform: CSS.Transform.toString(transform),
       transition,
     };
+console.log('row:',row);
 
     const [inputValue, setInputValue] = useState({
-      title: "",
+      title: row.defaultTitle ? row.title : "",
       width: row.width || '200',
       excel: row.excel,
       visible: row.visible
@@ -38,31 +39,12 @@ const SortableItem = React.forwardRef<HTMLDivElement, SortableItemProps>(
     const [badgeValue, setBadgeValue] = useState(row.title);
     
     useEffect(() => {
-      const allTables = config.result[0].setting;
+      const specificTable = config.result[0].setting.tables[tableId];
       if(row && row.defaultTitle) {
         setBadgeValue(row.defaultTitle)
       } else {
         setBadgeValue(row.title)
       }
-
-      if(config.result[0] && config.result[0].setting.tables[tableId]) {
-        setInputValue((prev) => ({
-          ...prev,
-          title: allTables.tables[tableId].columns.find((x: rowProps) => x.uniqueId == row.uniqueId)?.defaultTitle ? 
-            allTables.tables[tableId].columns.find((x: rowProps) => x.uniqueId == row.uniqueId)?.defaultTitle : '',
-          width: allTables.tables[tableId].columns.find((x: rowProps) => x.uniqueId == row.uniqueId)?.width,
-          excel: allTables.tables[tableId].columns.find( (x: rowProps) => x.uniqueId === row.uniqueId)?.excel,
-          visible: allTables.tables[tableId].columns.find( (x: rowProps) => x.uniqueId === row.uniqueId)?.visible,
-        }))
-      } else {
-        setInputValue((prev) => ({
-          ...prev,
-          title: "" ,
-          width: row.width || '200',
-          excel: row.excel,
-          visible: row.visible,
-        }))
-      } 
     } , [])
 
     const IconExcel = ({ isActive }: { isActive: boolean }) => (
@@ -158,6 +140,7 @@ const SortableItem = React.forwardRef<HTMLDivElement, SortableItemProps>(
       }))
       onChangeVisibility(!inputValue.visible, row.uniqueId)
     };
+console.log('inputValue', inputValue);
 
     return (
       <div ref={combinedRef} className={styles.border_bottom_}>
