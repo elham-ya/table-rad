@@ -27,7 +27,8 @@ export interface TableProps {
   onRowSelect?: (selectedRows: unknown[]) => void;
   onPageChange?:(pageNumber: number) => void;
   onSizeChange?:(pageNumber: number) => void;
-  requestConfig: AppConfig
+  requestConfig: AppConfig;
+  pageSizeOptions?: number[]
 }
 
 export interface TableColumn {
@@ -54,7 +55,7 @@ export interface TableColumn {
   excelFunc?: (row: unknown) => unknown;
   buttons?: buttonColProps[];
   visible: boolean;
-  excel: boolean
+  excel: boolean;
 }
 export interface CheckboxProps<T = unknown> {
   checked?: boolean;

@@ -24,6 +24,7 @@ const Table: React.FC<TableProps> = ({
   onSizeChange,
   requestConfig,
   totalCount = 0,
+  pageSizeOptions = [10, 20, 25, 30, 40, 50]
 }) => {
   // just keeping index
   const [selectedRowIds, setSelectedRowIds] = useState<Set<string | number>>(
@@ -91,7 +92,7 @@ const Table: React.FC<TableProps> = ({
     type: ContentType.Function,
     title: "#",
     htmlFunc: (row: any, rowIndex: number) => {
-      return rowIndex + 1;
+      return (page - 1) * pageSize + rowIndex + 1;
     },
     visible: true,
     excel: false,
@@ -439,7 +440,7 @@ const Table: React.FC<TableProps> = ({
             size={pageSize}
             onPageChange={handlePageChange}
             onSizeChange={handleSizeChange}
-            pageSizeOptions={[10, 25, 50, 100]}
+            pageSizeOptions={pageSizeOptions}
             showTotal
             showSizeChanger
           />

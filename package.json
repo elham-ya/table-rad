@@ -1,6 +1,6 @@
 {
   "name": "table-rad",
-  "version": "0.0.1-alpha",
+  "version": "0.0.2-alpha",
   "main": "dist/index.umd.js",
   "module": "dist/index.esm.js",
   "types": "dist/index.d.ts",

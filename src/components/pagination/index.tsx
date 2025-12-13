@@ -18,7 +18,7 @@ const TablePagination: React.FC<TablePaginationProps> = ({
   size = 10,
   onPageChange,
   onSizeChange,
-  pageSizeOptions = [10, 25, 50, 100],
+  pageSizeOptions = [10, 20, 25, 30, 40, 50],
   showSizeChanger = true,
   showTotal = true,
   className = "",
@@ -75,6 +75,7 @@ const TablePagination: React.FC<TablePaginationProps> = ({
     onPageChange(Number(e.target.value));
     setValue(e.target.value);
   };
+  
   const submit = () => {
     const n = parseInt(value.trim(), 10);
     if (Number.isNaN(n)) return; // ignore invalid input
