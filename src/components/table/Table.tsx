@@ -34,10 +34,6 @@ const Table: React.FC<TableProps> = ({
   const [settingModal, setSettingModal] = useState(false);
   const [configData, setConfigData] = useState<ApiResponse | null>(null);
 
-  console.log("configData for table:", configData);
-  console.log("developer cols for table:", cols);
-  console.log("requestConfig:", requestConfig);
-
   // selection of rows send to parent
   useEffect(() => {
     if (onRowSelect) {
@@ -157,129 +153,72 @@ const Table: React.FC<TableProps> = ({
 
   // final column for mapping and show data on cells
   const finalColumns = useMemo(() => {
-    let base = [];
-    const apiCol =
-      configData !== null && configData.result.length > 0
-        ? configData.result[0].setting.tables[id]?.columns
-        : [];
+    // change cols to array
+    const baseColumns: TableColumn[] = Array.isArray(cols) 
+      ? [...cols] 
+      : cols ? [cols] : [];
+    // add default cols
+    const withPrefix: TableColumn[] = [...baseColumns];
+    if (numberColumn) {
+      withPrefix.unshift(numberColumn);
+    }
+    if (checkBox && checkboxColumn) {
+      withPrefix.unshift(checkboxColumn);
+    }
+    //api setting
+    const apiColumns =
+      configData !== null &&
+      !configData.hasError &&
+      configData.result.length > 0 &&
+      configData.result[0]?.setting?.tables?.[id]?.columns;
 
-    console.log("apiCol from settings:", apiCol);
-
-    if (apiCol !== undefined && apiCol.length > 0) {
-      base = [numberColumn, ...apiCol];
-    } else {
-      base = [numberColumn, ...cols];
+    // if api is empty return default developer cols
+    if (!apiColumns || !Array.isArray(apiColumns) || apiColumns.length === 0) {
+      return withPrefix;
     }
 
-    return checkBox && checkboxColumn ? [checkboxColumn, ...base] : base;
+    const apiColumnMap = new Map<string, any>();
 
+    apiColumns.forEach((saved: any) => {
+      if (saved?.uniqueId) {
+        apiColumnMap.set(saved.uniqueId, saved);
+      }
+    });
+    
+    // final columns
+    const resultColumns: TableColumn[] = [];
+    
+    withPrefix.forEach((col) => {   
+      if (col?.uniqueId?.startsWith('__')) {
+        resultColumns.push(col);
+        return;
+      }
+
+      const savedConfig = apiColumnMap.get(col.uniqueId);
+      
+      if (!savedConfig) {
+        // column is not in api dont show 
+        return;
+      }
+
+      if (savedConfig.visible !== true) {
+        // delete all visible:false
+        return;
+      }
+
+      // visible: true -> added 
+      resultColumns.push({
+        ...col,
+        visible: true,
+        width: savedConfig.width ?? col.width,
+        title: savedConfig.title ?? col.title,
+        excel: savedConfig.excel ?? col.excel,
+        // other props is maintened from cols except these 4 fields
+      });
+    });
+    return resultColumns;
   }, [checkBox, checkboxColumn, cols, selectedRowIds, configData]);
 
-  //   const finalColumns = useMemo(() => {
-  //   const defaultColumns = [numberColumn, ...(checkBox ? [checkboxColumn] : []), ...cols];
-  //   if (configData && configData.result[0]?.setting?.tables?.[id]?.columns) {
-  //     const savedColumns = configData.result[0].setting.tables[id].columns;
-
-  //     return defaultColumns.map(col => {
-  //       const saved = savedColumns.find(s => s.uniqueId === col.uniqueId);
-  //       if (saved) {
-  //         return { ...col, visible: saved.visible ?? true, width: saved.width };
-  //       }
-  //       return col;
-  //     });
-  //   }
-
-  //   return defaultColumns;
-  // }, [checkBox, checkboxColumn, cols, configData, id]);
-
-  // const finalColumns = useMemo(() => {
-    
-  //   const prefixColumns: TableColumn[] = [numberColumn];
-
-  //   if (checkBox && checkboxColumn) {
-  //     prefixColumns.unshift(checkboxColumn);
-  //   }
-
-  //   prefixColumns.push(numberColumn);
-
-  //   const baseColumns = [...prefixColumns, ...cols];
-
-  //   const savedTableConfig = configData?.result?.[0]?.setting?.tables?.[id];
-
-  //   if (savedTableConfig?.columns && Array.isArray(savedTableConfig.columns)) {
-  //     const savedColumns = savedTableConfig.columns; // come from server
-
-  //     console.log("server Columns:", savedColumns);
-
-  //     return baseColumns.map((col) => {
-  //       if (!col || !col.uniqueId) return col;
-
-  //       const savedCol = savedColumns.find(
-  //         (saved: any) => saved?.uniqueId === col.uniqueId
-  //       );
-
-  //       if (!savedCol) return col;
-
-  //       console.log("savedCol:", savedCol);
-
-  //       if (savedCol && savedCol !== undefined) {
-  //         return {
-  //           ...col,
-  //           visible: savedCol.visible ?? true,
-  //           width: savedCol.width ?? col.width,
-  //           title: savedCol.title ?? col.title,
-  //           excel: savedCol.excel ?? col.excel,
-  //         };
-  //       }
-
-  //       return baseColumns;
-  //     });
-  //   }
-  //   return baseColumns.filter(
-  //     (col): col is TableColumn => col != null && col.visible !== false
-  //   );
-  // }, [cols, checkBox, checkboxColumn, configData, id]);
-
-
-//   const finalColumns = useMemo(() => {
-//   // پیش‌ستون‌ها: اول چک‌باکس (اگر باشه)، بعد شماره
-//   const prefixColumns: TableColumn[] = [numberColumn];
-//   if (checkBox && checkboxColumn) {
-//     prefixColumns.unshift(checkboxColumn); // چک‌باکس اول
-//   }
-
-//   // ستون‌های اصلی + پیش‌ستون‌ها
-//   const baseColumns: TableColumn[] = [...prefixColumns, ...cols];
-
-//   // تنظیمات ذخیره‌شده از API
-//   const savedTableConfig = configData?.result?.[0]?.setting?.tables?.[id];
-
-//   if (savedTableConfig?.columns && Array.isArray(savedTableConfig.columns)) {
-//     const savedColumns = savedTableConfig.columns;
-
-//     return baseColumns.map(col => {
-//       if (!col?.uniqueId) return col;
-
-//       const saved = savedColumns.find((s: any) => s?.uniqueId === col.uniqueId);
-//       if (!saved) return col;
-
-//       return {
-//         ...col,
-//         visible: saved.visible ?? true,
-//         width: saved.width ?? col.width,
-//         title: saved.title ?? col.title,
-//         excel: saved.excel ?? col.excel ?? true,
-//       };
-//     });
-//   }
-
-//   // اگر تنظیمات API نبود یا خالی بود
-//   return baseColumns;
-// }, [cols, checkBox, id, configData]); 
-
-  console.log("cols from props:", cols);
-  
-  console.log("finalColumns at parent:", finalColumns);
 
   const handlePageChange = (pageNumber: number) => {
     setPage(pageNumber);
@@ -325,15 +264,13 @@ const Table: React.FC<TableProps> = ({
               <tr className={styles.tr_container}>
                 {finalColumns.map((colItem) => {
                   return (
-                    colItem.visible && (
-                      <th
-                        key={colItem.uniqueId}
-                        className={styles.th_container}
-                        style={{ width: `${colItem.width}px` }}
-                      >
-                        {colItem.title}
-                      </th>
-                    )
+                    <th
+                      key={colItem.uniqueId}
+                      className={styles.th_container}
+                      style={{ width: `${colItem.width}px`}}
+                    >
+                      {colItem.title}
+                    </th>
                   );
                 })}
               </tr>
@@ -355,8 +292,7 @@ const Table: React.FC<TableProps> = ({
                     className={styles.tr_container}
                   >
                     {finalColumns.map((col) => {
-                      const val = col.key ? _.get(row, col.key) : null;
-                      if (col.visible) {
+                      const val = col?.key ? _.get(row, col.key) : null;
                         return (
                           <td
                             key={col.uniqueId}
@@ -451,20 +387,12 @@ const Table: React.FC<TableProps> = ({
                                   "-"
                                 );
                               }
-
-                              console.log(
-                                "DEBUG col.type:",
-                                col.type,
-                                typeof col.type,
-                                JSON.stringify(col.type)
-                              );
                               if (
-                                String(col.type || "")
+                                String(col?.type || "")
                                   .trim()
                                   .toLowerCase() === "function" &&
-                                typeof col.htmlFunc === "function"
+                                typeof col?.htmlFunc === "function"
                               ) {
-                                console.log("col.htmlFunc:", col.htmlFunc);
                                 let cellContent: React.ReactNode = (
                                   <span>--</span>
                                 );
@@ -493,30 +421,10 @@ const Table: React.FC<TableProps> = ({
                                 }
                                 return cellContent;
                               }
-
-                              // if (col.type === ContentType.Function) {
-                              //   if (col.htmlFunc) {
-                              //     console.log('col.htmlFunc.length:', col.htmlFunc.length);
-
-                              //     if (
-                              //       typeof col.htmlFunc === "function" &&
-                              //       col.htmlFunc.length === 2
-                              //     ) {
-
-                              //       console.log('11',col.htmlFunc, row, rowIndex);
-                              //       return (col.htmlFunc as any)(row, rowIndex);
-                              //     }
-                              //     console.log('222',col.htmlFunc, row);
-                              //     return (col.htmlFunc as any)(row);
-                              //   }
-                              //   return "-";
-                              // }
-
                               return <span>{val ?? "-"}</span>;
                             })()}
                           </td>
                         );
-                      }
                     })}
                   </tr>
                 ))
