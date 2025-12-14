@@ -28,7 +28,8 @@ export interface TableProps {
   onPageChange?:(pageNumber: number) => void;
   onSizeChange?:(pageNumber: number) => void;
   requestConfig: AppConfig;
-  pageSizeOptions?: number[]
+  pageSizeOptions?: number[];
+  excelExportUrl?: string
 }
 
 export interface TableColumn {

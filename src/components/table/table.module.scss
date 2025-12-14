@@ -78,7 +78,7 @@
 //  button and modal setting style
 
 .modal_Setting {
-  .btn_setting {
+  .btn_setting, .btn_xcel {
     background-color: transparent;
     border: none;
     padding: 0;
@@ -109,6 +109,32 @@
       border: none;
       border-color: transparent;
     }
+
+  }
+  .btn_xcel {
+    margin-left: 5px;
+  }
+  .btn_xcel:not(:disabled):not(.disabled):active {
+    box-shadow: none!important;
+    background-color: transparent!important;
+    border: none!important;
+    border-color: transparent!important;
+    outline: none!important;
+  }
+
+  .btn_xcel.disabled, .btn_xcel:disabled {
+    box-shadow: none!important;
+    background-color: transparent!important;
+    border: none!important;
+    border-color: transparent!important;
+    outline: none!important;
+  }
+
+  .progressBar {
+    width: 200px;
+    height: 28px;
+    float: left;
+    margin-left : 5px;
   }
 
 }

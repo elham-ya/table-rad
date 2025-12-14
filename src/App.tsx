@@ -5076,7 +5076,7 @@ function App() {
   };
 
   const config = {
-    "Access-Token": "3154878657-61464bcC290e440897c779ebb8d1827f.XzIwMjUxMg",
+    "Access-Token": "3154878657-32a34c3b122f4271ad79d0Cd9f8837e7.XzIwMjUxMg",
     "Client-Id": "17959574q2f0347718971594ccd86f3f4",
     url: `https://api.sandpod.ir/srv/cms-sandbox/api/core/users/setting`,
   };
@@ -5092,7 +5092,8 @@ function App() {
       onPageChange={handlePageChange}
       onSizeChange={handleSizeChange}
       requestConfig={config}
-      pageSizeOptions = {[10, 20, 25, 30, 40, 50]}
+      pageSizeOptions={[10, 20, 25, 30, 40, 50]}
+      excelExportUrl="https://api.sandpod.ir/srv/cms-sandbox/api/cms/users/search"
     />
   );
 }
