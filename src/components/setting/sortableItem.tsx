@@ -27,7 +27,6 @@ const SortableItem = React.forwardRef<HTMLDivElement, SortableItemProps>(
       transform: CSS.Transform.toString(transform),
       transition,
     };
-console.log('row:',row);
 
     const [inputValue, setInputValue] = useState({
       title: row.defaultTitle ? row.title : "",
@@ -140,7 +139,6 @@ console.log('row:',row);
       }))
       onChangeVisibility(!inputValue.visible, row.uniqueId)
     };
-console.log('inputValue', inputValue);
 
     return (
       <div ref={combinedRef} className={styles.border_bottom_}>

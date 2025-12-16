@@ -93,8 +93,6 @@ const SettingModal: React.FC<SettingModalProps> = ({
     if (targetTable !== null && targetTable?.columns) {
       const mergedItems = mergeLists(targetTable.columns, items);
       setItems(mergedItems);
-      console.log('items at useEffect:', items);
-
     }
   }, [targetTable]);
 
@@ -155,9 +153,7 @@ const SettingModal: React.FC<SettingModalProps> = ({
   };
 
   const requestSetSetting = async (params: any) => {
-    console.log('params:',params);
-    
-    try {
+   try {
       const res = await fetch(requestConfig.url, {
         method: "POST",
         headers: {
@@ -183,13 +179,10 @@ const SettingModal: React.FC<SettingModalProps> = ({
     const changedColumns = items.filter(
       (col) => col.visible === true || col.excel === true
     );
-
-    console.log('changedColumns:', changedColumns);
     if(changedColumns && changedColumns.length <= 0) {
       toggle();
       return;
     }
-    
     
     const newCommonColumns = changedColumns
       .map(changedCol => {
@@ -202,9 +195,7 @@ const SettingModal: React.FC<SettingModalProps> = ({
           };
         }
         return changedCol;
-      }).filter(Boolean); 
-    
-    console.log('newCommonColumns:',newCommonColumns);
+      }).filter(Boolean);
 
     const finalColumns: FinalColumnProps = {
       [tableName]: {
@@ -243,8 +234,6 @@ const SettingModal: React.FC<SettingModalProps> = ({
     }
     toggle();
   };
-
-  console.log('items in component:' , items);
   
   return (
     <Row>

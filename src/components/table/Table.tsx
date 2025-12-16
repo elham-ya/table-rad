@@ -7,15 +7,22 @@ import {
   ApiResponse,
 } from "../../types/index";
 import styles from "./table.module.scss";
-import { Table as ReactstrapTable, Row, Col, Button, Progress, Spinner, Badge } from "reactstrap";
+import {
+  Table as ReactstrapTable,
+  Row,
+  Col,
+  Button,
+  Progress,
+  Spinner,
+  Badge,
+} from "reactstrap";
 import Checkbox from "../checkBox";
 import ButtonComponent from "../button";
 import TablePagination from "../pagination";
 import SettingModal from "../setting";
 import SettingButtonIcon from "../../assets/icons/SettingButton.svg";
 import Xcel from "../../assets/icons/Xcel.svg";
-import ExcelJS from 'exceljs';
-
+import ExcelJS from "exceljs";
 
 const Table: React.FC<TableProps> = ({
   id,
@@ -35,7 +42,9 @@ const Table: React.FC<TableProps> = ({
   exportMessage = null,
 }) => {
   // just keeping index
-  const [selectedRowIds, setSelectedRowIds] = useState<Set<string | number>>(new Set());
+  const [selectedRowIds, setSelectedRowIds] = useState<Set<string | number>>(
+    new Set()
+  );
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [settingModal, setSettingModal] = useState(false);
@@ -59,41 +68,45 @@ const Table: React.FC<TableProps> = ({
   }, [requestConfig]);
 
   useEffect(() => {
-    if (allDataForExport.length > 0 && exportMessage === 'success') {
+    if (allDataForExport.length > 0 && exportMessage === "success") {
       const generateAndDownloadExcel = async () => {
         try {
           const workbook = new ExcelJS.Workbook();
-          const worksheet = workbook.addWorksheet('داده‌ها');
+          const worksheet = workbook.addWorksheet("داده‌ها");
 
-          const excelColumns = cols.filter(col => col.excel === true);
+          const excelColumns = cols.filter((col) => col.excel === true);
 
           if (excelColumns.length === 0) {
-            console.warn('هیچ ستونی برای اکسپورت اکسل تعریف نشده (excel: true)');
+            console.warn(
+              "هیچ ستونی برای اکسپورت اکسل تعریف نشده (excel: true)"
+            );
             return;
           }
 
           // ردیف عنوان‌ها
-          const headerRow = excelColumns.map(col => col.defaultTitle || col.title || '');
+          const headerRow = excelColumns.map(
+            (col) => col.defaultTitle || col.title || ""
+          );
           worksheet.addRow(headerRow);
 
           // اضافه کردن داده‌ها
-          allDataForExport.forEach(row => {
-            const rowValues = excelColumns.map(col => {
-              if (col.excelFunc && typeof col.excelFunc === 'function') {
+          allDataForExport.forEach((row) => {
+            const rowValues = excelColumns.map((col) => {
+              if (col.excelFunc && typeof col.excelFunc === "function") {
                 return col.excelFunc(row);
               }
               if (col.key) {
                 return _.get(row, col.key);
               }
-              return '';
+              return "";
             });
             worksheet.addRow(rowValues);
           });
 
           // استایل فارسی
-          worksheet.eachRow({ includeEmpty: true }, row => {
-            row.eachCell({ includeEmpty: true }, cell => {
-              cell.alignment = { horizontal: 'right', vertical: 'middle' };
+          worksheet.eachRow({ includeEmpty: true }, (row) => {
+            row.eachCell({ includeEmpty: true }, (cell) => {
+              cell.alignment = { horizontal: "right", vertical: "middle" };
             });
           });
           worksheet.getRow(1).font = { bold: true };
@@ -101,16 +114,18 @@ const Table: React.FC<TableProps> = ({
           // تولید فایل
           const buffer = await workbook.xlsx.writeBuffer();
           const blob = new Blob([buffer], {
-            type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+            type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
           });
 
-          const baseName =  id || 'tableData';
-          const dateStr = new Date().toLocaleDateString('fa-IR').replace(/\//g, '-');
+          const baseName = id || "tableData";
+          const dateStr = new Date()
+            .toLocaleDateString("fa-IR")
+            .replace(/\//g, "-");
           const fileName = `${baseName}_${dateStr}.xlsx`;
 
-          // دانلود  
+          // دانلود
           const url = window.URL.createObjectURL(blob);
-          const link = document.createElement('a');
+          const link = document.createElement("a");
           link.href = url;
           link.download = fileName;
           document.body.appendChild(link);
@@ -118,7 +133,7 @@ const Table: React.FC<TableProps> = ({
           document.body.removeChild(link);
           window.URL.revokeObjectURL(url);
         } catch (error) {
-          console.error('خطا در ساخت فایل اکسل:', error);
+          console.error("خطا در ساخت فایل اکسل:", error);
         }
       };
 
@@ -158,8 +173,6 @@ const Table: React.FC<TableProps> = ({
       console.log("error fetching setting:", error);
     }
   };
-
-  
 
   const numberColumn: TableColumn = {
     uniqueId: "__number__selector__",
@@ -231,9 +244,11 @@ const Table: React.FC<TableProps> = ({
   // final column for mapping and show data on cells
   const finalColumns = useMemo(() => {
     // change cols to array
-    const baseColumns: TableColumn[] = Array.isArray(cols) 
-      ? [...cols] 
-      : cols ? [cols] : [];
+    const baseColumns: TableColumn[] = Array.isArray(cols)
+      ? [...cols]
+      : cols
+      ? [cols]
+      : [];
     // add default cols
     const withPrefix: TableColumn[] = [...baseColumns];
     if (numberColumn) {
@@ -261,20 +276,20 @@ const Table: React.FC<TableProps> = ({
         apiColumnMap.set(saved.uniqueId, saved);
       }
     });
-    
+
     // final columns
     const resultColumns: TableColumn[] = [];
-    
-    withPrefix.forEach((col) => {   
-      if (col?.uniqueId?.startsWith('__')) {
+
+    withPrefix.forEach((col) => {
+      if (col?.uniqueId?.startsWith("__")) {
         resultColumns.push(col);
         return;
       }
 
       const savedConfig = apiColumnMap.get(col.uniqueId);
-      
+
       if (!savedConfig) {
-        // column is not in api dont show 
+        // column is not in api dont show
         return;
       }
 
@@ -283,7 +298,7 @@ const Table: React.FC<TableProps> = ({
         return;
       }
 
-      // visible: true -> added 
+      // visible: true -> added
       resultColumns.push({
         ...col,
         visible: true,
@@ -295,7 +310,6 @@ const Table: React.FC<TableProps> = ({
     });
     return resultColumns;
   }, [checkBox, checkboxColumn, cols, selectedRowIds, configData]);
-
 
   const handlePageChange = (pageNumber: number) => {
     setPage(pageNumber);
@@ -315,9 +329,6 @@ const Table: React.FC<TableProps> = ({
     setConfigData(data);
   };
 
-
-
-
   if (configData === null || configData?.hasError === true) {
     return null;
   } else {
@@ -330,15 +341,16 @@ const Table: React.FC<TableProps> = ({
           </Button>
           {/* start excel download */}
           {isExporting ? (
-            <div className="d-flex align-items-center gap-3">
-              <Button color="success" size="sm" disabled className={styles.btn_xcel}>
-                <img src={Xcel} alt="در حال تهیه" width={30} />
-                در حال تهیه فایل...
-              </Button>
-              <Progress
-                value={exportProgress}
-                className={styles.progressBar}
+            <div className=" gap-3">
+              <Button
+                color="success"
+                size="sm"
+                disabled
+                className={styles.btn_xcel}
               >
+                <img src={Xcel} alt="در حال تهیه" width={30} />
+              </Button>
+              <Progress value={exportProgress} className={styles.progressBar}>
                 <span className="fw-bold text-dark">{exportProgress}%</span>
               </Progress>
             </div>
@@ -351,13 +363,21 @@ const Table: React.FC<TableProps> = ({
             </Button>
           )}
           {/* پیام موفقیت یا خطا */}
-          {exportMessage === 'success' && (
-            <Badge color="success" pill className="px-3 py-2">
+          {exportMessage === "success" && (
+            <Badge
+              color="success"
+              pill
+              className={`px-3 py-2 ${styles.badge_action_download}`}
+            >
               فایل اکسل با موفقیت دانلود شد
             </Badge>
           )}
-          {exportMessage === 'error' && (
-            <Badge color="danger" pill className="px-3 py-2">
+          {exportMessage === "error" && (
+            <Badge
+              color="danger"
+              pill
+              className={`px-3 py-2 ${styles.badge_action_download}`}
+            >
               دانلود ناموفق بود
             </Badge>
           )}
@@ -381,7 +401,7 @@ const Table: React.FC<TableProps> = ({
                     <th
                       key={colItem.uniqueId}
                       className={styles.th_container}
-                      style={{ width: `${colItem.width}px`}}
+                      style={{ width: `${colItem.width}px` }}
                     >
                       {colItem.title}
                     </th>
@@ -407,138 +427,133 @@ const Table: React.FC<TableProps> = ({
                   >
                     {finalColumns.map((col) => {
                       const val = col?.key ? _.get(row, col.key) : null;
-                        return (
-                          <td
-                            key={col.uniqueId}
-                            className={styles.td_container}
-                          >
-                            {(() => {
-                              if (
-                                col.type === ContentType.Text ||
-                                col.type === "text"
-                              ) {
-                                return <span>{val ?? "-"}</span>;
-                              }
-                              if (
-                                col.type === ContentType.Price ||
-                                col.type === "price"
-                              ) {
-                                return (
-                                  <span className="font-mono">
-                                    {val?.toLocaleString?.() ?? "-"}
-                                  </span>
-                                );
-                              }
-                              if (
-                                col.type === ContentType.Number ||
-                                col.type === "number"
-                              ) {
-                                return (
-                                  <span className="font-mono">
-                                    {val ?? "-"}
-                                  </span>
-                                );
-                              }
-                              if (
-                                col.type === ContentType.Badge ||
-                                col.type === "badge"
-                              ) {
-                                const variant =
-                                  (col as any).badgeVariant || "info";
-                                const badgeStyles: Record<string, string> = {
-                                  success: "bg-green-100 text-green-800",
-                                  warning: "bg-yellow-100 text-yellow-800",
-                                  danger: "bg-red-100 text-red-800",
-                                  info: "bg-blue-100 text-blue-800",
-                                };
-                                return (
-                                  <span
-                                    className={`px-2 py-1 rounded-full text-xs font-medium ${badgeStyles[variant]}`}
-                                  >
-                                    {val ?? "-"}
-                                  </span>
-                                );
-                              }
-                              if (
-                                col.type === ContentType.Button ||
-                                col.type === "button"
-                              ) {
-                                return (
-                                  <ButtonComponent
-                                    buttonList={col.buttons ?? []}
-                                    data={data}
-                                  />
-                                );
-                              }
-                              if (
-                                col.type === ContentType.Image ||
-                                col.type === "img"
-                              ) {
-                                return val ? (
-                                  <img
-                                    src={val as string}
-                                    alt="تصویر"
-                                    className="w-10 h-10 object-cover rounded"
-                                  />
-                                ) : (
-                                  <div className="w-10 h-10 bg-gray-200 border-2 border-dashed rounded" />
-                                );
-                              }
-                              if (
-                                col.type === ContentType.Map ||
-                                col.type === "map"
-                              ) {
-                                return val ? (
-                                  <a
-                                    href={`https://www.google.com/maps?q=${val}`}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="text-blue-600 underline text-xs"
-                                  >
-                                    نمایش روی نقشه
-                                  </a>
-                                ) : (
-                                  "-"
-                                );
-                              }
-                              if (
-                                String(col?.type || "")
-                                  .trim()
-                                  .toLowerCase() === "function" &&
-                                typeof col?.htmlFunc === "function"
-                              ) {
-                                let cellContent: React.ReactNode = (
-                                  <span>--</span>
-                                );
-                                if (typeof col.htmlFunc === "function") {
-                                  try {
-                                    if (col.htmlFunc.length === 2) {
-                                      cellContent = (col.htmlFunc as any)(
-                                        row,
-                                        rowIndex
-                                      );
-                                    } else {
-                                      cellContent = (col.htmlFunc as any)(row);
-                                    }
-                                  } catch (error) {
-                                    console.error(
-                                      "خطا در اجرای htmlFunc:",
-                                      error,
-                                      col.uniqueId
-                                    );
-                                    cellContent = (
-                                      <span className="text-red-600">خطا!</span>
-                                    );
-                                  }
-                                } else {
-                                  cellContent = <span>{val ?? "-"}</span>;
-                                }
-                                return cellContent;
-                              }
+                      return (
+                        <td key={col.uniqueId} className={styles.td_container}>
+                          {(() => {
+                            if (
+                              col.type === ContentType.Text ||
+                              col.type === "text"
+                            ) {
                               return <span>{val ?? "-"}</span>;
-                            })()}
-                          </td>
-                        );
+                            }
+                            if (
+                              col.type === ContentType.Price ||
+                              col.type === "price"
+                            ) {
+                              return (
+                                <span className="font-mono">
+                                  {val?.toLocaleString?.() ?? "-"}
+                                </span>
+                              );
+                            }
+                            if (
+                              col.type === ContentType.Number ||
+                              col.type === "number"
+                            ) {
+                              return (
+                                <span className="font-mono">{val ?? "-"}</span>
+                              );
+                            }
+                            if (
+                              col.type === ContentType.Badge ||
+                              col.type === "badge"
+                            ) {
+                              const variant =
+                                (col as any).badgeVariant || "info";
+                              const badgeStyles: Record<string, string> = {
+                                success: "bg-green-100 text-green-800",
+                                warning: "bg-yellow-100 text-yellow-800",
+                                danger: "bg-red-100 text-red-800",
+                                info: "bg-blue-100 text-blue-800",
+                              };
+                              return (
+                                <span
+                                  className={`px-2 py-1 rounded-full text-xs font-medium ${badgeStyles[variant]}`}
+                                >
+                                  {val ?? "-"}
+                                </span>
+                              );
+                            }
+                            if (
+                              col.type === ContentType.Button ||
+                              col.type === "button"
+                            ) {
+                              return (
+                                <ButtonComponent
+                                  buttonList={col.buttons ?? []}
+                                  data={data}
+                                />
+                              );
+                            }
+                            if (
+                              col.type === ContentType.Image ||
+                              col.type === "img"
+                            ) {
+                              return val ? (
+                                <img
+                                  src={val as string}
+                                  alt="تصویر"
+                                  className="w-10 h-10 object-cover rounded"
+                                />
+                              ) : (
+                                <div className="w-10 h-10 bg-gray-200 border-2 border-dashed rounded" />
+                              );
+                            }
+                            if (
+                              col.type === ContentType.Map ||
+                              col.type === "map"
+                            ) {
+                              return val ? (
+                                <a
+                                  href={`https://www.google.com/maps?q=${val}`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-blue-600 underline text-xs"
+                                >
+                                  نمایش روی نقشه
+                                </a>
+                              ) : (
+                                "-"
+                              );
+                            }
+                            if (
+                              String(col?.type || "")
+                                .trim()
+                                .toLowerCase() === "function" &&
+                              typeof col?.htmlFunc === "function"
+                            ) {
+                              let cellContent: React.ReactNode = (
+                                <span>--</span>
+                              );
+                              if (typeof col.htmlFunc === "function") {
+                                try {
+                                  if (col.htmlFunc.length === 2) {
+                                    cellContent = (col.htmlFunc as any)(
+                                      row,
+                                      rowIndex
+                                    );
+                                  } else {
+                                    cellContent = (col.htmlFunc as any)(row);
+                                  }
+                                } catch (error) {
+                                  console.error(
+                                    "خطا در اجرای htmlFunc:",
+                                    error,
+                                    col.uniqueId
+                                  );
+                                  cellContent = (
+                                    <span className="text-red-600">خطا!</span>
+                                  );
+                                }
+                              } else {
+                                cellContent = <span>{val ?? "-"}</span>;
+                              }
+                              return cellContent;
+                            }
+                            return <span>{val ?? "-"}</span>;
+                          })()}
+                        </td>
+                      );
                     })}
                   </tr>
                 ))

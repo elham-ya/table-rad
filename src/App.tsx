@@ -5063,22 +5063,6 @@ function App() {
     },
   ];
 
-  const [currentPageData, setCurrentPageData] = useState<unknown[]>([]);
-  const [totalCount, setTotalCount] = useState(0);
-  const [currentPageNumber, setCurrentPageNumber] = useState(1); // صفحه فعلی جدول
-  const pageSize = 50;
-
-  // وضعیت‌های اکسپورت اکسل
-  const [allExportData, setAllExportData] = useState<unknown[]>([]);
-  const [exportProgress, setExportProgress] = useState(0);
-  const [isExporting, setIsExporting] = useState(false);
-  const [exportMessage, setExportMessage] = useState<'success' | 'error' | null>(null);
-
-
-   
-
-
-
   const handleSelect = (selectedRows: unknown[]) => {
     console.log("ردیف‌های انتخاب‌شده :", selectedRows);
   };
@@ -5109,11 +5093,6 @@ function App() {
       onSizeChange={handleSizeChange}
       requestConfig={config}
       pageSizeOptions={[10, 20, 25, 30, 40, 50]}
-      // onExcelExportClick={handleStartExport} 
-      allDataForExport={allExportData}
-      exportProgress={exportProgress}
-      isExporting={isExporting}
-      exportMessage={exportMessage}
     />
   );
 }
