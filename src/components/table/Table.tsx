@@ -404,6 +404,8 @@ const Table: React.FC<TableProps> = ({
                       className={styles.th_container}
                       style={{ width: `${colItem.width}px` }}
                     >
+                      {console.log('colItem:',colItem)
+                              }
                       {colItem.title}
                     </th>
                   );

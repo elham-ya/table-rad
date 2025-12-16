@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState } from "react";
 import TableView from "./components/table/Table";
 import { ContentType } from "./types/index";
 
@@ -5054,7 +5054,7 @@ function App() {
     {
       uniqueId: "actions",
       title: "عملیات",
-      width: "150",
+      width: "100",
       key: "actionbutton",
       type: ContentType.Button,
       buttons: actionButtons,
@@ -5076,7 +5076,7 @@ function App() {
   };
 
   const config = {
-    "Access-Token": "4206504876-dc875d0645b44bf4a712323c349fF8b4.XzIwMjUxMg",
+    "Access-Token": "8413009752-93b6cc42b7b3422e86cCb3064e0dbe21.XzIwMjUxMg",
     "Client-Id": "17959574q2f0347718971594ccd86f3f4",
     url: `https://api.sandpod.ir/srv/cms-sandbox/api/core/users/setting`,
   };
