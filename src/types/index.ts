@@ -29,7 +29,11 @@ export interface TableProps {
   onSizeChange?:(pageNumber: number) => void;
   requestConfig: AppConfig;
   pageSizeOptions?: number[];
-  excelExportUrl?: string
+  onExcelExportClick?: () => void;
+  allDataForExport?: unknown[];
+  exportProgress?: number;
+  isExporting?: boolean; 
+  exportMessage?: 'success' | 'error' | null; 
 }
 
 export interface TableColumn {

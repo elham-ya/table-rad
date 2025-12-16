@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import TableView from "./components/table/Table";
 import { ContentType } from "./types/index";
 
@@ -4934,7 +4935,6 @@ function App() {
       disable: false,
     },
   ];
-
   // columns of table
   const cols = [
     {
@@ -5063,6 +5063,22 @@ function App() {
     },
   ];
 
+  const [currentPageData, setCurrentPageData] = useState<unknown[]>([]);
+  const [totalCount, setTotalCount] = useState(0);
+  const [currentPageNumber, setCurrentPageNumber] = useState(1); // صفحه فعلی جدول
+  const pageSize = 50;
+
+  // وضعیت‌های اکسپورت اکسل
+  const [allExportData, setAllExportData] = useState<unknown[]>([]);
+  const [exportProgress, setExportProgress] = useState(0);
+  const [isExporting, setIsExporting] = useState(false);
+  const [exportMessage, setExportMessage] = useState<'success' | 'error' | null>(null);
+
+
+   
+
+
+
   const handleSelect = (selectedRows: unknown[]) => {
     console.log("ردیف‌های انتخاب‌شده :", selectedRows);
   };
@@ -5076,7 +5092,7 @@ function App() {
   };
 
   const config = {
-    "Access-Token": "3154878657-32a34c3b122f4271ad79d0Cd9f8837e7.XzIwMjUxMg",
+    "Access-Token": "4206504876-dc875d0645b44bf4a712323c349fF8b4.XzIwMjUxMg",
     "Client-Id": "17959574q2f0347718971594ccd86f3f4",
     url: `https://api.sandpod.ir/srv/cms-sandbox/api/core/users/setting`,
   };
@@ -5093,7 +5109,11 @@ function App() {
       onSizeChange={handleSizeChange}
       requestConfig={config}
       pageSizeOptions={[10, 20, 25, 30, 40, 50]}
-      excelExportUrl="https://api.sandpod.ir/srv/cms-sandbox/api/cms/users/search"
+      // onExcelExportClick={handleStartExport} 
+      allDataForExport={allExportData}
+      exportProgress={exportProgress}
+      isExporting={isExporting}
+      exportMessage={exportMessage}
     />
   );
 }

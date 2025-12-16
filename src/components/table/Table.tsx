@@ -16,6 +16,7 @@ import SettingButtonIcon from "../../assets/icons/SettingButton.svg";
 import Xcel from "../../assets/icons/Xcel.svg";
 import ExcelJS from 'exceljs';
 
+
 const Table: React.FC<TableProps> = ({
   id,
   data,
@@ -27,22 +28,18 @@ const Table: React.FC<TableProps> = ({
   requestConfig,
   totalCount = 0,
   pageSizeOptions = [10, 20, 25, 30, 40, 50],
-  excelExportUrl =""
+  onExcelExportClick,
+  allDataForExport = [],
+  exportProgress = 0,
+  isExporting = false,
+  exportMessage = null,
 }) => {
   // just keeping index
-  const [selectedRowIds, setSelectedRowIds] = useState<Set<string | number>>(
-    new Set()
-  );
+  const [selectedRowIds, setSelectedRowIds] = useState<Set<string | number>>(new Set());
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [settingModal, setSettingModal] = useState(false);
   const [configData, setConfigData] = useState<ApiResponse | null>(null);
-
-  // excel export states
-  const [exporting, setExporting] = useState(false);
-  const [exportProgress, setExportProgress] = useState(0);
-  const [exportMessage, setExportMessage] = useState<'success' | 'error' | null>(null);
-  const [exportData, setExportData] = useState<unknown[]>([]);
 
   // selection of rows send to parent
   useEffect(() => {
@@ -56,19 +53,78 @@ const Table: React.FC<TableProps> = ({
   }, [selectedRowIds, data, onRowSelect]);
 
   useEffect(() => {
-    if (exportMessage) {
-      const timer = setTimeout(() => {
-        setExportMessage(null);
-      }, 4000); // ۴ ثانیه بعد پیام ناپدید بشه
-      return () => clearTimeout(timer);
-    }
-  }, [exportMessage]);
-
-  useEffect(() => {
     if (requestConfig?.url && requestConfig["Access-Token"]) {
       requestGetSetting();
     }
   }, [requestConfig]);
+
+  useEffect(() => {
+    if (allDataForExport.length > 0 && exportMessage === 'success') {
+      const generateAndDownloadExcel = async () => {
+        try {
+          const workbook = new ExcelJS.Workbook();
+          const worksheet = workbook.addWorksheet('داده‌ها');
+
+          const excelColumns = cols.filter(col => col.excel === true);
+
+          if (excelColumns.length === 0) {
+            console.warn('هیچ ستونی برای اکسپورت اکسل تعریف نشده (excel: true)');
+            return;
+          }
+
+          // ردیف عنوان‌ها
+          const headerRow = excelColumns.map(col => col.defaultTitle || col.title || '');
+          worksheet.addRow(headerRow);
+
+          // اضافه کردن داده‌ها
+          allDataForExport.forEach(row => {
+            const rowValues = excelColumns.map(col => {
+              if (col.excelFunc && typeof col.excelFunc === 'function') {
+                return col.excelFunc(row);
+              }
+              if (col.key) {
+                return _.get(row, col.key);
+              }
+              return '';
+            });
+            worksheet.addRow(rowValues);
+          });
+
+          // استایل فارسی
+          worksheet.eachRow({ includeEmpty: true }, row => {
+            row.eachCell({ includeEmpty: true }, cell => {
+              cell.alignment = { horizontal: 'right', vertical: 'middle' };
+            });
+          });
+          worksheet.getRow(1).font = { bold: true };
+
+          // تولید فایل
+          const buffer = await workbook.xlsx.writeBuffer();
+          const blob = new Blob([buffer], {
+            type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+          });
+
+          const baseName =  id || 'tableData';
+          const dateStr = new Date().toLocaleDateString('fa-IR').replace(/\//g, '-');
+          const fileName = `${baseName}_${dateStr}.xlsx`;
+
+          // دانلود  
+          const url = window.URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.href = url;
+          link.download = fileName;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          window.URL.revokeObjectURL(url);
+        } catch (error) {
+          console.error('خطا در ساخت فایل اکسل:', error);
+        }
+      };
+
+      generateAndDownloadExcel();
+    }
+  }, [allDataForExport, exportMessage, cols, id]);
 
   // get all settings
   const requestGetSetting = async () => {
@@ -259,164 +315,8 @@ const Table: React.FC<TableProps> = ({
     setConfigData(data);
   };
 
-  const handleExcelExport = async () => {
-  if (!totalCount || totalCount === 0) {
-    setExportMessage('error');
-    setExporting(false);
-    return;
-  }
 
-  const pageSize = 50; // همان limit که API استفاده می‌کنه
-  const totalPages = Math.ceil(totalCount / pageSize);
-  let allData: unknown[] = [];
 
-  // ریست وضعیت
-  setExportProgress(0);
-  setExportData([]);
-  setExportMessage(null);
-  setExporting(true);
-
-  // تابع کمکی برای درخواست یک صفحه با حداکثر ۳ تلاش
-  const fetchPageWithRetry = async (offset: number, retries = 3): Promise<unknown[] | null> => {
-    for (let attempt = 1; attempt <= retries; attempt++) {
-      try {
-        // ساخت پارامترها (حفظ فیلتر، سورت و غیره از requestConfig اصلی)
-        const params: any = {
-          offset,
-          limit: pageSize,
-        };
-
-        const response = await fetch(requestConfig.url, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        });
-
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status}`);
-        }
-
-        const json = await response.json();
-
-        // تنظیم کنید بسته به ساختار پاسخ APIتون
-        // مثال‌های رایج:
-        const pageData = json.items || json.data || json.results || json;
-
-        return pageData;
-      } catch (error) {
-        console.warn(`تلاش ${attempt} برای offset ${offset} ناموفق بود`, error);
-        if (attempt === retries) {
-          console.error(`صفحه با offset ${offset} بعد از ۳ تلاش شکست خورد`);
-          return null;
-        }
-        // تأخیر قبل از تلاش بعدی (1، 2، 3 ثانیه)
-        await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
-      }
-    }
-    return null;
-  };
-
-  // درخواست ترتیبی تمام صفحه‌ها
-  for (let page = 0; page < totalPages; page++) {
-    const offset = page * pageSize;
-    const pageData = await fetchPageWithRetry(offset);
-
-    if (pageData === null) {
-      // شکست بعد از ۳ تلاش → کل دانلود لغو میشه
-      setExportMessage('error');
-      setExporting(false);
-      setExportProgress(0);
-      setExportData([]);
-      return;
-    }
-
-    // اضافه کردن داده‌های صفحه به مجموعه کل
-    allData = [...allData, ...pageData];
-    setExportData(allData);
-
-    // به‌روزرسانی progress bar
-    const newProgress = Math.round(((page + 1) / totalPages) * 100);
-    setExportProgress(newProgress);
-  }
-
-  // همه صفحه‌ها با موفقیت دریافت شدن → ساخت فایل اکسل
-  try {
-    const workbook = new ExcelJS.Workbook();
-    const worksheet = workbook.addWorksheet('داده‌ها');
-
-    // فقط ستون‌هایی که excel: true دارند
-    const excelColumns = cols.filter(col => col.excel === true);
-
-    // ردیف اول: عنوان ستون‌ها
-    const headerRow = excelColumns.map(col => col.title || col.uniqueId || '');
-    worksheet.addRow(headerRow);
-
-    // اضافه کردن داده‌ها
-    allData.forEach(row => {
-      const rowValues = excelColumns.map(col => {
-        // اگر excelFunc تعریف شده باشه، از اون استفاده کن
-        if (col.excelFunc && typeof col.excelFunc === 'function') {
-          return col.excelFunc(row);
-        }
-        // در غیر این صورت از key استفاده کن
-        if (col.key) {
-          return _.get(row, col.key);
-        }
-        return '';
-      });
-      worksheet.addRow(rowValues);
-    });
-
-    // استایل فارسی: راست‌چین + بولد کردن عنوان
-    worksheet.eachRow({ includeEmpty: true }, row => {
-      row.eachCell({ includeEmpty: true }, cell => {
-        cell.alignment = { horizontal: 'right', vertical: 'middle' };
-      });
-    });
-    worksheet.getRow(1).font = { bold: true };
-
-    // تولید فایل
-    const buffer = await workbook.xlsx.writeBuffer();
-    const blob = new Blob([buffer], {
-      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-    });
-
-    // نام فایل دلخواه بر اساس id جدول
-    const friendlyNames: Record<string, string> = {
-      userActivity: 'userActivityList',
-      invoice: 'invoiceList',
-      // موارد دیگه رو اینجا اضافه کن
-    };
-    const baseName = friendlyNames[id] || id || 'tableData';
-    const dateStr = new Date().toLocaleDateString('fa-IR').replace(/\//g, '-');
-    const fileName = `${baseName}_${dateStr}.xlsx`;
-
-    // دانلود بدون file-saver
-    const url = window.URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = fileName;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    window.URL.revokeObjectURL(url);
-
-    // پیام موفقیت
-    setExportMessage('success');
-    setTimeout(() => {
-      setExporting(false);
-      setExportProgress(0);
-      setExportMessage(null);
-      setExportData([]);
-    }, 3000);
-  } catch (error) {
-    console.error('خطا در ساخت یا دانلود فایل اکسل:', error);
-    setExportMessage('error');
-    setExporting(false);
-    setExportProgress(0);
-  }
-};
 
   if (configData === null || configData?.hasError === true) {
     return null;
@@ -429,39 +329,35 @@ const Table: React.FC<TableProps> = ({
             <img width={30} src={SettingButtonIcon} />
           </Button>
           {/* start excel download */}
-          {exporting ? (
-            <>
-              <Button size="sm" disabled className={styles.btn_xcel}>
-                <img width={30} src={Xcel} />
+          {isExporting ? (
+            <div className="d-flex align-items-center gap-3">
+              <Button color="success" size="sm" disabled className={styles.btn_xcel}>
+                <img src={Xcel} alt="در حال تهیه" width={30} />
+                در حال تهیه فایل...
               </Button>
               <Progress
-                value={exportProgress} 
+                value={exportProgress}
                 className={styles.progressBar}
               >
-                {exportProgress}%
+                <span className="fw-bold text-dark">{exportProgress}%</span>
               </Progress>
-            </>
+            </div>
           ) : (
-            <Button 
+            <Button
+              onClick={() => onExcelExportClick?.()}
               className={styles.btn_xcel}
-              size="sm" 
-              onClick={async () => {
-                setExporting(true);
-                setExportProgress(0);
-                setExportMessage(null);
-                await handleExcelExport();
-              }}
             >
-              <img width={30} src={Xcel} />
+              <img src={Xcel} alt="دانلود اکسل" width={30} />
             </Button>
           )}
+          {/* پیام موفقیت یا خطا */}
           {exportMessage === 'success' && (
-            <Badge color="success" pill>
+            <Badge color="success" pill className="px-3 py-2">
               فایل اکسل با موفقیت دانلود شد
             </Badge>
           )}
           {exportMessage === 'error' && (
-            <Badge color="danger" pill>
+            <Badge color="danger" pill className="px-3 py-2">
               دانلود ناموفق بود
             </Badge>
           )}
