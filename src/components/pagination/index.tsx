@@ -15,7 +15,7 @@ import GotoPageIcon from "../../assets/icons/ItemArrow.svg";
 const TablePagination: React.FC<TablePaginationProps> = ({
   totalCount = 0,
   pageNumber = 1,
-  size = 10,
+  size,
   onPageChange,
   onSizeChange,
   pageSizeOptions = [10, 20, 25, 30, 40, 50],
@@ -25,7 +25,7 @@ const TablePagination: React.FC<TablePaginationProps> = ({
 }) => {
   const totalPages = Math.ceil(totalCount / size) || 1;
   const currentPage = Math.max(1, Math.min(pageNumber, totalPages));
-
+console.log('siiiiiiize:' , size)
 
   const handlePageClick = (page: number) => {
     if (page >= 1 && page <= totalPages && page !== currentPage) {

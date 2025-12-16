@@ -33,7 +33,8 @@ export interface TableProps {
   allDataForExport?: unknown[];
   exportProgress?: number;
   isExporting?: boolean; 
-  exportMessage?: 'success' | 'error' | null; 
+  exportMessage?: 'success' | 'error' | null;
+  size?: number
 }
 
 export interface TableColumn {

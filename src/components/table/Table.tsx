@@ -40,6 +40,7 @@ const Table: React.FC<TableProps> = ({
   exportProgress = 0,
   isExporting = false,
   exportMessage = null,
+  size = 10
 }) => {
   // just keeping index
   const [selectedRowIds, setSelectedRowIds] = useState<Set<string | number>>(
@@ -565,7 +566,7 @@ const Table: React.FC<TableProps> = ({
           <TablePagination
             totalCount={totalCount}
             pageNumber={page}
-            size={pageSize}
+            size={size}
             onPageChange={handlePageChange}
             onSizeChange={handleSizeChange}
             pageSizeOptions={pageSizeOptions}
