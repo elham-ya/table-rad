@@ -42,12 +42,11 @@ const Table: React.FC<TableProps> = ({
   exportMessage = null,
   size = 10
 }) => {
+  
   // just keeping index
-  const [selectedRowIds, setSelectedRowIds] = useState<Set<string | number>>(
-    new Set()
-  );
+  const [selectedRowIds, setSelectedRowIds] = useState<Set<string | number>>(new Set());
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const [pageSize, setPageSize] = useState(size);
   const [settingModal, setSettingModal] = useState(false);
   const [configData, setConfigData] = useState<ApiResponse | null>(null);
 
@@ -402,10 +401,8 @@ const Table: React.FC<TableProps> = ({
                     <th
                       key={colItem.uniqueId}
                       className={styles.th_container}
-                      style={{ width: `${colItem.width}px` }}
+                      style={{ width: `${colItem.width}px`}}
                     >
-                      {console.log('colItem:',colItem)
-                              }
                       {colItem.title}
                     </th>
                   );

@@ -6,7 +6,7 @@ import dts from 'vite-plugin-dts';
 import cssInjectedByJsPlugin from 'vite-plugin-css-injected-by-js';
 
 export default defineConfig({
-  plugins: [react(), dts({ insertTypesEntry: true , rollupTypes: true }), cssInjectedByJsPlugin()],
+  plugins: [react(), dts({ insertTypesEntry: true , rollupTypes: false }), cssInjectedByJsPlugin()],
   css: {
     modules: {
       localsConvention: 'camelCase',
