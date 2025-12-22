@@ -13,7 +13,7 @@ import {
   Col,
   Button,
   Progress,
-  Spinner,
+  Tooltip,
   Badge,
 } from "reactstrap";
 import Checkbox from "../checkBox";
@@ -40,7 +40,8 @@ const Table: React.FC<TableProps> = ({
   exportProgress = 0,
   isExporting = false,
   exportMessage = null,
-  size = 10
+  size = 10,
+  onCancelExport
 }) => {
   
   // just keeping index
@@ -49,6 +50,7 @@ const Table: React.FC<TableProps> = ({
   const [pageSize, setPageSize] = useState(size);
   const [settingModal, setSettingModal] = useState(false);
   const [configData, setConfigData] = useState<ApiResponse | null>(null);
+  const [tooltipOpen, setTooltipOpen] = useState(false);
 
   // selection of rows send to parent
   useEffect(() => {
@@ -173,6 +175,10 @@ const Table: React.FC<TableProps> = ({
       console.log("error fetching setting:", error);
     }
   };
+
+
+
+  const toggleTooltip = () => setTooltipOpen(!tooltipOpen);
 
   const numberColumn: TableColumn = {
     uniqueId: "__number__selector__",
@@ -353,6 +359,23 @@ const Table: React.FC<TableProps> = ({
               <Progress value={exportProgress} className={styles.progressBar}>
                 <span className="fw-bold text-dark">{exportProgress}%</span>
               </Progress>
+              <Button
+                color="danger"
+                size="sm"
+                outline
+                id='cancelbtn'
+                tooltip="cancel"
+                onClick={() => onCancelExport?.()}
+              >
+                X
+              </Button>
+              <Tooltip
+                isOpen={tooltipOpen}
+                target='cancelbtn'
+                toggle={toggleTooltip}
+              >
+                انصراف
+              </Tooltip>
             </div>
           ) : (
             <Button

@@ -34,7 +34,8 @@ export interface TableProps {
   exportProgress?: number;
   isExporting?: boolean; 
   exportMessage?: 'success' | 'error' | null;
-  size?: number
+  size?: number;
+  onCancelExport?: () => void;
 }
 
 export interface TableColumn {
