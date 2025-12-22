@@ -370,6 +370,7 @@ const Table: React.FC<TableProps> = ({
                 X
               </Button>
               <Tooltip
+                placement="top"
                 isOpen={tooltipOpen}
                 target='cancelbtn'
                 toggle={toggleTooltip}
