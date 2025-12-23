@@ -377,24 +377,6 @@ const Table: React.FC<TableProps> = ({
               >
                 انصراف
               </UncontrolledTooltip>
-              {exportMessage === "success" && (
-                <Badge
-                  color="success"
-                  pill
-                  className={`px-3 py-2 ${styles.badge_action_download}`}
-                >
-                  فایل اکسل با موفقیت دانلود شد
-                </Badge>
-              )}
-              {exportMessage === "error" && (
-                <Badge
-                  color="danger"
-                  pill
-                  className={`px-3 py-2 ${styles.badge_action_download}`}
-                >
-                  دانلود ناموفق بود
-                </Badge>
-              )}
             </div>
           ) : (
             <Button
@@ -403,11 +385,8 @@ const Table: React.FC<TableProps> = ({
             >
               <img src={Xcel} alt="دانلود اکسل" width={30} />
             </Button>
-          )
-          
-          }
-          
-          {/* {exportMessage === "success" && (
+          )}
+          {exportMessage === "success" && (
             <Badge
               color="success"
               pill
@@ -424,7 +403,7 @@ const Table: React.FC<TableProps> = ({
             >
               دانلود ناموفق بود
             </Badge>
-          )} */}
+          )}
           {/* end excel download */}
           <SettingModal
             tableName={id}
