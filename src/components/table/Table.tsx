@@ -366,7 +366,7 @@ const Table: React.FC<TableProps> = ({
                 outline
                 ref={buttonRef}
                 onClick={() => onCancelExport?.()}
-                style={styles.cancel_btn}
+                className={styles.cancel_btn}
               >
                 X
               </Button>
