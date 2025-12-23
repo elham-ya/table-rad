@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import _ from "lodash";
 import {
   TableColumn,
@@ -13,7 +13,7 @@ import {
   Col,
   Button,
   Progress,
-  Tooltip,
+  UncontrolledTooltip,
   Badge,
 } from "reactstrap";
 import Checkbox from "../checkBox";
@@ -41,17 +41,18 @@ const Table: React.FC<TableProps> = ({
   isExporting = false,
   exportMessage = null,
   size = 10,
-  onCancelExport
+  onCancelExport,
 }) => {
-  
   // just keeping index
-  const [selectedRowIds, setSelectedRowIds] = useState<Set<string | number>>(new Set());
+  const [selectedRowIds, setSelectedRowIds] = useState<Set<string | number>>(
+    new Set()
+  );
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(size);
   const [settingModal, setSettingModal] = useState(false);
   const [configData, setConfigData] = useState<ApiResponse | null>(null);
   const [tooltipOpen, setTooltipOpen] = useState(false);
-
+  const buttonRef = useRef(null);
   // selection of rows send to parent
   useEffect(() => {
     if (onRowSelect) {
@@ -92,10 +93,12 @@ const Table: React.FC<TableProps> = ({
           worksheet.addRow(headerRow);
 
           // اضافه کردن داده‌ها
-          allDataForExport.forEach((row) => {
+          allDataForExport.forEach((row, rowIndex) => {
             const rowValues = excelColumns.map((col) => {
               if (col.excelFunc && typeof col.excelFunc === "function") {
                 return col.excelFunc(row);
+              } else if (col.htmlFunc && typeof col.htmlFunc === "function") {
+                return col.htmlFunc(row, rowIndex);
               }
               if (col.key) {
                 return _.get(row, col.key);
@@ -175,8 +178,6 @@ const Table: React.FC<TableProps> = ({
       console.log("error fetching setting:", error);
     }
   };
-
-
 
   const toggleTooltip = () => setTooltipOpen(!tooltipOpen);
 
@@ -363,20 +364,37 @@ const Table: React.FC<TableProps> = ({
                 color="danger"
                 size="sm"
                 outline
-                id='cancelbtn'
-                tooltip="cancel"
+                ref={buttonRef}
                 onClick={() => onCancelExport?.()}
+                style={styles.cancel_btn}
               >
                 X
               </Button>
-              <Tooltip
+              <UncontrolledTooltip
                 placement="top"
-                isOpen={tooltipOpen}
-                target='cancelbtn'
+                target={buttonRef}
                 toggle={toggleTooltip}
               >
                 انصراف
-              </Tooltip>
+              </UncontrolledTooltip>
+              {exportMessage === "success" && (
+                <Badge
+                  color="success"
+                  pill
+                  className={`px-3 py-2 ${styles.badge_action_download}`}
+                >
+                  فایل اکسل با موفقیت دانلود شد
+                </Badge>
+              )}
+              {exportMessage === "error" && (
+                <Badge
+                  color="danger"
+                  pill
+                  className={`px-3 py-2 ${styles.badge_action_download}`}
+                >
+                  دانلود ناموفق بود
+                </Badge>
+              )}
             </div>
           ) : (
             <Button
@@ -385,9 +403,11 @@ const Table: React.FC<TableProps> = ({
             >
               <img src={Xcel} alt="دانلود اکسل" width={30} />
             </Button>
-          )}
-          {/* پیام موفقیت یا خطا */}
-          {exportMessage === "success" && (
+          )
+          
+          }
+          
+          {/* {exportMessage === "success" && (
             <Badge
               color="success"
               pill
@@ -404,7 +424,7 @@ const Table: React.FC<TableProps> = ({
             >
               دانلود ناموفق بود
             </Badge>
-          )}
+          )} */}
           {/* end excel download */}
           <SettingModal
             tableName={id}
@@ -425,7 +445,7 @@ const Table: React.FC<TableProps> = ({
                     <th
                       key={colItem.uniqueId}
                       className={styles.th_container}
-                      style={{ width: `${colItem.width}px`}}
+                      style={{ width: `${colItem.width}px` }}
                     >
                       {colItem.title}
                     </th>

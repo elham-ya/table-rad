@@ -45,20 +45,14 @@ export interface TableColumn {
   key?: string;
   width?: string;
   type?: ContentType;
+
   htmlFunc?:
-    | React.FC<unknown>
-    | ((row: unknown, index: number) => React.ReactNode
-    | string
-    | number
-    | boolean
-    | null
-    | undefined)
-    | ((row: unknown) => React.ReactNode
-    | string
-    | number
-    | boolean
-    | null
-    | undefined)
+  | React.FC<any>
+  | ((row: any, index: number) => React.ReactNode)
+  | ((row: any) => React.ReactNode)
+  | React.ReactNode;
+
+
   excelFunc?: (row: unknown) => unknown;
   buttons?: buttonColProps[];
   visible: boolean;
