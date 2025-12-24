@@ -39,7 +39,7 @@ const Table: React.FC<TableProps> = ({
   allDataForExport = [],
   exportProgress = 0,
   isExporting = false,
-  exportMessage = null,
+  exportStatus = null,
   size = 10,
   onCancelExport,
 }) => {
@@ -47,6 +47,8 @@ const Table: React.FC<TableProps> = ({
   const [selectedRowIds, setSelectedRowIds] = useState<Set<string | number>>(
     new Set()
   );
+  console.log('exportStatus:',exportStatus);
+  
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(size);
   const [settingModal, setSettingModal] = useState(false);
@@ -71,7 +73,7 @@ const Table: React.FC<TableProps> = ({
   }, [requestConfig]);
 
   useEffect(() => {
-    if (allDataForExport.length > 0 && exportMessage === "success") {
+    if (allDataForExport.length > 0 && exportStatus === "success") {
       const generateAndDownloadExcel = async () => {
         try {
           const workbook = new ExcelJS.Workbook();
@@ -144,7 +146,7 @@ const Table: React.FC<TableProps> = ({
 
       generateAndDownloadExcel();
     }
-  }, [allDataForExport, exportMessage, cols, id]);
+  }, [allDataForExport, exportStatus, cols, id]);
 
   // get all settings
   const requestGetSetting = async () => {
@@ -386,7 +388,7 @@ const Table: React.FC<TableProps> = ({
               <img src={Xcel} alt="دانلود اکسل" width={30} />
             </Button>
           )}
-          {exportMessage === "success" && (
+          {exportStatus === "success" && (
             <Badge
               color="success"
               pill
@@ -395,7 +397,7 @@ const Table: React.FC<TableProps> = ({
               فایل اکسل با موفقیت دانلود شد
             </Badge>
           )}
-          {exportMessage === "error" && (
+          {exportStatus === "error" && (
             <Badge
               color="danger"
               pill
@@ -404,7 +406,7 @@ const Table: React.FC<TableProps> = ({
               دانلود ناموفق بود
             </Badge>
           )}
-          {exportMessage === "cancelled" && (
+          {exportStatus === "cancelled" && (
             <Badge
               color="secondary"
               pill

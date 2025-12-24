@@ -33,7 +33,7 @@ export interface TableProps {
   allDataForExport?: unknown[];
   exportProgress?: number;
   isExporting?: boolean; 
-  exportMessage?: 'success' | 'error' | 'cancelled' | null;
+  exportStatus?: 'success' | 'error' | 'cancelled' | null;
   size?: number;
   onCancelExport?: () => void;
 }

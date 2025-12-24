@@ -43,6 +43,7 @@ const SettingModal: React.FC<SettingModalProps> = ({
   onGetData, // changed data
 }) => {
   const [items, setItems] = useState(columns);
+  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
     setItems(columns);
@@ -234,6 +235,12 @@ const SettingModal: React.FC<SettingModalProps> = ({
     }
     toggle();
   };
+
+  const filteredItems = searchTerm
+  ? items.filter((item) =>
+      typeof item.title === 'string' && item.title.includes(searchTerm)
+    )
+  : items;
   
   return (
     <Row>
@@ -250,14 +257,20 @@ const SettingModal: React.FC<SettingModalProps> = ({
           </ModalHeader>
           <ModalBody>
             <Row>
-              {/* <Col xs="12" className={`${styles.search_setting}`}>
+              <Col xs="12" className={`${styles.search_setting}`}>
                 <div className={styles.search_wrapper}>
-                  <Input name="search" type="text" placeholder="جستجو..." />
+                  <Input 
+                    name="search"  
+                    type="text" 
+                    placeholder="جستجو..."
+                    value={searchTerm}
+                    onChange={(e: { target: { value: React.SetStateAction<string>; }; }) => setSearchTerm(e.target.value)}
+                  />
                   <button className={styles.search_btn}>
                     <img src={SearchIcon} />
                   </button>
                 </div>
-              </Col> */}
+              </Col>
               <Col xs="12" className="py-2">
                 <DndContext
                   sensors={sensors}
@@ -265,10 +278,17 @@ const SettingModal: React.FC<SettingModalProps> = ({
                   onDragEnd={handleDragEnd}
                 >
                   <SortableContext
-                    items={items.map((i) => i.uniqueId)}
+                    items={filteredItems.map((i) => i.uniqueId)}
                     strategy={verticalListSortingStrategy}
                   >
-                    {items.map((field) => (
+                    {
+                      filteredItems.length === 0 ? (
+                      <div className="text-center py-4 text-muted">
+                        ستونی با این عنوان یافت نشد
+                      </div>
+                    ) : 
+
+                    (filteredItems.map((field) => (
                       <SortableItem
                         key={field.uniqueId}
                         id={field.uniqueId}
@@ -280,7 +300,9 @@ const SettingModal: React.FC<SettingModalProps> = ({
                         onChangeExcelExport={handleChangeExcelExport}
                         config={apiConfigData}
                       />
-                    ))}
+                    )))
+                    
+                    }
                   </SortableContext>
                 </DndContext>
               </Col>
