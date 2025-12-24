@@ -404,6 +404,15 @@ const Table: React.FC<TableProps> = ({
               دانلود ناموفق بود
             </Badge>
           )}
+          {exportMessage === "cancelled" && (
+            <Badge
+              color="secondary"
+              pill
+              className={`px-3 py-2 ${styles.badge_action_download}`}
+            >
+              دانلود توسط کاربر لغو شد  
+            </Badge>
+          )}
           {/* end excel download */}
           <SettingModal
             tableName={id}
