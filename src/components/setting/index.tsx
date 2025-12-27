@@ -235,10 +235,11 @@ const SettingModal: React.FC<SettingModalProps> = ({
     }
     toggle();
   };
-
+  
   const filteredItems = searchTerm
   ? items.filter((item) =>
-      typeof item.title === 'string' && item.title.includes(searchTerm)
+      (typeof item.title === 'string' && item.title.includes(searchTerm)) ||
+      (typeof item.defaultTitle === 'string' && item.defaultTitle.includes(searchTerm))
     )
   : items;
   
