@@ -1,13 +1,22 @@
 @use '../../styles/variables' as *;
 
-
+.table_wrapper {
+  width: 100%;
+  min-width: 800px;
+  overflow-x: auto;
+  border-collapse: collapse; 
+  table-layout:fixed;
+  border-radius: 10px;
+}
 .tableContainer {
-  max-width: 100%;
+  width: 100%;
   padding: 0;
   border-radius: 10px;
   border-spacing: 0;
   overflow-x: auto;
-  border-collapse: separate; 
+  border-collapse: collapse; 
+  table-layout:fixed;
+  min-width: 800px;
 }
 
 .tableContainer .th_container{
@@ -25,25 +34,34 @@
     border-left: 1px solid $table-border;
   }
   &:first-child {
-    border-top-right-radius: 10px;
     position: sticky;
+    border-top-right-radius: 10px;
     right: 0;
-    z-index: 11;
+    z-index: 13;
+    box-shadow: -4px 0 10px -3px rgba(0,0,0,0.25);
   }
   &:nth-child(2) {
     position: sticky;
-    right: 30px;
-    box-shadow: -3px 0 6px -2px rgba(0,0,0,0.15);
+    right: 51px;
+    background-color: $table-header;
     z-index: 12;
   }
 }
 
 .theader_container {
   border-radius: 10px 10px 0 0;
+  tr{
+    border: 1px solid #DEDEDE;
+    th{
+      &:first-child {
+        border: 1px solid #DEDEDE;
+      }
+    }
+  }
 }
 
 .tr_container {
-  border-radius: 10px 0 0 0;
+  // border-radius: 10px 0 0 0;
   &:last-child {
     .td_container {
       &:last-child{
@@ -71,16 +89,16 @@
     position: sticky;
     right: 0;
     background-color: white;
-    z-index: 10;
+    z-index: 12;
+    border-left: 1px solid $table-border;
+    box-shadow: -4px 0 10px -3px rgba(0,0,0,0.25);
   }
   &:nth-child(2) {
     position: sticky;
-    right: 30px;
+    right: 51px;
     background-color: white;
-    z-index: 12;
-    box-shadow: -3px 0 6px -2px rgba(0,0,0,0.15);
+    z-index: 11;
   }
-
 }
 
 .sidebar_right {

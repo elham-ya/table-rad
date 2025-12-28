@@ -200,7 +200,7 @@ const Table: React.FC<TableProps> = ({
     ? {
         uniqueId: "__row_selector__",
         key: "__row_selector__",
-        width: "20",
+        width: "50",
         type: ContentType.Function,
         title: (
           <Checkbox
@@ -427,6 +427,7 @@ const Table: React.FC<TableProps> = ({
           />
         </Col>
         <Col xs="12">
+        <div className={styles.table_wrapper}>
           <ReactstrapTable className={styles.tableContainer}>
             <thead className={styles.theader_container}>
               <tr className={styles.tr_container}>
@@ -594,6 +595,7 @@ const Table: React.FC<TableProps> = ({
               )}
             </tbody>
           </ReactstrapTable>
+        </div>
         </Col>
         <Col xs="12">
           <TablePagination
