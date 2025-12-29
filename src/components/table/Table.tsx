@@ -427,175 +427,177 @@ const Table: React.FC<TableProps> = ({
           />
         </Col>
         <Col xs="12">
-        <div className={styles.table_wrapper}>
-          <ReactstrapTable className={styles.tableContainer}>
-            <thead className={styles.theader_container}>
-              <tr className={styles.tr_container}>
-                {finalColumns.map((colItem) => {
-                  return (
-                    <th
-                      key={colItem.uniqueId}
-                      className={styles.th_container}
-                      style={{ width: `${colItem.width}px` }}
-                    >
-                      {colItem.title}
-                    </th>
-                  );
-                })}
-              </tr>
-            </thead>
-            <tbody>
-              {data.length === 0 ? (
-                <tr>
-                  <td
-                    colSpan={finalColumns.length}
-                    className={styles.td_container}
-                  >
-                    داده‌ای وجود ندارد.
-                  </td>
-                </tr>
-              ) : (
-                data.map((row, rowIndex) => (
-                  <tr
-                    key={(row as any).id ?? rowIndex}
-                    className={styles.tr_container}
-                  >
-                    {finalColumns.map((col) => {
-                      const val = col?.key ? _.get(row, col.key) : null;
+          <div className={styles.table_outer_wrapper}>
+            <div className={styles.table_inner_wrapper}>
+              <ReactstrapTable bordered className={styles.tableContainer} >
+                <thead className={styles.theader_container}>
+                  <tr className={styles.tr_container}>
+                    {finalColumns.map((colItem) => {
                       return (
-                        <td key={col.uniqueId} className={styles.td_container}>
-                          {(() => {
-                            if (
-                              col.type === ContentType.Text ||
-                              col.type === "text"
-                            ) {
-                              return <span>{val ?? "-"}</span>;
-                            }
-                            if (
-                              col.type === ContentType.Price ||
-                              col.type === "price"
-                            ) {
-                              return (
-                                <span className="font-mono">
-                                  {val?.toLocaleString?.() ?? "-"}
-                                </span>
-                              );
-                            }
-                            if (
-                              col.type === ContentType.Number ||
-                              col.type === "number"
-                            ) {
-                              return (
-                                <span className="font-mono">{val ?? "-"}</span>
-                              );
-                            }
-                            if (
-                              col.type === ContentType.Badge ||
-                              col.type === "badge"
-                            ) {
-                              const variant =
-                                (col as any).badgeVariant || "info";
-                              const badgeStyles: Record<string, string> = {
-                                success: "bg-green-100 text-green-800",
-                                warning: "bg-yellow-100 text-yellow-800",
-                                danger: "bg-red-100 text-red-800",
-                                info: "bg-blue-100 text-blue-800",
-                              };
-                              return (
-                                <span
-                                  className={`px-2 py-1 rounded-full text-xs font-medium ${badgeStyles[variant]}`}
-                                >
-                                  {val ?? "-"}
-                                </span>
-                              );
-                            }
-                            if (
-                              col.type === ContentType.Button ||
-                              col.type === "button"
-                            ) {
-                              return (
-                                <ButtonComponent
-                                  buttonList={col.buttons ?? []}
-                                  data={data}
-                                />
-                              );
-                            }
-                            if (
-                              col.type === ContentType.Image ||
-                              col.type === "img"
-                            ) {
-                              return val ? (
-                                <img
-                                  src={val as string}
-                                  alt="تصویر"
-                                  className="w-10 h-10 object-cover rounded"
-                                />
-                              ) : (
-                                <div className="w-10 h-10 bg-gray-200 border-2 border-dashed rounded" />
-                              );
-                            }
-                            if (
-                              col.type === ContentType.Map ||
-                              col.type === "map"
-                            ) {
-                              return val ? (
-                                <a
-                                  href={`https://www.google.com/maps?q=${val}`}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="text-blue-600 underline text-xs"
-                                >
-                                  نمایش روی نقشه
-                                </a>
-                              ) : (
-                                "-"
-                              );
-                            }
-                            if (
-                              String(col?.type || "")
-                                .trim()
-                                .toLowerCase() === "function" &&
-                              typeof col?.htmlFunc === "function"
-                            ) {
-                              let cellContent: React.ReactNode = (
-                                <span>--</span>
-                              );
-                              if (typeof col.htmlFunc === "function") {
-                                try {
-                                  if (col.htmlFunc.length === 2) {
-                                    cellContent = (col.htmlFunc as any)(
-                                      row,
-                                      rowIndex
-                                    );
-                                  } else {
-                                    cellContent = (col.htmlFunc as any)(row);
-                                  }
-                                } catch (error) {
-                                  console.error(
-                                    "خطا در اجرای htmlFunc:",
-                                    error,
-                                    col.uniqueId
-                                  );
-                                  cellContent = (
-                                    <span className="text-red-600">خطا!</span>
-                                  );
-                                }
-                              } else {
-                                cellContent = <span>{val ?? "-"}</span>;
-                              }
-                              return cellContent;
-                            }
-                            return <span>{val ?? "-"}</span>;
-                          })()}
-                        </td>
+                        <th
+                          key={colItem.uniqueId}
+                          className={styles.th_container}
+                          style={{ width: `${colItem.width}px` }}
+                        >
+                          {colItem.title}
+                        </th>
                       );
                     })}
                   </tr>
-                ))
-              )}
-            </tbody>
-          </ReactstrapTable>
-        </div>
+                </thead>
+                <tbody>
+                  {data.length === 0 ? (
+                    <tr>
+                      <td
+                        colSpan={finalColumns.length}
+                        className={styles.td_container}
+                      >
+                        داده‌ای وجود ندارد.
+                      </td>
+                    </tr>
+                  ) : (
+                    data.map((row, rowIndex) => (
+                      <tr
+                        key={(row as any).id ?? rowIndex}
+                        className={styles.tr_container}
+                      >
+                        {finalColumns.map((col) => {
+                          const val = col?.key ? _.get(row, col.key) : null;
+                          return (
+                            <td key={col.uniqueId} className={styles.td_container}>
+                              {(() => {
+                                if (
+                                  col.type === ContentType.Text ||
+                                  col.type === "text"
+                                ) {
+                                  return <span>{val ?? "-"}</span>;
+                                }
+                                if (
+                                  col.type === ContentType.Price ||
+                                  col.type === "price"
+                                ) {
+                                  return (
+                                    <span className="font-mono">
+                                      {val?.toLocaleString?.() ?? "-"}
+                                    </span>
+                                  );
+                                }
+                                if (
+                                  col.type === ContentType.Number ||
+                                  col.type === "number"
+                                ) {
+                                  return (
+                                    <span className="font-mono">{val ?? "-"}</span>
+                                  );
+                                }
+                                if (
+                                  col.type === ContentType.Badge ||
+                                  col.type === "badge"
+                                ) {
+                                  const variant =
+                                    (col as any).badgeVariant || "info";
+                                  const badgeStyles: Record<string, string> = {
+                                    success: "bg-green-100 text-green-800",
+                                    warning: "bg-yellow-100 text-yellow-800",
+                                    danger: "bg-red-100 text-red-800",
+                                    info: "bg-blue-100 text-blue-800",
+                                  };
+                                  return (
+                                    <span
+                                      className={`px-2 py-1 rounded-full text-xs font-medium ${badgeStyles[variant]}`}
+                                    >
+                                      {val ?? "-"}
+                                    </span>
+                                  );
+                                }
+                                if (
+                                  col.type === ContentType.Button ||
+                                  col.type === "button"
+                                ) {
+                                  return (
+                                    <ButtonComponent
+                                      buttonList={col.buttons ?? []}
+                                      data={data}
+                                    />
+                                  );
+                                }
+                                if (
+                                  col.type === ContentType.Image ||
+                                  col.type === "img"
+                                ) {
+                                  return val ? (
+                                    <img
+                                      src={val as string}
+                                      alt="تصویر"
+                                      className="w-10 h-10 object-cover rounded"
+                                    />
+                                  ) : (
+                                    <div className="w-10 h-10 bg-gray-200 border-2 border-dashed rounded" />
+                                  );
+                                }
+                                if (
+                                  col.type === ContentType.Map ||
+                                  col.type === "map"
+                                ) {
+                                  return val ? (
+                                    <a
+                                      href={`https://www.google.com/maps?q=${val}`}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="text-blue-600 underline text-xs"
+                                    >
+                                      نمایش روی نقشه
+                                    </a>
+                                  ) : (
+                                    "-"
+                                  );
+                                }
+                                if (
+                                  String(col?.type || "")
+                                    .trim()
+                                    .toLowerCase() === "function" &&
+                                  typeof col?.htmlFunc === "function"
+                                ) {
+                                  let cellContent: React.ReactNode = (
+                                    <span>--</span>
+                                  );
+                                  if (typeof col.htmlFunc === "function") {
+                                    try {
+                                      if (col.htmlFunc.length === 2) {
+                                        cellContent = (col.htmlFunc as any)(
+                                          row,
+                                          rowIndex
+                                        );
+                                      } else {
+                                        cellContent = (col.htmlFunc as any)(row);
+                                      }
+                                    } catch (error) {
+                                      console.error(
+                                        "خطا در اجرای htmlFunc:",
+                                        error,
+                                        col.uniqueId
+                                      );
+                                      cellContent = (
+                                        <span className="text-red-600">خطا!</span>
+                                      );
+                                    }
+                                  } else {
+                                    cellContent = <span>{val ?? "-"}</span>;
+                                  }
+                                  return cellContent;
+                                }
+                                return <span>{val ?? "-"}</span>;
+                              })()}
+                            </td>
+                          );
+                        })}
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </ReactstrapTable>
+            </div>
+          </div>
         </Col>
         <Col xs="12">
           <TablePagination

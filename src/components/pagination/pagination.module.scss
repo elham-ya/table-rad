@@ -14,7 +14,6 @@
   align-items: center;
   .li_item_icon {
     background-color: $white;
-
     button {
       border: none;
     }
@@ -24,6 +23,7 @@
     color: $table-text;
     border-radius: 4px;
     border: none;
+    margin: 0 .12rem;
     .btn_li_item {
       width: 32px;
       height: 32px;
@@ -62,20 +62,17 @@
     display: inline-flex;
     gap: 0;
     background-color: $pagination-background-color-ul;
-    margin: 0;
+    margin: 0 2px;
     padding: 0;
     list-style: none;
-    flex-wrap: wrap; // برای ریسپانسیو بهتر
+    flex-wrap: wrap;   
     justify-content: center;
     align-items: center;
-
     border-radius: 8px;
   }
 
-  // استایل هر li (آیتم صفحه)
   &>li {
     margin: 0;
-
     &>button,
     &>span {
       display: flex;
@@ -84,7 +81,7 @@
       min-width: 38px;
       height: 38px;
       padding: 0 8px;
-      border-radius: 8px !important; // اگه می‌خوای گرد بشه
+      border-radius: 8px !important; 
       font-weight: 500;
       transition: all 0.2s ease;
       border: none;
@@ -92,14 +89,12 @@
       color: #4a5568;
     }
 
-    // حالت فعال
     &.active>a,
     &.active>span {
       background-color: $pagination-background-color-ul;
 
     }
 
-    // حالت غیرفعال
     &.disabled>a,
     &.disabled>span {
       background-color: #f8f9fa;
@@ -109,7 +104,6 @@
     }
   }
 
-  // برای ... (سه نقطه)
   &>li.disabled>span {
     background: transparent;
     border: none;
@@ -122,7 +116,6 @@
   }
 }
 
-// style of size option selector
 .goToPageContainer {
   position: relative;
   button:focus {
@@ -134,8 +127,8 @@
   width: 90px; 
   height: 40px;
   background-color: $white;
-  border: 1px solid $pagination-border;
-  border-radius: 8px;
+  border: 1px solid $pagination-border !important;
+  border-radius: 8px !important;
   font-size: 13px;
   padding: 3px 18px 3px 3px;
   box-sizing: border-box; 
@@ -158,6 +151,7 @@
   z-index: 3;
 
   &:focus {
+    outline: none !important;
     border-color: none;
     box-shadow: none;
   }
@@ -177,17 +171,16 @@
   top: 50%;
   left: 11px;
   transform: translateY(-50%);
-  pointer-events: none;                 /* click goes through to the select */
+  pointer-events: none;           
   
   width: 24px;
   height: 24px;
-  background-image: url('../../assets/icons/ArrowDown.svg');   /* ← your SVG file */
+  background-image: url('../../assets/icons/ArrowDown.svg');  
   background-repeat: no-repeat;
   background-size: contain;
   background-position: center;
 }
 
-// select style
 .sizeChangerContainer :global(.form-control) {
   display: block;
   width: 100%;
@@ -197,13 +190,11 @@
   border: 1px solid $pagination-border;
   background-color: $white;
   height: inherit;
-
   -webkit-appearance: none;
   -moz-appearance: none;
   appearance: none;
 }
 
-/* Hide arrow in Internet Explorer (if you still care) */
 .sizeChangerContainer :global(.form-control)::-ms-expand {
   display: none;
 }
@@ -246,11 +237,9 @@ select.selectSizeOption.form-control {
   }
 }
 
-// اگه می‌خوای در موبایل کوچیک‌تر بشه
 @media (max-width: 576px) {
   .customPagination {
     gap: 2px;
-
     &>li>a,
     &>li>span {
       min-width: 34px;

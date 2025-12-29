@@ -1,22 +1,30 @@
 @use '../../styles/variables' as *;
 
-.table_wrapper {
+.table_outer_wrapper {
+  // border: 1px solid $table-border;
+  border-radius: 10px;
+  overflow: hidden;   
+  background-color: white;
+}
+.table_inner_wrapper {
   width: 100%;
   min-width: 800px;
   overflow-x: auto;
-  border-collapse: collapse; 
-  table-layout:fixed;
+  
   border-radius: 10px;
 }
 .tableContainer {
   width: 100%;
   padding: 0;
-  border-radius: 10px;
-  border-spacing: 0;
-  overflow-x: auto;
   border-collapse: collapse; 
   table-layout:fixed;
   min-width: 800px;
+  th {
+    border-bottom-width: 2px solid $table-border !important;;
+  }
+  td {
+    border: 1px solid $table-border !important;
+  }
 }
 
 .tableContainer .th_container{
@@ -25,43 +33,35 @@
   font-weight: 600;
   background-color: $table-header;
   padding: 12px 8px;
-  border-bottom: 1px solid $table-border;
-  border-right: 1px solid $table-border;
-  border-top: 1px solid $table-border;
   vertical-align: middle;
   &:last-child {
     border-top-left-radius: 10px; 
-    border-left: 1px solid $table-border;
   }
   &:first-child {
     position: sticky;
     border-top-right-radius: 10px;
     right: 0;
-    z-index: 13;
-    box-shadow: -4px 0 10px -3px rgba(0,0,0,0.25);
+    background-color: $table-header !important;
+    border-left: 1px solid $table-border !important;
+    box-shadow: -5px 0 12px -3px rgba(0,0,0,0.3) !important;
+    z-index: 3;
   }
   &:nth-child(2) {
     position: sticky;
-    right: 51px;
-    background-color: $table-header;
-    z-index: 12;
+    right: 50px;
+    background-color: $table-header !important;
+    border-left: 1px solid $table-border !important;
+    z-index: 3;
   }
 }
 
 .theader_container {
   border-radius: 10px 10px 0 0;
-  tr{
-    border: 1px solid #DEDEDE;
-    th{
-      &:first-child {
-        border: 1px solid #DEDEDE;
-      }
-    }
-  }
 }
 
 .tr_container {
-  // border-radius: 10px 0 0 0;
+  border: 1px solid $table-border;
+  border-radius: 10px;
   &:last-child {
     .td_container {
       &:last-child{
@@ -78,26 +78,23 @@
   font-size: 14px;
   text-align: center;
   padding: 12px 8px;
-  border-bottom: 1px solid $table-border;
-  border-right: 1px solid $table-border;
   border-top: none;
   vertical-align: middle;
-  &:last-child {
-    border-left: 1px solid $table-border;
-  }
   &:first-child{
     position: sticky;
     right: 0;
-    background-color: white;
-    z-index: 12;
-    border-left: 1px solid $table-border;
-    box-shadow: -4px 0 10px -3px rgba(0,0,0,0.25);
+    background-color: white !important;
+    border-left: 1px solid $table-border !important;
+    border-right: none !important;
+    box-shadow: -5px 0 12px -3px rgba(0,0,0,0.3);
+    z-index: 3;
   }
   &:nth-child(2) {
     position: sticky;
-    right: 51px;
-    background-color: white;
-    z-index: 11;
+    right: 50px;
+    background-color: white !important;
+    border-left: 1px solid $table-border !important;
+    z-index: 3;
   }
 }
 
@@ -116,7 +113,6 @@
 }
 
 //  button and modal setting style
-
 .modal_Setting {
   .btn_setting, .btn_xcel {
     background-color: transparent;
