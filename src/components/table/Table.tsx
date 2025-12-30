@@ -13,7 +13,6 @@ import {
   Col,
   Button,
   Progress,
-  UncontrolledTooltip,
   Badge,
 } from "reactstrap";
 import Checkbox from "../checkBox";
@@ -47,14 +46,14 @@ const Table: React.FC<TableProps> = ({
   const [selectedRowIds, setSelectedRowIds] = useState<Set<string | number>>(
     new Set()
   );
-  console.log('exportStatus:',exportStatus);
-  
+  console.log("exportStatus:", exportStatus);
+
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(size);
   const [settingModal, setSettingModal] = useState(false);
   const [configData, setConfigData] = useState<ApiResponse | null>(null);
   const [tooltipOpen, setTooltipOpen] = useState(false);
-  const buttonRef = useRef(null);
+
   // selection of rows send to parent
   useEffect(() => {
     if (onRowSelect) {
@@ -366,19 +365,12 @@ const Table: React.FC<TableProps> = ({
                 color="danger"
                 size="sm"
                 outline
-                ref={buttonRef}
+                title="انصراف"
                 onClick={() => onCancelExport?.()}
                 className={styles.cancel_btn}
               >
                 X
               </Button>
-              <UncontrolledTooltip
-                placement="top"
-                target={buttonRef}
-                toggle={toggleTooltip}
-              >
-                انصراف
-              </UncontrolledTooltip>
             </div>
           ) : (
             <Button
@@ -412,7 +404,7 @@ const Table: React.FC<TableProps> = ({
               pill
               className={`px-3 py-2 ${styles.badge_action_download}`}
             >
-              دانلود توسط کاربر لغو شد  
+              دانلود توسط کاربر لغو شد
             </Badge>
           )}
           {/* end excel download */}
@@ -429,7 +421,7 @@ const Table: React.FC<TableProps> = ({
         <Col xs="12">
           <div className={styles.table_outer_wrapper}>
             <div className={styles.table_inner_wrapper}>
-              <ReactstrapTable bordered className={styles.tableContainer} >
+              <ReactstrapTable bordered className={styles.tableContainer}>
                 <thead className={styles.theader_container}>
                   <tr className={styles.tr_container}>
                     {finalColumns.map((colItem) => {
@@ -464,7 +456,10 @@ const Table: React.FC<TableProps> = ({
                         {finalColumns.map((col) => {
                           const val = col?.key ? _.get(row, col.key) : null;
                           return (
-                            <td key={col.uniqueId} className={styles.td_container}>
+                            <td
+                              key={col.uniqueId}
+                              className={styles.td_container}
+                            >
                               {(() => {
                                 if (
                                   col.type === ContentType.Text ||
@@ -487,7 +482,9 @@ const Table: React.FC<TableProps> = ({
                                   col.type === "number"
                                 ) {
                                   return (
-                                    <span className="font-mono">{val ?? "-"}</span>
+                                    <span className="font-mono">
+                                      {val ?? "-"}
+                                    </span>
                                   );
                                 }
                                 if (
@@ -569,7 +566,9 @@ const Table: React.FC<TableProps> = ({
                                           rowIndex
                                         );
                                       } else {
-                                        cellContent = (col.htmlFunc as any)(row);
+                                        cellContent = (col.htmlFunc as any)(
+                                          row
+                                        );
                                       }
                                     } catch (error) {
                                       console.error(
@@ -578,7 +577,9 @@ const Table: React.FC<TableProps> = ({
                                         col.uniqueId
                                       );
                                       cellContent = (
-                                        <span className="text-red-600">خطا!</span>
+                                        <span className="text-red-600">
+                                          خطا!
+                                        </span>
                                       );
                                     }
                                   } else {

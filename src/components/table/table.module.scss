@@ -1,7 +1,7 @@
 @use '../../styles/variables' as *;
 
 .table_outer_wrapper {
-  // border: 1px solid $table-border;
+  border: 1px solid $table-border;
   border-radius: 10px;
   overflow: hidden;   
   background-color: white;
@@ -10,20 +10,40 @@
   width: 100%;
   min-width: 800px;
   overflow-x: auto;
-  
   border-radius: 10px;
+}
+
+.table_inner_wrapper::-webkit-scrollbar {
+  width: 2px;
+  height: 7px;
+  border-radius: 5px;
+}
+.table_inner_wrapper::-webkit-scrollbar-thumb {
+  background: #999;
+  border-radius: 10px;
+}
+.table_inner_wrapper::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+.table_inner_wrapper::-webkit-scrollbar-thumb:hover {
+  background: #666;
+  cursor: grab;
+  
 }
 .tableContainer {
   width: 100%;
   padding: 0;
-  border-collapse: collapse; 
+  border-collapse: separate; 
   table-layout:fixed;
   min-width: 800px;
+  border: none !important;
+  border-spacing: 0;
   th {
-    border-bottom-width: 2px solid $table-border !important;;
+    border-bottom: 2px solid $table-border !important;
   }
   td {
-    border: 1px solid $table-border !important;
+    // border: 1px solid $table-border !important;
   }
 }
 
@@ -34,34 +54,37 @@
   background-color: $table-header;
   padding: 12px 8px;
   vertical-align: middle;
+  border:none;
+  border-right: 1px solid $table-border;
   &:last-child {
-    border-top-left-radius: 10px; 
+    border-top-left-radius: 10px;
   }
   &:first-child {
     position: sticky;
     border-top-right-radius: 10px;
     right: 0;
+    border-right: none;
     background-color: $table-header !important;
-    border-left: 1px solid $table-border !important;
-    box-shadow: -5px 0 12px -3px rgba(0,0,0,0.3) !important;
+    // box-shadow: -5px 0 12px -3px rgba(0,0,0,0.3) !important;
     z-index: 3;
   }
   &:nth-child(2) {
     position: sticky;
     right: 50px;
+    // border-right: 1px solid $table-border;
+    // border-left: 1px solid $table-border;
     background-color: $table-header !important;
-    border-left: 1px solid $table-border !important;
     z-index: 3;
   }
 }
 
 .theader_container {
   border-radius: 10px 10px 0 0;
+  border: none;
 }
 
 .tr_container {
-  border: 1px solid $table-border;
-  border-radius: 10px;
+  border: none;
   &:last-child {
     .td_container {
       &:last-child{
@@ -78,22 +101,24 @@
   font-size: 14px;
   text-align: center;
   padding: 12px 8px;
+  border-left: 1px solid $table-border !important;
+  border-bottom: 1px solid $table-border !important;
+  border-right: none !important;
   border-top: none;
   vertical-align: middle;
   &:first-child{
     position: sticky;
     right: 0;
     background-color: white !important;
-    border-left: 1px solid $table-border !important;
-    border-right: none !important;
-    box-shadow: -5px 0 12px -3px rgba(0,0,0,0.3);
+    // box-shadow: -5px 0 12px -3px rgba(0,0,0,0.3);
     z-index: 3;
   }
   &:nth-child(2) {
     position: sticky;
     right: 50px;
     background-color: white !important;
-    border-left: 1px solid $table-border !important;
+    box-shadow: -5px 0px 9px rgba(0,0,0,0.1);
+    // border-left: 1px solid $table-border !important;
     z-index: 3;
   }
 }
@@ -166,7 +191,8 @@
 
   .progressBar {
     width: 200px;
-    height: 28px;
+    height: 29px;
+    border-radius: 5px;
     float: left;
     margin-left : 5px;
   }
