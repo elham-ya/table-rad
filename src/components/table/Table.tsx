@@ -34,25 +34,31 @@ const Table: React.FC<TableProps> = ({
   requestConfig,
   totalCount = 0,
   pageSizeOptions = [10, 20, 25, 30, 40, 50],
-  onExcelExportClick,
-  allDataForExport = [],
-  exportProgress = 0,
-  isExporting = false,
-  exportStatus = null,
+  onExcelExportRequest,
   size = 10,
   onCancelExport,
 }) => {
+  console.log('onExcelExportRequest:',onExcelExportRequest);
+  
   // just keeping index
   const [selectedRowIds, setSelectedRowIds] = useState<Set<string | number>>(
     new Set()
   );
-  console.log("exportStatus:", exportStatus);
+
 
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(size);
   const [settingModal, setSettingModal] = useState(false);
   const [configData, setConfigData] = useState<ApiResponse | null>(null);
   const [tooltipOpen, setTooltipOpen] = useState(false);
+
+  // وضعیت دانلود اکسل
+  const [isExporting, setIsExporting] = useState(false);
+  const [abortController, setAbortController] = useState(null);
+  const [exportStatus, setExportStatus] = useState<'idle' | 'exporting' | 'success' | 'error' | 'cancelled'>('idle');
+  const [isCancelled, setIsCancelled] = useState(false);
+  const [allExportData, setAllExportData] = useState([]);
+  const [exportProgress, setExportProgress] = useState(0);
 
   // selection of rows send to parent
   useEffect(() => {
@@ -72,7 +78,7 @@ const Table: React.FC<TableProps> = ({
   }, [requestConfig]);
 
   useEffect(() => {
-    if (allDataForExport.length > 0 && exportStatus === "success") {
+    if (allExportData.length > 0 && exportStatus === "success") {
       const generateAndDownloadExcel = async () => {
         try {
           const workbook = new ExcelJS.Workbook();
@@ -94,7 +100,7 @@ const Table: React.FC<TableProps> = ({
           worksheet.addRow(headerRow);
 
           // اضافه کردن داده‌ها
-          allDataForExport.forEach((row, rowIndex) => {
+          allExportData.forEach((row, rowIndex) => {
             const rowValues = excelColumns.map((col) => {
               if (col.excelFunc && typeof col.excelFunc === "function") {
                 return col.excelFunc(row);
@@ -145,7 +151,7 @@ const Table: React.FC<TableProps> = ({
 
       generateAndDownloadExcel();
     }
-  }, [allDataForExport, exportStatus, cols, id]);
+  }, [allExportData, exportStatus, cols, id]);
 
   // get all settings
   const requestGetSetting = async () => {
@@ -337,6 +343,84 @@ const Table: React.FC<TableProps> = ({
     setConfigData(data);
   };
 
+
+
+  const handleExportExcel = async () => {
+
+    setIsCancelled(false);
+    if (!totalCount || totalCount === 0) {
+      setExportStatus("error");
+      return;
+    }
+
+    if (abortController) {
+      abortController.abort();
+    }
+
+    if(onExcelExportRequest && typeof(onExcelExportRequest) === 'function') {
+
+      setIsExporting(true);
+      const controller = new AbortController();
+      setAbortController(controller);
+
+      setIsExporting(true);
+      setExportProgress(0);
+      setExportStatus('idle');
+      setAllExportData([]);
+
+      const totalPagesToFetch = Math.ceil(totalCount / 50);
+      let collectedData = [];
+
+      try {
+        for (let page = 1; page <= totalPagesToFetch; page++) {
+
+          const data = await onExcelExportRequest();
+
+          if (data === null) {
+            if (!isCancelled) {
+              setExportStatus('error');
+            }
+            setIsExporting(false);
+            setExportProgress(0);
+            setAllExportData([]);
+            setAbortController(null);
+            return;
+          }
+
+          collectedData = [...collectedData, ...data];
+          setExportProgress(Math.round((page / totalPagesToFetch) * 100));
+        }
+
+        setAllExportData(collectedData);
+        setExportStatus("success");
+        setAbortController(null);
+
+        setTimeout(() => {
+          setIsExporting(false);
+          setExportProgress(0);
+          setExportStatus('idle');
+          setAllExportData([]);
+      }, 3000);
+
+
+      } catch {
+
+      }
+  }
+}
+
+  const handleCancelExport = () => {
+    if (abortController) {
+      abortController.abort();
+    }
+    setIsCancelled(true);
+    setIsExporting(false);
+    setExportProgress(0);
+    setExportStatus("cancelled");
+    setAllExportData([]);
+    setAbortController(null);
+  };
+
   if (configData === null || configData?.hasError === true) {
     return null;
   } else {
@@ -358,7 +442,7 @@ const Table: React.FC<TableProps> = ({
               >
                 <img src={Xcel} alt="در حال تهیه" width={30} />
               </Button>
-              <Progress value={exportProgress} className={styles.progressBar}>
+              <Progress animated striped value={exportProgress} className={styles.progressBar}>
                 <span className="fw-bold text-dark">{exportProgress}%</span>
               </Progress>
               <Button
@@ -366,7 +450,7 @@ const Table: React.FC<TableProps> = ({
                 size="sm"
                 outline
                 title="انصراف"
-                onClick={() => onCancelExport?.()}
+                onClick={handleCancelExport}
                 className={styles.cancel_btn}
               >
                 X
@@ -374,7 +458,7 @@ const Table: React.FC<TableProps> = ({
             </div>
           ) : (
             <Button
-              onClick={() => onExcelExportClick?.()}
+              onClick={handleExportExcel}
               className={styles.btn_xcel}
             >
               <img src={Xcel} alt="دانلود اکسل" width={30} />

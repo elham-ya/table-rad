@@ -29,7 +29,7 @@ export interface TableProps {
   onSizeChange?:(pageNumber: number) => void;
   requestConfig: AppConfig;
   pageSizeOptions?: number[];
-  onExcelExportClick?: () => void;
+  onExcelExportRequest?: () => Promise<any[]>;
   allDataForExport?: unknown[];
   exportProgress?: number;
   isExporting?: boolean; 

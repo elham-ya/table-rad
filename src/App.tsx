@@ -10088,14 +10088,14 @@ function App() {
   };
 
   const config = {
-    "Access-Token": "7361383533-8eaCe311d7fa40518c07878db018e019.XzIwMjUxMg",
+    "Access-Token": "9464635971-5ae831b460f243bCbab4bfb71e7d0081.XzIwMjUxMg",
     "Client-Id": "17959574q2f0347718971594ccd86f3f4",
     url: `https://api.sandpod.ir/srv/cms-sandbox/api/core/users/setting`,
   };
 
   return (
     <TableView
-      id="invoiceList"
+      id='invoiceList'
       data={data}
       cols={cols}
       totalCount={data.length}
