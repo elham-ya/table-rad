@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useRef } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import _ from "lodash";
 import {
   TableColumn,
@@ -36,29 +36,28 @@ const Table: React.FC<TableProps> = ({
   pageSizeOptions = [10, 20, 25, 30, 40, 50],
   onExcelExportRequest,
   size = 10,
-  onCancelExport,
 }) => {
-  console.log('onExcelExportRequest:',onExcelExportRequest);
   
+console.log('onExcelExportRequest2:' , onExcelExportRequest);
+
   // just keeping index
   const [selectedRowIds, setSelectedRowIds] = useState<Set<string | number>>(
     new Set()
   );
 
-
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(size);
   const [settingModal, setSettingModal] = useState(false);
   const [configData, setConfigData] = useState<ApiResponse | null>(null);
-  const [tooltipOpen, setTooltipOpen] = useState(false);
 
   // وضعیت دانلود اکسل
   const [isExporting, setIsExporting] = useState(false);
-  const [abortController, setAbortController] = useState(null);
-  const [exportStatus, setExportStatus] = useState<'idle' | 'exporting' | 'success' | 'error' | 'cancelled'>('idle');
-  const [isCancelled, setIsCancelled] = useState(false);
+  const [abortController, setAbortController] =
+    useState<AbortController | null>(null);
+  const [exportStatus, setExportStatus] = useState<"idle" | "exporting" | "success" | "error" | "cancelled">("idle");
   const [allExportData, setAllExportData] = useState([]);
   const [exportProgress, setExportProgress] = useState(0);
+
 
   // selection of rows send to parent
   useEffect(() => {
@@ -185,8 +184,6 @@ const Table: React.FC<TableProps> = ({
       console.log("error fetching setting:", error);
     }
   };
-
-  const toggleTooltip = () => setTooltipOpen(!tooltipOpen);
 
   const numberColumn: TableColumn = {
     uniqueId: "__number__selector__",
@@ -343,82 +340,149 @@ const Table: React.FC<TableProps> = ({
     setConfigData(data);
   };
 
+  const generateAndDownloadExcel = async (fullData: unknown[]) => {
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet("داده‌ها");
 
+    const excelColumns = cols.filter((col) => col.excel === true);
+    if (excelColumns.length === 0) return;
+
+    const headerRow = excelColumns.map(
+      (col) => col.defaultTitle || col.title || ""
+    );
+    worksheet.addRow(headerRow);
+
+    fullData.forEach((row, rowIndex) => {
+      const rowValues = excelColumns.map((col) => {
+        if (col.excelFunc && typeof col.excelFunc === "function")
+          return col.excelFunc(row);
+        if (col.htmlFunc && typeof col.htmlFunc === "function")
+          return col.htmlFunc(row, rowIndex);
+        if (col.key) return _.get(row, col.key);
+        return "";
+      });
+      worksheet.addRow(rowValues);
+    });
+
+    // استایل فارسی
+    worksheet.eachRow({ includeEmpty: true }, (row) => {
+      row.eachCell({ includeEmpty: true }, (cell) => {
+        cell.alignment = { horizontal: "right", vertical: "middle" };
+      });
+    });
+    worksheet.getRow(1).font = { bold: true };
+
+    const buffer = await workbook.xlsx.writeBuffer();
+    const blob = new Blob([buffer], {
+      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    });
+
+    const baseName = id || "tableData";
+    const dateStr = new Date().toLocaleDateString("fa-IR").replace(/\//g, "-");
+    const fileName = `${baseName}_${dateStr}.xlsx`;
+
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = fileName;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
+  };
+
+  const cleanup = (timeout = 0) => {
+    setTimeout(() => {
+      setExportStatus("idle");
+      setExportProgress(0);
+      setAbortController(null);
+      setIsExporting(false);
+      setAllExportData([]);
+    }, timeout);
+  };
 
   const handleExportExcel = async () => {
-
-    setIsCancelled(false);
-    if (!totalCount || totalCount === 0) {
-      setExportStatus("error");
+    if (!onExcelExportRequest) {
+      console.warn("onExcelExportRequest تعریف نشده است");
       return;
     }
 
-    if (abortController) {
-      abortController.abort();
+    if (!totalCount || totalCount === 0) {
+      console.warn("totalCount تعریف نشده است");
+      return;
+    }
+    
+    setIsExporting(true);
+    setExportStatus("exporting");
+    setExportProgress(0);
+    setAllExportData([]);
+    const controller = new AbortController();
+    setAbortController(controller);
+
+    handleExcelExportRequest();
+
+  };
+
+  const fetchPageWithRetry = async () => {
+    if (!onExcelExportRequest) {
+      console.warn("onExcelExportRequest تعریف نشده است");
+      return;
+    }
+    console.log('page fetchPageWithRetry:' , page);
+    for (let attempt = 1; attempt <= 3; attempt++) {
+      try {
+        const offset = (page - 1) * 50;
+        const fullData = await onExcelExportRequest(offset);
+        if (!fullData || fullData.length === 0) {
+          cleanup();
+          return;
+        }
+        await generateAndDownloadExcel(fullData);
+        setExportStatus("success");
+        cleanup(4000);
+  
+      } catch (error: any) {
+        if (error.name === "AbortError") {
+          setExportStatus("cancelled");
+        } else {
+          setExportStatus("error");
+        }
+        cleanup(4000);
+      }
+    }
+  }
+
+const handleExcelExportRequest = async () => {
+  let collectedData: unknown[] = [];
+  const totalPages = Math.ceil(totalCount / pageSize);
+
+  for (let page = 1; page <= totalPages; page++) {
+
+    const pageData = await fetchPageWithRetry();
+
+    if (pageData === null) {
+      throw new Error("دریافت داده ناموفق پس از تلاش‌ها");
     }
 
-    if(onExcelExportRequest && typeof(onExcelExportRequest) === 'function') {
+    collectedData = [...collectedData, ...pageData];
 
-      setIsExporting(true);
-      const controller = new AbortController();
-      setAbortController(controller);
+    const progress = Math.round((page / totalPages) * 100);
 
-      setIsExporting(true);
-      setExportProgress(0);
-      setExportStatus('idle');
-      setAllExportData([]);
-
-      const totalPagesToFetch = Math.ceil(totalCount / 50);
-      let collectedData = [];
-
-      try {
-        for (let page = 1; page <= totalPagesToFetch; page++) {
-
-          const data = await onExcelExportRequest();
-
-          if (data === null) {
-            if (!isCancelled) {
-              setExportStatus('error');
-            }
-            setIsExporting(false);
-            setExportProgress(0);
-            setAllExportData([]);
-            setAbortController(null);
-            return;
-          }
-
-          collectedData = [...collectedData, ...data];
-          setExportProgress(Math.round((page / totalPagesToFetch) * 100));
-        }
-
-        setAllExportData(collectedData);
-        setExportStatus("success");
-        setAbortController(null);
-
-        setTimeout(() => {
-          setIsExporting(false);
-          setExportProgress(0);
-          setExportStatus('idle');
-          setAllExportData([]);
-      }, 3000);
-
-
-      } catch {
-
-      }
+    console.log('collectedData:', collectedData);
   }
-}
+  return collectedData;
+};
 
   const handleCancelExport = () => {
     if (abortController) {
       abortController.abort();
     }
-    setIsCancelled(true);
+    setExportStatus("cancelled");
     setIsExporting(false);
     setExportProgress(0);
-    setExportStatus("cancelled");
-    setAllExportData([]);
     setAbortController(null);
+    setAllExportData([]);
+    cleanup(4000);
   };
 
   if (configData === null || configData?.hasError === true) {
@@ -442,7 +506,12 @@ const Table: React.FC<TableProps> = ({
               >
                 <img src={Xcel} alt="در حال تهیه" width={30} />
               </Button>
-              <Progress animated striped value={exportProgress} className={styles.progressBar}>
+              <Progress
+                animated
+                striped
+                value={exportProgress}
+                className={styles.progressBar}
+              >
                 <span className="fw-bold text-dark">{exportProgress}%</span>
               </Progress>
               <Button
@@ -457,10 +526,7 @@ const Table: React.FC<TableProps> = ({
               </Button>
             </div>
           ) : (
-            <Button
-              onClick={handleExportExcel}
-              className={styles.btn_xcel}
-            >
+            <Button onClick={handleExportExcel} className={styles.btn_xcel}>
               <img src={Xcel} alt="دانلود اکسل" width={30} />
             </Button>
           )}

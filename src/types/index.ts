@@ -29,13 +29,8 @@ export interface TableProps {
   onSizeChange?:(pageNumber: number) => void;
   requestConfig: AppConfig;
   pageSizeOptions?: number[];
-  onExcelExportRequest?: () => Promise<any[]>;
-  allDataForExport?: unknown[];
-  exportProgress?: number;
-  isExporting?: boolean; 
-  exportStatus?: 'success' | 'error' | 'cancelled' | null;
   size?: number;
-  onCancelExport?: () => void;
+  onExcelExportRequest?: (offset: number) => Promise<unknown[]>;
 }
 
 export interface TableColumn {
