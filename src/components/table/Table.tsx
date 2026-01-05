@@ -37,8 +37,6 @@ const Table: React.FC<TableProps> = ({
   onExcelExportRequest,
   size = 10,
 }) => {
-  
-console.log('onExcelExportRequest2:' , onExcelExportRequest);
 
   // just keeping index
   const [selectedRowIds, setSelectedRowIds] = useState<Set<string | number>>(
@@ -51,11 +49,11 @@ console.log('onExcelExportRequest2:' , onExcelExportRequest);
   const [configData, setConfigData] = useState<ApiResponse | null>(null);
 
   // وضعیت دانلود اکسل
-  const [isExporting, setIsExporting] = useState(false);
+  // const [isExporting, setIsExporting] = useState(false);
   const [abortController, setAbortController] =
     useState<AbortController | null>(null);
   const [exportStatus, setExportStatus] = useState<"idle" | "exporting" | "success" | "error" | "cancelled">("idle");
-  const [allExportData, setAllExportData] = useState([]);
+  // const [allExportData, setAllExportData] = useState<unknown[]>([]);
   const [exportProgress, setExportProgress] = useState(0);
 
 
@@ -76,81 +74,81 @@ console.log('onExcelExportRequest2:' , onExcelExportRequest);
     }
   }, [requestConfig]);
 
-  useEffect(() => {
-    if (allExportData.length > 0 && exportStatus === "success") {
-      const generateAndDownloadExcel = async () => {
-        try {
-          const workbook = new ExcelJS.Workbook();
-          const worksheet = workbook.addWorksheet("داده‌ها");
+  // useEffect(() => {
+  //   if (allExportData.length > 0 && exportStatus === "success") {
+  //     const generateAndDownloadExcel = async () => {
+  //       try {
+  //         const workbook = new ExcelJS.Workbook();
+  //         const worksheet = workbook.addWorksheet("داده‌ها");
 
-          const excelColumns = cols.filter((col) => col.excel === true);
+  //         const excelColumns = cols.filter((col) => col.excel === true);
 
-          if (excelColumns.length === 0) {
-            console.warn(
-              "هیچ ستونی برای اکسپورت اکسل تعریف نشده (excel: true)"
-            );
-            return;
-          }
+  //         if (excelColumns.length === 0) {
+  //           console.warn(
+  //             "هیچ ستونی برای اکسپورت اکسل تعریف نشده (excel: true)"
+  //           );
+  //           return;
+  //         }
 
-          // ردیف عنوان‌ها
-          const headerRow = excelColumns.map(
-            (col) => col.defaultTitle || col.title || ""
-          );
-          worksheet.addRow(headerRow);
+  //         // ردیف عنوان‌ها
+  //         const headerRow = excelColumns.map(
+  //           (col) => col.defaultTitle || col.title || ""
+  //         );
+  //         worksheet.addRow(headerRow);
 
-          // اضافه کردن داده‌ها
-          allExportData.forEach((row, rowIndex) => {
-            const rowValues = excelColumns.map((col) => {
-              if (col.excelFunc && typeof col.excelFunc === "function") {
-                return col.excelFunc(row);
-              } else if (col.htmlFunc && typeof col.htmlFunc === "function") {
-                return col.htmlFunc(row, rowIndex);
-              }
-              if (col.key) {
-                return _.get(row, col.key);
-              }
-              return "";
-            });
-            worksheet.addRow(rowValues);
-          });
+  //         // اضافه کردن داده‌ها
+  //         allExportData.forEach((row, rowIndex) => {
+  //           const rowValues = excelColumns.map((col) => {
+  //             if (col.excelFunc && typeof col.excelFunc === "function") {
+  //               return col.excelFunc(row);
+  //             } else if (col.htmlFunc && typeof col.htmlFunc === "function") {
+  //               return col.htmlFunc(row, rowIndex);
+  //             }
+  //             if (col.key) {
+  //               return _.get(row, col.key);
+  //             }
+  //             return "";
+  //           });
+  //           worksheet.addRow(rowValues);
+  //         });
 
-          // استایل فارسی
-          worksheet.eachRow({ includeEmpty: true }, (row) => {
-            row.eachCell({ includeEmpty: true }, (cell) => {
-              cell.alignment = { horizontal: "right", vertical: "middle" };
-            });
-          });
-          worksheet.getRow(1).font = { bold: true };
+  //         // استایل فارسی
+  //         worksheet.eachRow({ includeEmpty: true }, (row) => {
+  //           row.eachCell({ includeEmpty: true }, (cell) => {
+  //             cell.alignment = { horizontal: "right", vertical: "middle" };
+  //           });
+  //         });
+  //         worksheet.getRow(1).font = { bold: true };
 
-          // تولید فایل
-          const buffer = await workbook.xlsx.writeBuffer();
-          const blob = new Blob([buffer], {
-            type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-          });
+  //         // تولید فایل
+  //         const buffer = await workbook.xlsx.writeBuffer();
+  //         const blob = new Blob([buffer], {
+  //           type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  //         });
 
-          const baseName = id || "tableData";
-          const dateStr = new Date()
-            .toLocaleDateString("fa-IR")
-            .replace(/\//g, "-");
-          const fileName = `${baseName}_${dateStr}.xlsx`;
+  //         const baseName = id || "tableData";
+  //         const dateStr = new Date()
+  //           .toLocaleDateString("fa-IR")
+  //           .replace(/\//g, "-");
+  //         const fileName = `${baseName}_${dateStr}.xlsx`;
 
-          // دانلود
-          const url = window.URL.createObjectURL(blob);
-          const link = document.createElement("a");
-          link.href = url;
-          link.download = fileName;
-          document.body.appendChild(link);
-          link.click();
-          document.body.removeChild(link);
-          window.URL.revokeObjectURL(url);
-        } catch (error) {
-          console.error("خطا در ساخت فایل اکسل:", error);
-        }
-      };
+  //         // دانلود
+  //         const url = window.URL.createObjectURL(blob);
+  //         const link = document.createElement("a");
+  //         link.href = url;
+  //         link.download = fileName;
+  //         document.body.appendChild(link);
+  //         link.click();
+  //         document.body.removeChild(link);
+  //         window.URL.revokeObjectURL(url);
+  //       } catch (error) {
+  //         console.error("خطا در ساخت فایل اکسل:", error);
+  //       }
+  //     };
 
-      generateAndDownloadExcel();
-    }
-  }, [allExportData, exportStatus, cols, id]);
+  //     generateAndDownloadExcel();
+  //   }
+  // }, [allExportData, exportStatus, cols, id]);
 
   // get all settings
   const requestGetSetting = async () => {
@@ -396,10 +394,45 @@ console.log('onExcelExportRequest2:' , onExcelExportRequest);
       setExportStatus("idle");
       setExportProgress(0);
       setAbortController(null);
-      setIsExporting(false);
-      setAllExportData([]);
     }, timeout);
   };
+
+  const fetchPageWithRetry = async (page: number , signal: AbortSignal,) => {
+    if (!onExcelExportRequest) {
+      console.warn("onExcelExportRequest تعریف نشده است");
+      return null;
+    }
+    console.log('page fetchPageWithRetry:' , page);
+
+    for (let attempt = 1; attempt <= 3; attempt++) {
+      try {
+        if (signal.aborted) {
+          return null;
+        }
+        const offset = (page - 1) * 50;
+        console.log('offset at fetch:' , offset);
+        
+        const response = await onExcelExportRequest(offset, signal);
+
+        if(response.hasError) {
+          if(attempt === 3) return null;
+          await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
+          continue;
+        }
+
+        return response.result ?? []
+      } 
+      catch (error: any) {
+        if (error.name === "AbortError") {
+          setExportStatus("cancelled");
+          return null;
+        } 
+        if(attempt === 3) return [];
+        await new Promise(resolve => setTimeout(resolve, 1000 * attempt))
+      }
+    }
+    return null;
+  }
 
   const handleExportExcel = async () => {
     if (!onExcelExportRequest) {
@@ -407,83 +440,104 @@ console.log('onExcelExportRequest2:' , onExcelExportRequest);
       return;
     }
 
-    if (!totalCount || totalCount === 0) {
-      console.warn("totalCount تعریف نشده است");
+    if (totalCount === 0) {
+      setExportStatus('error');
+      setTimeout(() => setExportStatus('idle'), 4000);
       return;
     }
-    
-    setIsExporting(true);
-    setExportStatus("exporting");
-    setExportProgress(0);
-    setAllExportData([]);
+
     const controller = new AbortController();
     setAbortController(controller);
 
-    handleExcelExportRequest();
+    setExportStatus("exporting");
+    setExportProgress(0);
+    console.log('start export page:',page);
 
-  };
+    let collectedData: unknown[] = [];
+    const totalPages = Math.ceil(totalCount / pageSize);
 
-  const fetchPageWithRetry = async () => {
-    if (!onExcelExportRequest) {
-      console.warn("onExcelExportRequest تعریف نشده است");
-      return;
-    }
-    console.log('page fetchPageWithRetry:' , page);
-    for (let attempt = 1; attempt <= 3; attempt++) {
-      try {
-        const offset = (page - 1) * 50;
-        const fullData = await onExcelExportRequest(offset);
-        if (!fullData || fullData.length === 0) {
-          cleanup();
-          return;
+    try {
+      for (let page = 1; page <= totalPages; page++) {
+        if (controller.signal.aborted) {
+          throw new DOMException("Aborted", "AbortError");
         }
-        await generateAndDownloadExcel(fullData);
-        setExportStatus("success");
-        cleanup(4000);
-  
-      } catch (error: any) {
-        if (error.name === "AbortError") {
-          setExportStatus("cancelled");
-        } else {
-          setExportStatus("error");
+
+        const offset = (page - 1) * pageSize;
+        const response = await fetchPageWithRetry(offset, controller.signal);
+
+        if (response.hasError) {
+          throw new Error(response.message?.join(", ") || "خطای سرور");
         }
-        cleanup(4000);
+
+        const pageData = response.result || [];
+        collectedData = [...collectedData, ...pageData];
+
+        const progress = Math.round((page / totalPages) * 100);
+        setExportProgress(progress);
       }
+
+      // ساخت و دانلود فایل
+      await generateAndDownloadExcel(collectedData);
+
+      setExportStatus('success');
+      cleanup(4000);
+
+    } catch (error: any) {
+        if (error.name === "AbortError") {
+        setExportStatus('cancelled');
+      } else {
+        console.error("خطا در اکسپورت:", error);
+        setExportStatus('error');
+      }
+      cleanup(4000);
     }
-  }
-
-const handleExcelExportRequest = async () => {
-  let collectedData: unknown[] = [];
-  const totalPages = Math.ceil(totalCount / pageSize);
-
-  for (let page = 1; page <= totalPages; page++) {
-
-    const pageData = await fetchPageWithRetry();
-
-    if (pageData === null) {
-      throw new Error("دریافت داده ناموفق پس از تلاش‌ها");
-    }
-
-    collectedData = [...collectedData, ...pageData];
-
-    const progress = Math.round((page / totalPages) * 100);
-
-    console.log('collectedData:', collectedData);
-  }
-  return collectedData;
-};
+  };
 
   const handleCancelExport = () => {
     if (abortController) {
       abortController.abort();
     }
     setExportStatus("cancelled");
-    setIsExporting(false);
-    setExportProgress(0);
-    setAbortController(null);
-    setAllExportData([]);
     cleanup(4000);
   };
+
+  const renderExportButton = () => {
+    if (exportStatus === 'exporting') {
+      return (
+        <div className="d-flex align-items-center gap-3">
+          <Button color="success" size="sm" disabled>
+            <img src={Xcel} alt="در حال تهیه" width={30} />
+            در حال تهیه فایل...
+          </Button>
+          <Progress value={exportProgress} style={{ width: '200px', height: '32px' }}>
+            <span className="fw-bold text-dark">{exportProgress}%</span>
+          </Progress>
+          <Button color="danger" size="sm" outline onClick={handleCancelExport}>
+            انصراف
+          </Button>
+        </div>
+      );
+    }
+  return (
+      <Button
+        color="success"
+        size="sm"
+        onClick={handleExportExcel}
+        className="d-flex align-items-center gap-2"
+      >
+        <img src={Xcel} alt="دانلود اکسل" width={16} height={16} />
+        دانلود اکسل
+      </Button>
+    );
+  };
+
+  const renderExportMessage = () => {
+    if (exportStatus === 'success') return <Badge color="success" pill>فایل با موفقیت دانلود شد</Badge>;
+    if (exportStatus === 'error') return <Badge color="danger" pill>دانلود ناموفق بود</Badge>;
+    if (exportStatus === 'cancelled') return <Badge color="secondary" pill>دانلود توسط کاربر لغو شد</Badge>;
+    return null;
+  };
+ 
 
   if (configData === null || configData?.hasError === true) {
     return null;
@@ -496,67 +550,10 @@ const handleExcelExportRequest = async () => {
             <img width={30} src={SettingButtonIcon} />
           </Button>
           {/* start excel download */}
-          {isExporting ? (
-            <div className=" gap-3">
-              <Button
-                color="success"
-                size="sm"
-                disabled
-                className={styles.btn_xcel}
-              >
-                <img src={Xcel} alt="در حال تهیه" width={30} />
-              </Button>
-              <Progress
-                animated
-                striped
-                value={exportProgress}
-                className={styles.progressBar}
-              >
-                <span className="fw-bold text-dark">{exportProgress}%</span>
-              </Progress>
-              <Button
-                color="danger"
-                size="sm"
-                outline
-                title="انصراف"
-                onClick={handleCancelExport}
-                className={styles.cancel_btn}
-              >
-                X
-              </Button>
-            </div>
-          ) : (
-            <Button onClick={handleExportExcel} className={styles.btn_xcel}>
-              <img src={Xcel} alt="دانلود اکسل" width={30} />
-            </Button>
-          )}
-          {exportStatus === "success" && (
-            <Badge
-              color="success"
-              pill
-              className={`px-3 py-2 ${styles.badge_action_download}`}
-            >
-              فایل اکسل با موفقیت دانلود شد
-            </Badge>
-          )}
-          {exportStatus === "error" && (
-            <Badge
-              color="danger"
-              pill
-              className={`px-3 py-2 ${styles.badge_action_download}`}
-            >
-              دانلود ناموفق بود
-            </Badge>
-          )}
-          {exportStatus === "cancelled" && (
-            <Badge
-              color="secondary"
-              pill
-              className={`px-3 py-2 ${styles.badge_action_download}`}
-            >
-              دانلود توسط کاربر لغو شد
-            </Badge>
-          )}
+          <div className="d-flex align-items-center gap-3">
+            {renderExportButton()}
+            {renderExportMessage()}
+          </div>
           {/* end excel download */}
           <SettingModal
             tableName={id}

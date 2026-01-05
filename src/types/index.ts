@@ -17,6 +17,18 @@ type AppConfig = {
   url: string;
 };
 
+interface ExcelExportResponse<T = unknown> {
+  aggregation: number;
+  count: number;
+  errorCode: number;
+  hasError: boolean;
+  message: string[];
+  metaDate: unknown[];
+  refId: string;
+  referenceNumber: string;
+  result: T[];
+}
+
 export interface TableProps {
   id: string;
   data: unknown[];
@@ -30,7 +42,7 @@ export interface TableProps {
   requestConfig: AppConfig;
   pageSizeOptions?: number[];
   size?: number;
-  onExcelExportRequest?: (offset: number) => Promise<unknown[]>;
+  onExcelExportRequest?: (offset: number, signal:AbortSignal) => Promise<ExcelExportResponse>;
 }
 
 export interface TableColumn {
