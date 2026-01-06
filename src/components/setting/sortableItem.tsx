@@ -38,7 +38,7 @@ const SortableItem = React.forwardRef<HTMLDivElement, SortableItemProps>(
     const [badgeValue, setBadgeValue] = useState(row.title);
     
     useEffect(() => {
-      const specificTable = config.result[0].setting.tables[tableId];
+      // const specificTable = config.result[0]?.setting?.tables[tableId];
       if(row && row.defaultTitle) {
         setBadgeValue(row.defaultTitle)
       } else {

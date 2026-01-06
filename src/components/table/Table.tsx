@@ -37,7 +37,6 @@ const Table: React.FC<TableProps> = ({
   onExcelExportRequest,
   size = 10,
 }) => {
-
   // just keeping index
   const [selectedRowIds, setSelectedRowIds] = useState<Set<string | number>>(
     new Set()
@@ -49,13 +48,11 @@ const Table: React.FC<TableProps> = ({
   const [configData, setConfigData] = useState<ApiResponse | null>(null);
 
   // وضعیت دانلود اکسل
-  // const [isExporting, setIsExporting] = useState(false);
+
   const [abortController, setAbortController] =
     useState<AbortController | null>(null);
   const [exportStatus, setExportStatus] = useState<"idle" | "exporting" | "success" | "error" | "cancelled">("idle");
-  // const [allExportData, setAllExportData] = useState<unknown[]>([]);
   const [exportProgress, setExportProgress] = useState(0);
-
 
   // selection of rows send to parent
   useEffect(() => {
@@ -397,42 +394,45 @@ const Table: React.FC<TableProps> = ({
     }, timeout);
   };
 
-  const fetchPageWithRetry = async (page: number , signal: AbortSignal,) => {
-    if (!onExcelExportRequest) {
-      console.warn("onExcelExportRequest تعریف نشده است");
-      return null;
-    }
-    console.log('page fetchPageWithRetry:' , page);
+  const fetchPageWithRetry = async (
+    offset: number,
+    signal: AbortSignal
+  ): Promise<unknown[] | null> => {
+    console.log("page fetchPageWithRetry:", offset);
 
     for (let attempt = 1; attempt <= 3; attempt++) {
       try {
         if (signal.aborted) {
           return null;
         }
-        const offset = (page - 1) * 50;
-        console.log('offset at fetch:' , offset);
+
+        if (!onExcelExportRequest) return null;
+
         
+        console.log("offset at fetchPageWithRetry:", offset);
+
         const response = await onExcelExportRequest(offset, signal);
 
-        if(response.hasError) {
-          if(attempt === 3) return null;
-          await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
+        if (response.hasError) {
+          console.warn(`تلاش ${attempt}: hasError = true`, response.message);
+          if (attempt === 3) return null;
+          await new Promise((resolve) => setTimeout(resolve, 1000 * attempt));
           continue;
         }
 
-        return response.result ?? []
-      } 
-      catch (error: any) {
+        return response.result ?? [];
+      } catch (error: any) {
         if (error.name === "AbortError") {
           setExportStatus("cancelled");
           return null;
-        } 
-        if(attempt === 3) return [];
-        await new Promise(resolve => setTimeout(resolve, 1000 * attempt))
+        }
+        console.warn(`تلاش ${attempt} ناموفق`, error);
+        if (attempt === 3) return null;
+        await new Promise((resolve) => setTimeout(resolve, 1000 * attempt));
       }
     }
     return null;
-  }
+  };
 
   const handleExportExcel = async () => {
     if (!onExcelExportRequest) {
@@ -441,8 +441,8 @@ const Table: React.FC<TableProps> = ({
     }
 
     if (totalCount === 0) {
-      setExportStatus('error');
-      setTimeout(() => setExportStatus('idle'), 4000);
+      setExportStatus("error");
+      setTimeout(() => setExportStatus("idle"), 4000);
       return;
     }
 
@@ -451,10 +451,10 @@ const Table: React.FC<TableProps> = ({
 
     setExportStatus("exporting");
     setExportProgress(0);
-    console.log('start export page:',page);
+    console.log("start export page:", page);
 
     let collectedData: unknown[] = [];
-    const totalPages = Math.ceil(totalCount / pageSize);
+    const totalPages = Math.ceil(totalCount / 50);
 
     try {
       for (let page = 1; page <= totalPages; page++) {
@@ -462,14 +462,13 @@ const Table: React.FC<TableProps> = ({
           throw new DOMException("Aborted", "AbortError");
         }
 
-        const offset = (page - 1) * pageSize;
-        const response = await fetchPageWithRetry(offset, controller.signal);
+        const offset = (page - 1) * 50;
+        const pageData = await fetchPageWithRetry(offset, controller.signal);
 
-        if (response.hasError) {
-          throw new Error(response.message?.join(", ") || "خطای سرور");
+        if (pageData === null) {
+          throw new Error("دریافت داده ناموفق پس از تلاش‌ها");
         }
 
-        const pageData = response.result || [];
         collectedData = [...collectedData, ...pageData];
 
         const progress = Math.round((page / totalPages) * 100);
@@ -479,15 +478,15 @@ const Table: React.FC<TableProps> = ({
       // ساخت و دانلود فایل
       await generateAndDownloadExcel(collectedData);
 
-      setExportStatus('success');
+      setExportStatus("success");
       cleanup(4000);
-
     } catch (error: any) {
-        if (error.name === "AbortError") {
-        setExportStatus('cancelled');
+      if (error.name === "AbortError") {
+        setExportStatus("cancelled");
+        return;
       } else {
         console.error("خطا در اکسپورت:", error);
-        setExportStatus('error');
+        setExportStatus("error");
       }
       cleanup(4000);
     }
@@ -504,40 +503,63 @@ const Table: React.FC<TableProps> = ({
   const renderExportButton = () => {
     if (exportStatus === 'exporting') {
       return (
-        <div className="d-flex align-items-center gap-3">
-          <Button color="success" size="sm" disabled>
+        <div>
+          <Button
+            color="success"
+            size="sm"
+            disabled
+            className={styles.btn_xcel}
+          >
             <img src={Xcel} alt="در حال تهیه" width={30} />
-            در حال تهیه فایل...
           </Button>
-          <Progress value={exportProgress} style={{ width: '200px', height: '32px' }}>
+          <Progress value={exportProgress} className={styles.progressBar}>
             <span className="fw-bold text-dark">{exportProgress}%</span>
           </Progress>
-          <Button color="danger" size="sm" outline onClick={handleCancelExport}>
-            انصراف
+          <Button
+            color="danger"
+            size="sm"
+            outline
+            onClick={handleCancelExport}
+            className={styles.cancel_btn}
+          >
+            X
           </Button>
         </div>
       );
     }
-  return (
+    return (
       <Button
         color="success"
         size="sm"
         onClick={handleExportExcel}
-        className="d-flex align-items-center gap-2"
+        className={styles.btn_xcel}
       >
-        <img src={Xcel} alt="دانلود اکسل" width={16} height={16} />
-        دانلود اکسل
+        <img src={Xcel} alt="دانلود اکسل" width={30} />
       </Button>
     );
   };
 
   const renderExportMessage = () => {
-    if (exportStatus === 'success') return <Badge color="success" pill>فایل با موفقیت دانلود شد</Badge>;
-    if (exportStatus === 'error') return <Badge color="danger" pill>دانلود ناموفق بود</Badge>;
-    if (exportStatus === 'cancelled') return <Badge color="secondary" pill>دانلود توسط کاربر لغو شد</Badge>;
+    if (exportStatus === "success")
+      return (
+        <Badge color="success" pill>
+          فایل با موفقیت دانلود شد
+        </Badge>
+      );
+    if (exportStatus === "error")
+      return (
+        <Badge color="danger" pill>
+          دانلود ناموفق بود
+        </Badge>
+      );
+    if (exportStatus === "cancelled")
+      return (
+        <Badge color="secondary" pill>
+          دانلود توسط کاربر لغو شد
+        </Badge>
+      );
     return null;
   };
- 
 
   if (configData === null || configData?.hasError === true) {
     return null;
@@ -550,7 +572,7 @@ const Table: React.FC<TableProps> = ({
             <img width={30} src={SettingButtonIcon} />
           </Button>
           {/* start excel download */}
-          <div className="d-flex align-items-center gap-3">
+          <div className={styles.download_Excel_wrapper}>
             {renderExportButton()}
             {renderExportMessage()}
           </div>

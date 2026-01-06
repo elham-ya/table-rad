@@ -9962,7 +9962,7 @@ function App() {
       visible: true,
       excel: true,
     },
-    
+
     {
       uniqueId: "orderStatus",
       title: "وضعیت سفارش",
@@ -10088,14 +10088,14 @@ function App() {
   };
 
   const config = {
-    "Access-Token": "6309757314-d72cf9579ae44a608Ce9db6b95678761.XzIwMjUxMg",
+    "Access-Token": "4206504876-abed31e2d1314910bcba17144B8b7164.XzIwMjUxMg",
     "Client-Id": "17959574q2f0347718971594ccd86f3f4",
     url: `https://api.sandpod.ir/srv/cms-sandbox/api/core/users/setting`,
   };
 
   return (
     <TableView
-      id='invoiceList'
+      id="test"
       data={data}
       cols={cols}
       totalCount={data.length}
