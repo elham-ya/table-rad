@@ -6,7 +6,10 @@ export const ContentType = {
   Badge: "badge",
   Number: "number",
   Function: "function",
-  Price: "price"
+  Price: "price",
+  Time: "time",
+  DateTime: "datetime",
+  Date: "date",
 } as const;
 
 export type ContentType = string;
@@ -64,6 +67,7 @@ export interface TableColumn {
   buttons?: buttonColProps[];
   visible: boolean;
   excel: boolean;
+  format?: string;
 }
 export interface CheckboxProps<T = unknown> {
   checked?: boolean;
@@ -178,5 +182,11 @@ export interface TableSchema {
 }
 
 export type FinalColumnProps =Record<string, TableSchema>;
+
+export interface DateTimeProps {
+  value: string, 
+  format?: string, // format:"YYYY/MM/DD HH:mm:ss",
+  type?: string, // type: "date-date/time-time",
+}
  
 

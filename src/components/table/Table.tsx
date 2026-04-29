@@ -22,6 +22,7 @@ import SettingModal from "../setting";
 import SettingButtonIcon from "../../assets/icons/SettingButton.svg";
 import Xcel from "../../assets/icons/Xcel.svg";
 import ExcelJS from "exceljs";
+import DateTime from "./DateTime";
 
 const Table: React.FC<TableProps> = ({
   id,
@@ -39,9 +40,9 @@ const Table: React.FC<TableProps> = ({
 }) => {
   // just keeping index
   const [selectedRowIds, setSelectedRowIds] = useState<Set<string | number>>(
-    new Set()
+    new Set(),
   );
-
+  console.log(3435564646);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(size);
   const [settingModal, setSettingModal] = useState(false);
@@ -51,7 +52,9 @@ const Table: React.FC<TableProps> = ({
 
   const [abortController, setAbortController] =
     useState<AbortController | null>(null);
-  const [exportStatus, setExportStatus] = useState<"idle" | "exporting" | "success" | "error" | "cancelled">("idle");
+  const [exportStatus, setExportStatus] = useState<
+    "idle" | "exporting" | "success" | "error" | "cancelled"
+  >("idle");
   const [exportProgress, setExportProgress] = useState(0);
 
   // selection of rows send to parent
@@ -157,7 +160,7 @@ const Table: React.FC<TableProps> = ({
     ) {
       console.warn(
         "requestConfig ناقص است یا وجود ندارد. درخواست تنظیمات ارسال نشد.",
-        requestConfig
+        requestConfig,
       );
       return;
     }
@@ -213,9 +216,9 @@ const Table: React.FC<TableProps> = ({
                   ? new Set(
                       data
                         .map((row) => (row as any)?.id)
-                        .filter((id) => id != null)
+                        .filter((id) => id != null),
                     )
-                  : new Set()
+                  : new Set(),
               );
             }}
           />
@@ -253,8 +256,8 @@ const Table: React.FC<TableProps> = ({
     const baseColumns: TableColumn[] = Array.isArray(cols)
       ? [...cols]
       : cols
-      ? [cols]
-      : [];
+        ? [cols]
+        : [];
     // add default cols
     const withPrefix: TableColumn[] = [...baseColumns];
     if (numberColumn) {
@@ -343,7 +346,7 @@ const Table: React.FC<TableProps> = ({
     if (excelColumns.length === 0) return;
 
     const headerRow = excelColumns.map(
-      (col) => col.defaultTitle || col.title || ""
+      (col) => col.defaultTitle || col.title || "",
     );
     worksheet.addRow(headerRow);
 
@@ -396,7 +399,7 @@ const Table: React.FC<TableProps> = ({
 
   const fetchPageWithRetry = async (
     offset: number,
-    signal: AbortSignal
+    signal: AbortSignal,
   ): Promise<unknown[] | null> => {
     console.log("page fetchPageWithRetry:", offset);
 
@@ -408,7 +411,6 @@ const Table: React.FC<TableProps> = ({
 
         if (!onExcelExportRequest) return null;
 
-        
         console.log("offset at fetchPageWithRetry:", offset);
 
         const response = await onExcelExportRequest(offset, signal);
@@ -501,7 +503,7 @@ const Table: React.FC<TableProps> = ({
   };
 
   const renderExportButton = () => {
-    if (exportStatus === 'exporting') {
+    if (exportStatus === "exporting") {
       return (
         <div>
           <Button
@@ -624,6 +626,7 @@ const Table: React.FC<TableProps> = ({
                       >
                         {finalColumns.map((col) => {
                           const val = col?.key ? _.get(row, col.key) : null;
+                          console.log("col", col);
                           return (
                             <td
                               key={col.uniqueId}
@@ -732,18 +735,18 @@ const Table: React.FC<TableProps> = ({
                                       if (col.htmlFunc.length === 2) {
                                         cellContent = (col.htmlFunc as any)(
                                           row,
-                                          rowIndex
+                                          rowIndex,
                                         );
                                       } else {
                                         cellContent = (col.htmlFunc as any)(
-                                          row
+                                          row,
                                         );
                                       }
                                     } catch (error) {
                                       console.error(
                                         "خطا در اجرای htmlFunc:",
                                         error,
-                                        col.uniqueId
+                                        col.uniqueId,
                                       );
                                       cellContent = (
                                         <span className="text-red-600">
@@ -755,6 +758,12 @@ const Table: React.FC<TableProps> = ({
                                     cellContent = <span>{val ?? "-"}</span>;
                                   }
                                   return cellContent;
+                                }
+                                if (
+                                  col.type === ContentType.DateTime ||
+                                  col.type === "datetime"
+                                ) {
+                                  return <DateTime value={val} format={col.format} type={col.type} />
                                 }
                                 return <span>{val ?? "-"}</span>;
                               })()}
