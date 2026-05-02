@@ -23,6 +23,7 @@ import SettingButtonIcon from "../../assets/icons/SettingButton.svg";
 import Xcel from "../../assets/icons/Xcel.svg";
 import ExcelJS from "exceljs";
 import DateTime from "./DateTime";
+import Text from "./Text";
 
 const Table: React.FC<TableProps> = ({
   id,
@@ -637,7 +638,7 @@ const Table: React.FC<TableProps> = ({
                                   col.type === ContentType.Text ||
                                   col.type === "text"
                                 ) {
-                                  return <span>{val ?? "-"}</span>;
+                                  return <Text value={val} />;
                                 }
                                 if (
                                   col.type === ContentType.Price ||
@@ -769,7 +770,7 @@ const Table: React.FC<TableProps> = ({
                                 ) {
                                   return (
                                     <DateTime
-                                      value={"1775475228"}
+                                      value={val}
                                       format={col.format}
                                       type={col.type}
                                     />

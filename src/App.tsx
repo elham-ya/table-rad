@@ -9869,8 +9869,8 @@ function App() {
       title: "شناسه قبض",
       key: "metadata.billNumber",
       width: "180",
-      type: ContentType.Number,
-      visible: false,
+      type: ContentType.Text,
+      visible: true,
       excel: true,
     },
     {
@@ -9879,7 +9879,7 @@ function App() {
       width: "200",
       key: "userSrv.name",
       type: ContentType.Text,
-      visible: false,
+      visible: true,
       excel: false,
     },
     {

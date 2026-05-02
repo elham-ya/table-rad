@@ -188,5 +188,9 @@ export interface DateTimeProps {
   format?: string, // format:"YYYY/MM/DD HH:mm:ss",
   type?: string, // type: "date-date/time-time",
 }
+
+export interface TextProps {
+  value: String | Number,
+}
  
 
