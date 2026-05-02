@@ -192,5 +192,14 @@ export interface DateTimeProps {
 export interface TextProps {
   value: String | Number,
 }
+
+
+type ClassNameType = "info" | "danger" | "warning" | "success" | "secondary" | "primary";
+export type Item = {
+  value: string;
+  className: ClassNameType;
+  extraValue?: string;
+};
+export type TagProps = Item | Item[];
  
 
