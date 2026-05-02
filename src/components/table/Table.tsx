@@ -625,7 +625,7 @@ const Table: React.FC<TableProps> = ({
                         className={styles.tr_container}
                       >
                         {finalColumns.map((col) => {
-                          const val = col?.key ? _.get(row, col.key) : null;
+                          const val = col?.key ? _.get(row, col.key) : "";
                           console.log("col", col);
                           return (
                             <td
@@ -761,9 +761,19 @@ const Table: React.FC<TableProps> = ({
                                 }
                                 if (
                                   col.type === ContentType.DateTime ||
-                                  col.type === "datetime"
+                                  col.type === "datetime" ||
+                                  col.type === ContentType.Time ||
+                                  col.type === "time" ||
+                                  col.type === ContentType.Date ||
+                                  col.type === "date"
                                 ) {
-                                  return <DateTime value={val} format={col.format} type={col.type} />
+                                  return (
+                                    <DateTime
+                                      value={"1775475228"}
+                                      format={col.format}
+                                      type={col.type}
+                                    />
+                                  );
                                 }
                                 return <span>{val ?? "-"}</span>;
                               })()}
