@@ -9846,6 +9846,69 @@ function App() {
       excel: true,
     },
     {
+      uniqueId: "tagValue",
+      title: "تست تگ",
+      visible: true,
+      excel: true,
+      type: ContentType.Badge,
+      width: "200",
+      tagValue: {
+        value: "تست الهام",
+        className: "primary",
+      },
+    },
+    {
+      uniqueId: "tagValue",
+      title: "تست تگ2",
+      visible: true,
+      excel: true,
+      type: ContentType.Badge,
+      width: "200",
+      tagValue: {
+        value: "تست الهام",
+        className: "warning",
+        extraValue: "10%",
+      },
+    },
+    {
+      uniqueId: "multiTag",
+      title: "تست تگ دو سطحی",
+      visible: true,
+      excel: true,
+      type: ContentType.Badge,
+      width: "200",
+      tagValue: [
+        {
+          value: "تست الهام",
+          className: "secondary",
+          extraValue: "10%",
+        },
+        {
+          value: "تست 2سطحی",
+          className: "info",
+          extraValue: "8%",
+        },
+      ],
+    },
+    {
+      uniqueId: "multiTagWithoutSub",
+      title: "تست تگ یک سطحی در حالت لیست",
+      visible: true,
+      excel: true,
+      type: ContentType.Badge,
+      width: "200",
+      tagValue: [
+        {
+          value: "تست بدون 2",
+          className: "info",
+        },
+        {
+          value: "تست 2سطحی77",
+          className: "success",
+        },
+      ],
+    },
+    {
       uniqueId: "creationDate",
       title: "تاریخ ایجاد",
       width: "140",
@@ -10098,7 +10161,7 @@ function App() {
   };
 
   const config = {
-    "Access-Token": "5258131095-8a1fCaff03ea462ba062a297067d83de.XzIwMjY1",
+    "Access-Token": "7361383533-75797061F5f54168a886234ac7b68fdd.XzIwMjY1",
     "Client-Id": "17959574q2f0347718971594ccd86f3f4",
     url: `https://api.sandpod.ir/srv/cms-sandbox/api/core/users/setting`,
   };

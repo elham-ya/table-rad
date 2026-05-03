@@ -68,6 +68,7 @@ export interface TableColumn {
   visible: boolean;
   excel: boolean;
   format?: string;
+  tagValue?: Item | Item[];
 }
 export interface CheckboxProps<T = unknown> {
   checked?: boolean;
@@ -194,12 +195,16 @@ export interface TextProps {
 }
 
 
-type ClassNameType = "info" | "danger" | "warning" | "success" | "secondary" | "primary";
+
 export type Item = {
   value: string;
-  className: ClassNameType;
+  className: string;
   extraValue?: string;
 };
-export type TagProps = Item | Item[];
+export type TagProps = {
+  tagValue?: Item | Item[];
+};
+
+
  
 
