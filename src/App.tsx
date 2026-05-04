@@ -9879,7 +9879,7 @@ function App() {
       width: "200",
       tagValue: [
         {
-          value: "تست الهام",
+          value: "تست ساده",
           className: "secondary",
           extraValue: "10%",
         },
@@ -10161,9 +10161,14 @@ function App() {
   };
 
   const config = {
-    "Access-Token": "7361383533-75797061F5f54168a886234ac7b68fdd.XzIwMjY1",
+    "Access-Token": "7361383533-12428bc3712940d2bD3e652365b723b9.XzIwMjY1",
     "Client-Id": "17959574q2f0347718971594ccd86f3f4",
     url: `https://api.sandpod.ir/srv/cms-sandbox/api/core/users/setting`,
+  };
+
+  const myTranslate = {
+    rial: "ریال",
+    hours: "ساعت",
   };
 
   return (
@@ -10179,6 +10184,7 @@ function App() {
       requestConfig={config}
       pageSizeOptions={[10, 20, 25, 30, 40, 50]}
       size={10}
+      translates={myTranslate}
     />
   );
 }

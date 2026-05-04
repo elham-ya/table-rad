@@ -25,6 +25,8 @@ import ExcelJS from "exceljs";
 import DateTime from "./DateTime";
 import Text from "./Text";
 import Tag from './Tag';
+import Number from './Number';
+import Price from './Price';
 
 const Table: React.FC<TableProps> = ({
   id,
@@ -646,9 +648,7 @@ const Table: React.FC<TableProps> = ({
                                   col.type === "price"
                                 ) {
                                   return (
-                                    <span className="font-mono">
-                                      {val?.toLocaleString?.() ?? "-"}
-                                    </span>
+                                    <Price value={val} />
                                   );
                                 }
                                 if (
@@ -656,9 +656,7 @@ const Table: React.FC<TableProps> = ({
                                   col.type === "number"
                                 ) {
                                   return (
-                                    <span className="font-mono">
-                                      {val ?? "-"}
-                                    </span>
+                                    <Number value={val} />
                                   );
                                 }
                                 if (

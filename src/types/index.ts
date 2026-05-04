@@ -32,6 +32,7 @@ interface ExcelExportResponse<T = unknown> {
   result: T[];
 }
 
+type translateProp = Record<string, string>;
 export interface TableProps {
   id: string;
   data: unknown[];
@@ -46,6 +47,7 @@ export interface TableProps {
   pageSizeOptions?: number[];
   size?: number;
   onExcelExportRequest?: (offset: number, signal:AbortSignal) => Promise<ExcelExportResponse>;
+  translates?: translateProp;
 }
 
 export interface TableColumn {
@@ -194,8 +196,6 @@ export interface TextProps {
   value: String | Number,
 }
 
-
-
 export type Item = {
   value: string;
   className: string;
@@ -205,6 +205,12 @@ export type TagProps = {
   tagValue?: Item | Item[];
 };
 
+export type NumberProps = {
+  value: string | number
+}
 
+export type PriceProps = {
+  value: string | number
+}
  
 
