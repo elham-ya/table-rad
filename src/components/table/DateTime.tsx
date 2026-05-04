@@ -1,17 +1,19 @@
 import React from "react";
-import { Row, Col, Button, Progress, Badge } from "reactstrap";
 import moment from "moment-jalaali";
 import { DateTimeProps } from "../../types/index";
+import { findString } from "../../utils";
 
 const DateTime: React.FC<DateTimeProps> = ({
   value = "",
   format,
   type = "datetime",
+  strings
 }) => {
   // examples of date and time
   // endDateTime: "2026-02-01 18:34:00"
   // endTime: "18:34:00"
   console.log(333, value, type, format);
+  console.log('strings at DateTime:',strings);
 
    const isEmpty = (val: any) => {
     return val === undefined || val === null || val === "";
@@ -85,7 +87,7 @@ const DateTime: React.FC<DateTimeProps> = ({
     if (m && m.isValid()) {
       let date = m.format("jYYYY/jM/jD");
       let time = m.format("HH:mm:ss");
-      result = `${date} ساعت ${time}`;
+      result = `${date} ${findString(strings?.hours , strings)} ${time}`;
     } else {
       console.warn('Invalid datetime for type="datetime":', value);
       result = "نامعتبر";

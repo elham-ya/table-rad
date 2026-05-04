@@ -32,7 +32,7 @@ interface ExcelExportResponse<T = unknown> {
   result: T[];
 }
 
-type translateProp = Record<string, string>;
+type translateProp = Record<string, string> | null;
 export interface TableProps {
   id: string;
   data: unknown[];
@@ -190,6 +190,7 @@ export interface DateTimeProps {
   value: string, 
   format?: string, // format:"YYYY/MM/DD HH:mm:ss",
   type?: string, // type: "date-date/time-time",
+  strings?: translateProp
 }
 
 export interface TextProps {
@@ -210,7 +211,8 @@ export type NumberProps = {
 }
 
 export type PriceProps = {
-  value: string | number
+  value: string | number;
+  strings?: translateProp
 }
  
 

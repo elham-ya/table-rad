@@ -1,6 +1,7 @@
 import { useState } from "react";
 import TableView from "./components/table/Table";
 import { ContentType } from "./types/index";
+import { uniqueId } from "lodash";
 
 function App() {
   const data = [
@@ -9616,7 +9617,7 @@ function App() {
         totalPayableAmount: 2000000,
         updated: [
           {
-            at: 1761638555,
+            at: 1777725532,
             user_name: "podcms.test",
             ssoId: 17959574,
             changes: {
@@ -9835,10 +9836,10 @@ function App() {
       title: "قیمت",
       key: "payableAmount",
       width: "200",
-      type: ContentType.Function,
-      htmlFunc: () => {
-        return "1,000,000 rial";
-      },
+      type: ContentType.Price,
+      // htmlFunc: () => {
+      //   return "1,000,000 rial";
+      // },
       // excelFunc: () => {
       //   return 1000000;
       // },
@@ -9914,9 +9915,18 @@ function App() {
       width: "140",
       visible: true,
       excel: true,
-      key: "metadata.created.at",
-      type: "date",
+      key: "metadata.updated.at",
+      type: "datetime",
       format: "YYYY/MM/DD",
+    },
+    {
+      title: "تاریخ پرداخت",
+      uniqueId: "paymentDate",
+      visible: true,
+      excel: false,
+      type: "datetime",
+      width: "120",
+      key: "paymentDate"
     },
     {
       uniqueId: "description",

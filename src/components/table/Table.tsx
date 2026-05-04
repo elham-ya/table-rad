@@ -41,12 +41,13 @@ const Table: React.FC<TableProps> = ({
   pageSizeOptions = [10, 20, 25, 30, 40, 50],
   onExcelExportRequest,
   size = 10,
+  translates = null
 }) => {
   // just keeping index
   const [selectedRowIds, setSelectedRowIds] = useState<Set<string | number>>(
     new Set(),
   );
-  console.log(3435564646);
+  console.log(3435564646, translates);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(size);
   const [settingModal, setSettingModal] = useState(false);
@@ -648,7 +649,7 @@ const Table: React.FC<TableProps> = ({
                                   col.type === "price"
                                 ) {
                                   return (
-                                    <Price value={val} />
+                                    <Price value={val} strings={translates} />
                                   );
                                 }
                                 if (
@@ -760,6 +761,7 @@ const Table: React.FC<TableProps> = ({
                                       value={val}
                                       format={col.format}
                                       type={col.type}
+                                      strings={translates} 
                                     />
                                   );
                                 }
