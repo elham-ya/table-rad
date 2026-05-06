@@ -71,6 +71,7 @@ export interface TableColumn {
   excel: boolean;
   format?: string;
   tagValue?: Item | Item[];
+  translate?: boolean;
 }
 export interface CheckboxProps<T = unknown> {
   checked?: boolean;
@@ -195,6 +196,8 @@ export interface DateTimeProps {
 
 export interface TextProps {
   value: String | Number,
+  strings?: translateProp,
+  translate? : boolean
 }
 
 export type Item = {
@@ -204,6 +207,8 @@ export type Item = {
 };
 export type TagProps = {
   tagValue?: Item | Item[];
+  strings?: translateProp;
+  translate? : boolean
 };
 
 export type NumberProps = {

@@ -24,9 +24,9 @@ import Xcel from "../../assets/icons/Xcel.svg";
 import ExcelJS from "exceljs";
 import DateTime from "./DateTime";
 import Text from "./Text";
-import Tag from './Tag';
-import Number from './Number';
-import Price from './Price';
+import Tag from "./Tag";
+import Number from "./Number";
+import Price from "./Price";
 
 const Table: React.FC<TableProps> = ({
   id,
@@ -41,13 +41,13 @@ const Table: React.FC<TableProps> = ({
   pageSizeOptions = [10, 20, 25, 30, 40, 50],
   onExcelExportRequest,
   size = 10,
-  translates = null
+  translates = null,
 }) => {
   // just keeping index
   const [selectedRowIds, setSelectedRowIds] = useState<Set<string | number>>(
     new Set(),
   );
-  console.log(3435564646, translates);
+  
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(size);
   const [settingModal, setSettingModal] = useState(false);
@@ -638,98 +638,78 @@ const Table: React.FC<TableProps> = ({
                               className={styles.td_container}
                             >
                               {(() => {
-                                if (
-                                  col.type === ContentType.Text ||
-                                  col.type === "text"
-                                ) {
-                                  return <Text value={val} />;
-                                }
-                                if (
-                                  col.type === ContentType.Price ||
-                                  col.type === "price"
-                                ) {
-                                  return (
-                                    <Price value={val} strings={translates} />
-                                  );
-                                }
-                                if (
-                                  col.type === ContentType.Number ||
-                                  col.type === "number"
-                                ) {
-                                  return (
-                                    <Number value={val} />
-                                  );
-                                }
-                                if (
-                                  col.type === ContentType.Badge ||
-                                  col.type === "badge"
-                                ) {
-                                  return (
-                                    <Tag tagValue={col?.tagValue} />
-                                  );
-                                }
-                                if (
-                                  col.type === ContentType.Button ||
-                                  col.type === "button"
-                                ) {
-                                  return (
-                                    <ButtonComponent
-                                      buttonList={col.buttons ?? []}
-                                      data={data}
-                                    />
-                                  );
-                                }
-                                if (
-                                  col.type === ContentType.Image ||
-                                  col.type === "img"
-                                ) {
-                                  return val ? (
-                                    <img
-                                      src={val as string}
-                                      alt="تصویر"
-                                      className="w-10 h-10 object-cover rounded"
-                                    />
-                                  ) : (
-                                    <div className="w-10 h-10 bg-gray-200 border-2 border-dashed rounded" />
-                                  );
-                                }
-                                if (
-                                  col.type === ContentType.Map ||
-                                  col.type === "map"
-                                ) {
-                                  return val ? (
-                                    <a
-                                      href={`https://www.google.com/maps?q=${val}`}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                      className="text-blue-600 underline text-xs"
-                                    >
-                                      نمایش روی نقشه
-                                    </a>
-                                  ) : (
-                                    "-"
-                                  );
-                                }
-                                if (
-                                  String(col?.type || "")
-                                    .trim()
-                                    .toLowerCase() === "function" &&
-                                  typeof col?.htmlFunc === "function"
-                                ) {
-                                  let cellContent: React.ReactNode = (
-                                    <span>--</span>
-                                  );
-                                  if (typeof col.htmlFunc === "function") {
+                                switch (col.type) {
+                                  case "text":
+                                    return (
+                                      <Text
+                                        value={val}
+                                        strings={translates}
+                                        translate={col?.translate}
+                                      />
+                                    );
+
+                                  case "price":
+                                    return (
+                                      <Price value={val} strings={translates} />
+                                    );
+
+                                  case "number":
+                                    return <Number value={val} />;
+
+                                  case "badge":
+                                    return (
+                                      <Tag
+                                        tagValue={col?.tagValue}
+                                        strings={translates}
+                                        translate={col?.translate}
+                                      />
+                                    );
+
+                                  case "button":
+                                    return (
+                                      <ButtonComponent
+                                        buttonList={col.buttons ?? []}
+                                        data={data}
+                                      />
+                                    );
+
+                                  case "img":
+                                    return val ? (
+                                      <img
+                                        src={val as string}
+                                        alt="تصویر"
+                                        className="w-10 h-10 object-cover rounded"
+                                      />
+                                    ) : (
+                                      <div className="w-10 h-10 bg-gray-200 border-2 border-dashed rounded" />
+                                    );
+
+                                  case "map":
+                                    return val ? (
+                                      <a
+                                        href={`https://www.google.com/maps?q=${val}`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="text-blue-600 underline text-xs"
+                                      >
+                                        نمایش روی نقشه
+                                      </a>
+                                    ) : (
+                                      "-"
+                                    );
+                                  case "function": {
+                                    if (typeof col?.htmlFunc !== "function") {
+                                      return <span>{val ?? " "}</span>;
+                                    }
+
                                     try {
                                       if (col.htmlFunc.length === 2) {
-                                        cellContent = (col.htmlFunc as any)(
+                                        return (col.htmlFunc as any)(
                                           row,
                                           rowIndex,
                                         );
                                       } else {
-                                        cellContent = (col.htmlFunc as any)(
-                                          row,
-                                        );
+                                        return (col.htmlFunc as any)(row);
                                       }
                                     } catch (error) {
                                       console.error(
@@ -737,35 +717,28 @@ const Table: React.FC<TableProps> = ({
                                         error,
                                         col.uniqueId,
                                       );
-                                      cellContent = (
+                                      return (
                                         <span className="text-red-600">
                                           خطا!
                                         </span>
                                       );
                                     }
-                                  } else {
-                                    cellContent = <span>{val ?? "-"}</span>;
                                   }
-                                  return cellContent;
+                                  case "datetime":
+                                  case "time":
+                                  case "date":
+                                    return (
+                                      <DateTime
+                                        value={val}
+                                        format={col.format}
+                                        type={col.type}
+                                        strings={translates}
+                                      />
+                                    );
+
+                                  default:
+                                    return <span>{val ?? ""}</span>;
                                 }
-                                if (
-                                  col.type === ContentType.DateTime ||
-                                  col.type === "datetime" ||
-                                  col.type === ContentType.Time ||
-                                  col.type === "time" ||
-                                  col.type === ContentType.Date ||
-                                  col.type === "date"
-                                ) {
-                                  return (
-                                    <DateTime
-                                      value={val}
-                                      format={col.format}
-                                      type={col.type}
-                                      strings={translates} 
-                                    />
-                                  );
-                                }
-                                return <span>{val ?? "-"}</span>;
                               })()}
                             </td>
                           );

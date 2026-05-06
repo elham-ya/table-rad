@@ -257,7 +257,7 @@ function App() {
         minStartTimestamp: 1761849000,
         maxEndTimestamp: 1761849600,
         minEndTimestamp: 1761849600,
-        businessName: "podcms Test",
+        businessName: "podcms_Test",
         buyer: {
           type: "natural",
           businessId: "",
@@ -431,6 +431,7 @@ function App() {
         qrCode: null,
         exporterUsername: null,
         clientMetadata: null,
+        tags: ["invoice_types"],
       },
       safe: false,
       postVoucherEnabled: false,
@@ -688,7 +689,7 @@ function App() {
         minStartTimestamp: 1761849000,
         maxEndTimestamp: 1761849600,
         minEndTimestamp: 1761849600,
-        businessName: "podcms Test",
+        businessName: "podcms_Test",
         buyer: {
           type: "natural",
           businessId: "",
@@ -862,6 +863,7 @@ function App() {
         qrCode: null,
         exporterUsername: null,
         clientMetadata: null,
+        tags: ["content_product_type", "content_type"],
       },
       safe: false,
       postVoucherEnabled: false,
@@ -1100,6 +1102,7 @@ function App() {
       closed: false,
       verificationNeeded: false,
       metadata: {
+        tags: ["content"],
         exporter: "17959574",
         issuer: "17959574",
         issuerType: "user",
@@ -1119,7 +1122,7 @@ function App() {
         minStartTimestamp: 1761849000,
         maxEndTimestamp: 1761849600,
         minEndTimestamp: 1761849600,
-        businessName: "podcms Test",
+        businessName: "podcms_Test",
         buyer: {
           type: "natural",
           businessId: "",
@@ -1550,7 +1553,7 @@ function App() {
         minStartTimestamp: 1761849000,
         maxEndTimestamp: 1761849600,
         minEndTimestamp: 1761849600,
-        businessName: "podcms Test",
+        businessName: "podcms_Test",
         buyer: {
           type: "natural",
           businessId: "",
@@ -1724,6 +1727,11 @@ function App() {
         qrCode: null,
         exporterUsername: null,
         clientMetadata: null,
+        tags: [
+          "tourismServices",
+          "service_provider_20283",
+          "service_enable_true",
+        ],
       },
       safe: false,
       postVoucherEnabled: false,
@@ -1962,6 +1970,11 @@ function App() {
       closed: false,
       verificationNeeded: false,
       metadata: {
+        tags: [
+          "tourismServices",
+          "service_provider_20283",
+          "service_enable_true",
+        ],
         exporter: "17959574",
         issuer: "17959574",
         issuerType: "user",
@@ -1981,7 +1994,7 @@ function App() {
         minStartTimestamp: 1761849000,
         maxEndTimestamp: 1761849600,
         minEndTimestamp: 1761849600,
-        businessName: "podcms Test",
+        businessName: "podcms_Test",
         buyer: {
           type: "natural",
           businessId: "",
@@ -2424,6 +2437,11 @@ function App() {
       closed: false,
       verificationNeeded: false,
       metadata: {
+        tags: [
+          "tourismServices",
+          "service_provider_20283",
+          "service_enable_true",
+        ],
         exporter: "17959574",
         issuer: "17959574",
         issuerType: "user",
@@ -2443,7 +2461,7 @@ function App() {
         minStartTimestamp: 1761849000,
         maxEndTimestamp: 1761849600,
         minEndTimestamp: 1761849600,
-        businessName: "podcms Test",
+        businessName: "podcms_Test",
         buyer: {
           type: "natural",
           businessId: "",
@@ -2884,6 +2902,11 @@ function App() {
       closed: false,
       verificationNeeded: false,
       metadata: {
+        tags: [
+          "tourismServices",
+          "service_provider_20283",
+          "service_enable_true",
+        ],
         exporter: "17959574",
         issuer: "17959574",
         issuerType: "user",
@@ -2903,7 +2926,7 @@ function App() {
         minStartTimestamp: 1761849000,
         maxEndTimestamp: 1761849600,
         minEndTimestamp: 1761849600,
-        businessName: "podcms Test",
+        businessName: "podcms_Test",
         buyer: {
           type: "natural",
           businessId: "",
@@ -3344,6 +3367,11 @@ function App() {
       closed: false,
       verificationNeeded: false,
       metadata: {
+        tags: [
+          "tourismServices",
+          "service_provider_20283",
+          "service_enable_true",
+        ],
         exporter: "17959574",
         issuer: "17959574",
         issuerType: "user",
@@ -3363,7 +3391,7 @@ function App() {
         minStartTimestamp: 1761849000,
         maxEndTimestamp: 1761849600,
         minEndTimestamp: 1761849600,
-        businessName: "podcms Test",
+        businessName: "podcms_Test",
         buyer: {
           type: "natural",
           businessId: "",
@@ -3804,6 +3832,7 @@ function App() {
       closed: false,
       verificationNeeded: false,
       metadata: {
+        tags: ["content"],
         exporter: "17959574",
         issuer: "17959574",
         issuerType: "user",
@@ -3823,7 +3852,7 @@ function App() {
         minStartTimestamp: 1761849000,
         maxEndTimestamp: 1761849600,
         minEndTimestamp: 1761849600,
-        businessName: "podcms Test",
+        businessName: "podcms_Test",
         buyer: {
           type: "natural",
           businessId: "",
@@ -4238,6 +4267,7 @@ function App() {
       closed: false,
       verificationNeeded: false,
       metadata: {
+        tags: ["content"],
         exporter: "17959574",
         issuer: "17959574",
         issuerType: "user",
@@ -4257,7 +4287,7 @@ function App() {
         minStartTimestamp: 1761849000,
         maxEndTimestamp: 1761849600,
         minEndTimestamp: 1761849600,
-        businessName: "podcms Test",
+        businessName: "podcms_Test",
         buyer: {
           type: "natural",
           businessId: "",
@@ -4669,6 +4699,7 @@ function App() {
       closed: false,
       verificationNeeded: false,
       metadata: {
+        tags: ["content"],
         exporter: "17959574",
         issuer: "17959574",
         issuerType: "user",
@@ -4688,7 +4719,7 @@ function App() {
         minStartTimestamp: 1761849000,
         maxEndTimestamp: 1761849600,
         minEndTimestamp: 1761849600,
-        businessName: "podcms Test",
+        businessName: "podcms_Test",
         buyer: {
           type: "natural",
           businessId: "",
@@ -5131,6 +5162,7 @@ function App() {
       closed: false,
       verificationNeeded: false,
       metadata: {
+        tags: ["content"],
         exporter: "17959574",
         issuer: "17959574",
         issuerType: "user",
@@ -5150,7 +5182,7 @@ function App() {
         minStartTimestamp: 1761849000,
         maxEndTimestamp: 1761849600,
         minEndTimestamp: 1761849600,
-        businessName: "podcms Test",
+        businessName: "podcms_Test",
         buyer: {
           type: "natural",
           businessId: "",
@@ -5562,6 +5594,7 @@ function App() {
       closed: false,
       verificationNeeded: false,
       metadata: {
+        tags: ["content"],
         exporter: "17959574",
         issuer: "17959574",
         issuerType: "user",
@@ -5581,7 +5614,7 @@ function App() {
         minStartTimestamp: 1761849000,
         maxEndTimestamp: 1761849600,
         minEndTimestamp: 1761849600,
-        businessName: "podcms Test",
+        businessName: "podcms_Test",
         buyer: {
           type: "natural",
           businessId: "",
@@ -5993,6 +6026,7 @@ function App() {
       closed: false,
       verificationNeeded: false,
       metadata: {
+        tags: ["content"],
         exporter: "17959574",
         issuer: "17959574",
         issuerType: "user",
@@ -6012,7 +6046,7 @@ function App() {
         minStartTimestamp: 1761849000,
         maxEndTimestamp: 1761849600,
         minEndTimestamp: 1761849600,
-        businessName: "podcms Test",
+        businessName: "podcms_Test",
         buyer: {
           type: "natural",
           businessId: "",
@@ -6424,6 +6458,7 @@ function App() {
       closed: false,
       verificationNeeded: false,
       metadata: {
+        tags: ["content"],
         exporter: "17959574",
         issuer: "17959574",
         issuerType: "user",
@@ -6443,7 +6478,7 @@ function App() {
         minStartTimestamp: 1761849000,
         maxEndTimestamp: 1761849600,
         minEndTimestamp: 1761849600,
-        businessName: "podcms Test",
+        businessName: "podcms_Test",
         buyer: {
           type: "natural",
           businessId: "",
@@ -6855,6 +6890,7 @@ function App() {
       closed: false,
       verificationNeeded: false,
       metadata: {
+        tags: ["content"],
         exporter: "17959574",
         issuer: "17959574",
         issuerType: "user",
@@ -6874,7 +6910,7 @@ function App() {
         minStartTimestamp: 1761849000,
         maxEndTimestamp: 1761849600,
         minEndTimestamp: 1761849600,
-        businessName: "podcms Test",
+        businessName: "podcms_Test",
         buyer: {
           type: "natural",
           businessId: "",
@@ -7317,6 +7353,7 @@ function App() {
       closed: false,
       verificationNeeded: false,
       metadata: {
+        tags: ["content"],
         exporter: "17959574",
         issuer: "17959574",
         issuerType: "user",
@@ -7336,7 +7373,7 @@ function App() {
         minStartTimestamp: 1761849000,
         maxEndTimestamp: 1761849600,
         minEndTimestamp: 1761849600,
-        businessName: "podcms Test",
+        businessName: "podcms_Test",
         buyer: {
           type: "natural",
           businessId: "",
@@ -7777,6 +7814,7 @@ function App() {
       closed: false,
       verificationNeeded: false,
       metadata: {
+        tags: ["content"],
         exporter: "17959574",
         issuer: "17959574",
         issuerType: "user",
@@ -7796,7 +7834,7 @@ function App() {
         minStartTimestamp: 1761849000,
         maxEndTimestamp: 1761849600,
         minEndTimestamp: 1761849600,
-        businessName: "podcms Test",
+        businessName: "podcms_Test",
         buyer: {
           type: "natural",
           businessId: "",
@@ -8237,6 +8275,7 @@ function App() {
       closed: false,
       verificationNeeded: false,
       metadata: {
+        tags: ["ticket", "product_153999"],
         exporter: "17959574",
         issuer: "17959574",
         issuerType: "user",
@@ -8256,7 +8295,7 @@ function App() {
         minStartTimestamp: 1761849000,
         maxEndTimestamp: 1761849600,
         minEndTimestamp: 1761849600,
-        businessName: "podcms Test",
+        businessName: "podcms_Test",
         buyer: {
           type: "natural",
           businessId: "",
@@ -8697,6 +8736,7 @@ function App() {
       closed: false,
       verificationNeeded: false,
       metadata: {
+        tags: ["ticket", "product_154160"],
         exporter: "17959574",
         issuer: "17959574",
         issuerType: "user",
@@ -8716,7 +8756,7 @@ function App() {
         minStartTimestamp: 1761849000,
         maxEndTimestamp: 1761849600,
         minEndTimestamp: 1761849600,
-        businessName: "podcms Test",
+        businessName: "podcms_Test",
         buyer: {
           type: "natural",
           businessId: "",
@@ -9131,6 +9171,7 @@ function App() {
       closed: false,
       verificationNeeded: false,
       metadata: {
+        tags: ["ticket", "product_154160"],
         exporter: "17959574",
         issuer: "17959574",
         issuerType: "user",
@@ -9150,7 +9191,7 @@ function App() {
         minStartTimestamp: 1761849000,
         maxEndTimestamp: 1761849600,
         minEndTimestamp: 1761849600,
-        businessName: "podcms Test",
+        businessName: "podcms_Test",
         buyer: {
           type: "natural",
           businessId: "",
@@ -9562,6 +9603,7 @@ function App() {
       closed: false,
       verificationNeeded: false,
       metadata: {
+        tags: ["invoice_types"],
         exporter: "17959574",
         issuer: "17959574",
         issuerType: "user",
@@ -9581,7 +9623,7 @@ function App() {
         minStartTimestamp: 1761849000,
         maxEndTimestamp: 1761849600,
         minEndTimestamp: 1761849600,
-        businessName: "podcms Test",
+        businessName: "podcms_Test",
         buyer: {
           type: "natural",
           businessId: "",
@@ -9832,10 +9874,40 @@ function App() {
   // columns of table
   const cols = [
     {
+      uniqueId: "actions",
+      title: "عملیات",
+      width: "100",
+      key: "actionbutton",
+      type: ContentType.Button,
+      buttons: actionButtons,
+      visible: true,
+      excel: true,
+    },
+    {
+      uniqueId: "ChangeKind",
+      title: "نوع تغییر",
+      type: ContentType.Text,
+      width: "160",
+      visible: true,
+      excel: false,
+      translate: true,
+      key: "metadata.tags",
+    },
+    {
+      uniqueId: "تست تکست یک دونه ای",
+      title: "تکست تکی",
+      type: ContentType.Text,
+      width: "100",
+      visible: true,
+      excel: false,
+      translate: true,
+      key: "metadata.businessName",
+    },
+    {
       uniqueId: "price",
       title: "قیمت",
       key: "payableAmount",
-      width: "200",
+      width: "100",
       type: ContentType.Price,
       // htmlFunc: () => {
       //   return "1,000,000 rial";
@@ -9852,9 +9924,10 @@ function App() {
       visible: true,
       excel: true,
       type: ContentType.Badge,
-      width: "200",
+      width: "100",
+      translate: true,
       tagValue: {
-        value: "تست الهام",
+        value: "paymentReport",
         className: "primary",
       },
     },
@@ -9864,7 +9937,7 @@ function App() {
       visible: true,
       excel: true,
       type: ContentType.Badge,
-      width: "200",
+      width: "140",
       tagValue: {
         value: "تست الهام",
         className: "warning",
@@ -9877,10 +9950,11 @@ function App() {
       visible: true,
       excel: true,
       type: ContentType.Badge,
-      width: "200",
+      width: "150",
+      translate: true,
       tagValue: [
         {
-          value: "تست ساده",
+          value: "paymentReport",
           className: "secondary",
           extraValue: "10%",
         },
@@ -9898,13 +9972,14 @@ function App() {
       excel: true,
       type: ContentType.Badge,
       width: "200",
+      translate: true,
       tagValue: [
         {
-          value: "تست بدون 2",
+          value: "ticket",
           className: "info",
         },
         {
-          value: "تست 2سطحی77",
+          value: "countReport",
           className: "success",
         },
       ],
@@ -9926,13 +10001,13 @@ function App() {
       excel: false,
       type: "datetime",
       width: "120",
-      key: "paymentDate"
+      key: "paymentDate",
     },
     {
       uniqueId: "description",
       title: "توضیحات",
       key: "description",
-      width: "300",
+      width: "100",
       type: ContentType.Text,
       visible: false,
       excel: true,
@@ -9941,7 +10016,7 @@ function App() {
       uniqueId: "billNumber",
       title: "شناسه قبض",
       key: "metadata.billNumber",
-      width: "180",
+      width: "150",
       type: ContentType.Text,
       visible: true,
       excel: true,
@@ -9949,7 +10024,7 @@ function App() {
     {
       uniqueId: "customerInfo",
       title: "اطلاعات مشتری",
-      width: "200",
+      width: "120",
       key: "userSrv.name",
       type: ContentType.Text,
       visible: true,
@@ -9976,7 +10051,7 @@ function App() {
     {
       uniqueId: "phoneNumber",
       title: "شماره تلفن",
-      width: "200",
+      width: "140",
       key: "cellphoneNumber",
       type: ContentType.Text,
       visible: false,
@@ -9985,7 +10060,7 @@ function App() {
     {
       uniqueId: "invoiceId",
       title: "شناسه فاکتور",
-      width: "200",
+      width: "160",
       key: "metadata.invoiceId",
       type: ContentType.Text,
       visible: true,
@@ -10133,26 +10208,6 @@ function App() {
       width: "200",
       key: "metadata.invoiceId",
       type: ContentType.Text,
-      visible: true,
-      excel: true,
-    },
-    {
-      uniqueId: "actions",
-      title: "عملیات",
-      width: "100",
-      key: "actionbutton",
-      type: ContentType.Button,
-      buttons: actionButtons,
-      visible: true,
-      excel: true,
-    },
-    {
-      uniqueId: "actions",
-      title: "عملیات",
-      width: "100",
-      key: "actionbutton",
-      type: ContentType.Button,
-      buttons: actionButtons,
       visible: true,
       excel: true,
     },
@@ -10171,7 +10226,7 @@ function App() {
   };
 
   const config = {
-    "Access-Token": "7361383533-12428bc3712940d2bD3e652365b723b9.XzIwMjY1",
+    "Access-Token": "2103252438-403f0b891Ca94fbf90849b5cc2bc956d.XzIwMjY1",
     "Client-Id": "17959574q2f0347718971594ccd86f3f4",
     url: `https://api.sandpod.ir/srv/cms-sandbox/api/core/users/setting`,
   };
@@ -10179,6 +10234,22 @@ function App() {
   const myTranslate = {
     rial: "ریال",
     hours: "ساعت",
+    content: "محتوا",
+    product: "محصول",
+    invoice_types: "نوع فاکتور",
+    promotions: "مدیریت پیشنهادات",
+    tourismServices: "خدمات",
+    ticket: "بلیت",
+    paymentReport: `گزارش مبلغی`,
+    countReport: `گزارش تعدادی`,
+    issuedInvoices: `فاکتور های صادر شده`,
+    canceledInvoice: `فاکتور های استرداد شده`,
+    product_154160: "محصول154160",
+    content_product_type: `نوع‌محتوا/نوع‌محصول`,
+    content_type: `نوع محتوا`,
+    service_provider_20283: "سرویس پرووایدر20283",
+    service_enable_true: "سرویس فعال است",
+    podcms_Test: "پنل تست cms",
   };
 
   return (

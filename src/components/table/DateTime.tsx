@@ -12,8 +12,6 @@ const DateTime: React.FC<DateTimeProps> = ({
   // examples of date and time
   // endDateTime: "2026-02-01 18:34:00"
   // endTime: "18:34:00"
-  console.log(333, value, type, format);
-  console.log('strings at DateTime:',strings);
 
    const isEmpty = (val: any) => {
     return val === undefined || val === null || val === "";
@@ -27,19 +25,15 @@ const DateTime: React.FC<DateTimeProps> = ({
   };
 
   const normalizeTimestamp = (val: any) => {
-    console.log("normalizeTimestamp val:", val);
-
     let ts = Number(val);
     return ts < 1e12 ? ts * 1000 : ts;
   };
 
   const parseDate = (value: any) => {
-    console.log("parseDate val:", value);
     if (!value || value === "undefined") return null;
 
     if (isNumeric(value)) {
       const normalizedTs = normalizeTimestamp(value);
-      console.log("parsing as timestamp:", normalizedTs);
       return moment(normalizedTs);
     }
 
@@ -49,12 +43,10 @@ const DateTime: React.FC<DateTimeProps> = ({
 
     if (isJalaliFormat || looksLikeJalali) {
       const jalaliFormat = format || "jYYYY/jM/jD";
-      console.log("parsing as jalali with format:", jalaliFormat);
       return moment(str, jalaliFormat, true);
     }
 
     const gregorianFormat = format || "YYYY-MM-DD HH:mm:ss";
-    console.log("parsing as gregorian with format:", gregorianFormat);
     return moment(str, gregorianFormat, true);
   };
 
@@ -68,7 +60,6 @@ const DateTime: React.FC<DateTimeProps> = ({
       console.warn('Invalid date for type="date":', value);
       result = "نامعتبر";
     }
-    console.log("type date:", m, result);
   }
 
   if (type === "time") {
@@ -79,7 +70,6 @@ const DateTime: React.FC<DateTimeProps> = ({
       console.warn('Invalid time for type="time":', value);
       result = "نامعتبر";
     }
-    console.log("type time:", m, result);
   }
 
   if (type === "datetime") {
@@ -92,7 +82,6 @@ const DateTime: React.FC<DateTimeProps> = ({
       console.warn('Invalid datetime for type="datetime":', value);
       result = "نامعتبر";
     }
-    console.log("type datetime:", m, result);
   }
 
   return <>{result}</>;
