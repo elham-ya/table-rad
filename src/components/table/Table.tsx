@@ -47,6 +47,7 @@ const Table: React.FC<TableProps> = ({
   const [selectedRowIds, setSelectedRowIds] = useState<Set<string | number>>(
     new Set(),
   );
+  console.log('data for table:',data);
   
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(size);
@@ -632,6 +633,7 @@ const Table: React.FC<TableProps> = ({
                         {finalColumns.map((col) => {
                           const val = col?.key ? _.get(row, col.key) : "";
                           console.log("col", col);
+                          console.log("val:", val);
                           return (
                             <td
                               key={col.uniqueId}
@@ -646,6 +648,7 @@ const Table: React.FC<TableProps> = ({
                                         strings={translates}
                                         translate={col?.translate}
                                       />
+                                    
                                     );
 
                                   case "price":
@@ -659,7 +662,7 @@ const Table: React.FC<TableProps> = ({
                                   case "badge":
                                     return (
                                       <Tag
-                                        tagValue={col?.tagValue}
+                                        value={val}
                                         strings={translates}
                                         translate={col?.translate}
                                       />

@@ -1,9 +1,14 @@
 import React from "react";
-import { TagProps, Item } from "../../types/index";
+import { TagProps, TagItem } from "../../types/index";
 import { findString } from "../../utils/index";
 
-const Tag: React.FC<TagProps> = ({ tagValue, strings, translate = false }) => {
-  const isArray = Array.isArray(tagValue);
+const Tag: React.FC<TagProps> = ({ value, strings, translate = false }) => {
+console.log(777, value);
+
+  if (!value || (Array.isArray(value) && value.length === 0)) {
+    return null;
+  }
+  const isArray = Array.isArray(value);
 
   const processText = (text: string): string => {
     if (translate) {
@@ -12,61 +17,34 @@ const Tag: React.FC<TagProps> = ({ tagValue, strings, translate = false }) => {
     return text;
   };
 
-  // array list
-  const renderItem = (item: Item, index?: number) => {
+  const renderTagItem = (item: TagItem, key?: string | number) => {
     const translatedValue = processText(item.value);
-    const translatedExtraValue = item.extraValue
-      ? processText(item.extraValue)
-      : undefined;
+    const hasExtraValue = item.extraValue && item.extraValue !== "";
+    const translatedExtraValue = hasExtraValue
+      ? processText(item.extraValue!)
+      : "";
 
     return (
-      <React.Fragment key={index || item.value}>
-        <span className={`badge badge-${item.className} badge-pill mb-1`}>
-          <h6 className="d-inline ml-2">
-            <span className="badge badge-light badge-pill display-3">
-              {translatedExtraValue && translatedExtraValue}
-            </span>
-          </h6>
+      <React.Fragment key={key || item.value}>
+        <span className={`badge badge-${item.class} badge-pill mb-1`}>
+          {hasExtraValue && (
+            <h6 className="d-inline ml-2">
+              <span className="badge badge-light badge-pill display-3">
+                {translatedExtraValue && translatedExtraValue}
+              </span>
+            </h6>
+          )}
           {translatedValue}
         </span>
-        <br />
+         <br />
       </React.Fragment>
     );
   };
 
-  const renderItemPrimary = (item: Item) => {
-    const translatedValue = processText(item.value);
-
-    if (item && item.extraValue) {
-      const translatedExtraValue = processText(item.extraValue);
-      return (
-        <span className={`badge badge-${item.className} badge-pill mb-1`}>
-          <h6 className="d-inline ml-2">
-            <span className="badge badge-light badge-pill display-3">
-              {translatedExtraValue}
-            </span>
-          </h6>
-          {translatedValue}
-        </span>
-      );
-    } else {
-      return (
-        <span className={`badge badge-${item?.className} badge-pill`}>
-          {translatedValue}
-        </span>
-      );
-    }
-  };
-
-  return (
-    <>
-      {!isArray
-        ? tagValue
-          ? renderItemPrimary(tagValue as Item)
-          : null
-        : tagValue.map((item) => renderItem(item))}
-    </>
-  );
+  if (!isArray) {
+    return <>{renderTagItem(value as TagItem)}</>;
+  }
+  return <>{value.map((item, index) => renderTagItem(item, index))}</>;
 };
 
 export default Tag;

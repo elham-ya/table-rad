@@ -70,7 +70,7 @@ export interface TableColumn {
   visible: boolean;
   excel: boolean;
   format?: string;
-  tagValue?: Item | Item[];
+  value?: any;
   translate?: boolean;
 }
 export interface CheckboxProps<T = unknown> {
@@ -193,22 +193,21 @@ export interface DateTimeProps {
   type?: string, // type: "date-date/time-time",
   strings?: translateProp
 }
-
 export interface TextProps {
   value: String | Number,
   strings?: translateProp,
   translate? : boolean
 }
 
-export type Item = {
+export type TagItem = {
   value: string;
-  className: string;
+  class: string;
   extraValue?: string;
 };
-export type TagProps = {
-  tagValue?: Item | Item[];
-  strings?: translateProp;
-  translate? : boolean
+export type TagProps =  {
+  value?: TagItem | TagItem[];
+  strings?: Record<string, string> | null;
+  translate?: boolean;
 };
 
 export type NumberProps = {
