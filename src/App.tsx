@@ -23,7 +23,7 @@ function App() {
         {
           ...item.guildSrv,
           value: item.guildSrv.name,
-          class: "success",
+          class: "info",
           extraValue: "14%",
         },
       ],
@@ -410,7 +410,7 @@ function App() {
   };
 
   const config = {
-    "Access-Token": "8413009752-ab275feF510d431589819c385dc96e62.XzIwMjY1",
+    "Access-Token": "7361383533-fa4ca8B6b5dc44a3aa3e8f727c41fffb.XzIwMjY1",
     "Client-Id": "17959574q2f0347718971594ccd86f3f4",
     url: `https://api.sandpod.ir/srv/cms-sandbox/api/core/users/setting`,
   };

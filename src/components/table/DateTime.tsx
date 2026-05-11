@@ -12,6 +12,7 @@ const DateTime: React.FC<DateTimeProps> = ({
   // examples of date and time
   // endDateTime: "2026-02-01 18:34:00"
   // endTime: "18:34:00"
+  console.log('date time data:', value, format, type, strings);
 
    const isEmpty = (val: any) => {
     return val === undefined || val === null || val === "";
@@ -30,7 +31,7 @@ const DateTime: React.FC<DateTimeProps> = ({
   };
 
   const parseDate = (value: any) => {
-    if (!value || value === "undefined") return null;
+    if (value === undefined || value === null || value === "" || value === "undefined") return null;
 
     if (isNumeric(value)) {
       const normalizedTs = normalizeTimestamp(value);
@@ -74,10 +75,12 @@ const DateTime: React.FC<DateTimeProps> = ({
 
   if (type === "datetime") {
     const m = parseDate(value);
+    console.log('m#',m);
+    
     if (m && m.isValid()) {
       let date = m.format("jYYYY/jM/jD");
       let time = m.format("HH:mm:ss");
-      result = `${date} ${findString(strings?.hours , strings)} ${time}`;
+      result = `${date} ${findString(strings?.hour , strings)} ${time}`;
     } else {
       console.warn('Invalid datetime for type="datetime":', value);
       result = "نامعتبر";

@@ -47,8 +47,8 @@ const Table: React.FC<TableProps> = ({
   const [selectedRowIds, setSelectedRowIds] = useState<Set<string | number>>(
     new Set(),
   );
-  console.log('data for table:',data);
-  
+  console.log("data for table:", data);
+
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(size);
   const [settingModal, setSettingModal] = useState(false);
@@ -606,7 +606,9 @@ const Table: React.FC<TableProps> = ({
                         <th
                           key={colItem.uniqueId}
                           className={styles.th_container}
-                          style={{ width: `${colItem.width}px` }}
+                          style={{
+                            width: `${colItem.width ? colItem.width : "120"}px`,
+                          }}
                         >
                           {colItem.title}
                         </th>
@@ -648,7 +650,6 @@ const Table: React.FC<TableProps> = ({
                                         strings={translates}
                                         translate={col?.translate}
                                       />
-                                    
                                     );
 
                                   case "price":
