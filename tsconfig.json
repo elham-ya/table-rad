@@ -23,6 +23,6 @@
     },
     "resolveJsonModule": true
   },
-  "include": ["src", "vite.config.ts", "src/types/**/*"], 
-  "exclude": ["node_modules", "dist", "**/*.test.ts", "**/*.spec.ts"]
+  "include": ["src"], 
+  "exclude": ["node_modules", "dist", "vite.config.ts"]
 }

@@ -6,7 +6,7 @@ import dts from 'vite-plugin-dts';
 import cssInjectedByJsPlugin from 'vite-plugin-css-injected-by-js';
 
 export default defineConfig({
-  plugins: [react(), dts({ insertTypesEntry: true , rollupTypes: false }), cssInjectedByJsPlugin()],
+  plugins: [react(), dts({ insertTypesEntry: true , rollupTypes: true }), cssInjectedByJsPlugin()],
   css: {
     modules: {
       localsConvention: 'camelCase',
@@ -24,7 +24,7 @@ export default defineConfig({
       formats: ['es', 'umd'], 
     },
     rollupOptions: {
-      external: ['react', 'react-dom'],
+      external: ['react', 'react-dom', 'reactstrap'],
       output: {
         globals: {
           react: 'React',
