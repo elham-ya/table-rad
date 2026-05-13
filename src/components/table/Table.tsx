@@ -16,7 +16,7 @@ import {
   Badge,
 } from "reactstrap";
 import Checkbox from "../checkBox";
-import ButtonComponent from "../button";
+import ActionRenderer from "../actionRenderer";
 import TablePagination from "../pagination";
 import SettingModal from "../setting";
 import SettingButtonIcon from "../../assets/icons/SettingButton.svg";
@@ -671,9 +671,10 @@ const Table: React.FC<TableProps> = ({
 
                                   case "button":
                                     return (
-                                      <ButtonComponent
-                                        buttonList={col.buttons ?? []}
-                                        data={data}
+                                      <ActionRenderer
+                                        row={row}
+                                        actions={col.actions ?? []}
+                                        strings={translates}
                                       />
                                     );
 

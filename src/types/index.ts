@@ -66,7 +66,7 @@ export interface TableColumn {
 
 
   excelFunc?: (row: unknown) => unknown;
-  buttons?: buttonColProps[];
+  actions?: ActionItem[];
   visible: boolean;
   excel: boolean;
   format?: string;
@@ -89,16 +89,22 @@ export interface CheckboxProps<T = unknown> {
 }
 
 export type CheckboxChangeEvent = React.ChangeEvent<HTMLInputElement>;
-export interface buttonColProps {
-  title?: string;
-  className?: string;
+export interface ActionItem {
+  uniqueId?: string;
+  title: string;
+  icon?: string | React.ReactNode;
+  href?: string;
+  target?: '_blank' | '_self';
   onClick?: ((row: unknown) => React.ReactNode);
-  visible?: boolean;
+  className?: string;
   disable?: boolean;
 }
-export interface ButtonProps {
-  data: unknown[];
-  buttonList: buttonColProps[];
+export interface ButtonActionProps {
+  row: any;
+  actions: ActionItem[];
+  onEditClick?: (row: any) => void;
+  editIcon?: string;
+  strings?: translateProp
 }
 export interface actionColumn {
   visible: boolean;

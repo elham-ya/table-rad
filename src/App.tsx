@@ -50,42 +50,50 @@ function App() {
 
     return newItem;
   });
-
+  const handleViewInvoice = () => {
+    alert("first action");
+  };
   const actionButtons = [
     {
+      uniqueId: "1",
       title: "مشاهده فاکتور",
-      className: "fa fa-eye",
-      onClick: () => console.log("button clicked"),
-      visible: true,
+      icon: "fa fa-eye",
+      onClick: () => handleViewInvoice,
       disable: false,
+      hasAccess: true,
     },
     {
-      title: "عملیات دسته‌ای انتشار",
-      className: "fa fa-eye",
-      onClick: () => console.log("button clicked"),
-      visible: true,
+      uniqueId: "2",
+      title: "لیست بلیت ها",
+      onClick: () => console.log("button 2 clicked"),
       disable: false,
+      hasAccess: false,
+      icon: "fas fa-ticket-alt fa-lg fa-rotate-90",
     },
     {
-      title: "عملیات دسته‌ای عدم انتشار ",
-      className: "fa fa-eye",
+      uniqueId: "3",
+      title: "چاپ مجدد",
       onClick: () => console.log("button clicked"),
-      visible: true,
       disable: false,
+      hasAccess: true,
+      icon: "fas fa-bars fa-lg",
     },
     {
+      uniqueId: "4",
       title: "استرداد فاکتور",
-      className: "fa fa-eye",
       onClick: () => console.log("button clicked"),
-      visible: true,
-      disable: false,
+      disable: true,
+      hasAccess: true,
+      icon: "fas fa-print fa-lg",
     },
     {
+      uniqueId: "5",
       title: "پرداخت فاکتور",
-      className: "fa fa-eye",
       onClick: () => console.log("button clicked"),
-      visible: true,
       disable: false,
+      hasAccess: true,
+      href: "/",
+      icon: "fas fa-times-circle fa-lg",
     },
   ];
   // columns of table
@@ -96,7 +104,7 @@ function App() {
       width: "100",
       key: "actionbutton",
       type: ContentType.Button,
-      buttons: actionButtons,
+      actions: actionButtons.filter((btn) => btn.hasAccess === true),
       visible: true,
       excel: true,
     },
@@ -410,7 +418,7 @@ function App() {
   };
 
   const config = {
-    "Access-Token": "7361383533-fa4ca8B6b5dc44a3aa3e8f727c41fffb.XzIwMjY1",
+    "Access-Token": "151626219-7e82c9cb78Be438d91932002d6959a60.XzIwMjY1",
     "Client-Id": "17959574q2f0347718971594ccd86f3f4",
     url: `https://api.sandpod.ir/srv/cms-sandbox/api/core/users/setting`,
   };
