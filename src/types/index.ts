@@ -67,6 +67,7 @@ export interface TableColumn {
 
   excelFunc?: (row: unknown) => unknown;
   actions?: ActionItem[];
+
   visible: boolean;
   excel: boolean;
   format?: string;
@@ -102,8 +103,6 @@ export interface ActionItem {
 export interface ButtonActionProps {
   row: any;
   actions: ActionItem[];
-  onEditClick?: (row: any) => void;
-  editIcon?: string;
   strings?: translateProp
 }
 export interface actionColumn {

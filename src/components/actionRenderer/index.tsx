@@ -12,7 +12,7 @@ import styles from "./button.module.scss";
 import EditIcon from "../../assets/icons/IconEdit.svg";
 import DotIcon from "../../assets/icons/IconDot.svg";
 
-const ActionRenderer: React.FC<ButtonActionProps> = ({ row, actions }) => {
+const ActionRenderer: React.FC<ButtonActionProps> = ({ row, actions, strings }) => {
   console.log("row ActionRenderer:", row);
   console.log("actions:", actions);
   const [dropdownOpen, setDropdownOpen] = useState(false);
