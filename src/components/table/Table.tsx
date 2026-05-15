@@ -670,10 +670,20 @@ const Table: React.FC<TableProps> = ({
                                     );
 
                                   case "button":
+                                    let actions = col.actions;
+
+                                    if (col.actionsGetter) {
+                                      actions = col.actionsGetter(row);
+                                    }
+
+                                    const finalActions = Array.isArray(actions)
+                                      ? actions
+                                      : [];
+
                                     return (
                                       <ActionRenderer
                                         row={row}
-                                        actions={col.actions ?? []}
+                                        actions={finalActions}
                                         strings={translates}
                                       />
                                     );

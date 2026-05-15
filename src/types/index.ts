@@ -67,7 +67,7 @@ export interface TableColumn {
 
   excelFunc?: (row: unknown) => unknown;
   actions?: ActionItem[];
-
+  actionsGetter?: (row: any) => ActionItem[];
   visible: boolean;
   excel: boolean;
   format?: string;
