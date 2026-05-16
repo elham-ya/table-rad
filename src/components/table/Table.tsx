@@ -668,26 +668,15 @@ const Table: React.FC<TableProps> = ({
                                         translate={col?.translate}
                                       />
                                     );
-
                                   case "button":
-                                    let actions = col.actions;
-
-                                    if (col.actionsGetter) {
-                                      actions = col.actionsGetter(row);
-                                    }
-
-                                    const finalActions = Array.isArray(actions)
-                                      ? actions
-                                      : [];
-
                                     return (
                                       <ActionRenderer
                                         row={row}
-                                        actions={finalActions}
+                                        rowIndex={rowIndex}
+                                        actions={col.buttonList || (() => [])}
                                         strings={translates}
                                       />
                                     );
-
                                   case "img":
                                     return val ? (
                                       <img

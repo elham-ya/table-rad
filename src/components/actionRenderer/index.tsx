@@ -12,14 +12,20 @@ import styles from "./button.module.scss";
 import EditIcon from "../../assets/icons/IconEdit.svg";
 import DotIcon from "../../assets/icons/IconDot.svg";
 
-const ActionRenderer: React.FC<ButtonActionProps> = ({ row, actions, strings }) => {
+const ActionRenderer: React.FC<ButtonActionProps> = ({
+  row,
+  actions,
+  strings,
+}) => {
   console.log("row ActionRenderer:", row);
   console.log("actions:", actions);
+
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const toggle = () => setDropdownOpen((prevState) => !prevState);
 
+
+
   const renderIcon = (icon: string | React.ReactNode) => {
-    console.log("icon", icon);
 
     if (!icon) {
       return (
@@ -31,8 +37,6 @@ const ActionRenderer: React.FC<ButtonActionProps> = ({ row, actions, strings }) 
     }
 
     if (typeof icon === "string") {
-      console.log('type if');
-      
       return (
         <i className={icon} style={{ marginLeft: "8px", width: "20px" }} />
       );
@@ -64,9 +68,14 @@ const ActionRenderer: React.FC<ButtonActionProps> = ({ row, actions, strings }) 
     }
   };
 
-  if (!actions || !Array.isArray(actions) || actions.length === 0) return null;
-  const firstAction = actions[0];
-  const dropdownActions = actions.slice(1);
+  const actionItems = typeof actions === 'function' ? actions(row) : actions;
+  if (!actionItems || !Array.isArray(actionItems) || actionItems.length === 0) return null;
+  let finalActions = actionItems.filter((item) => item.visible !== false);
+
+  if (finalActions.length === 0) return null;
+
+  const firstAction = finalActions[0];
+  const dropdownActions = finalActions.slice(1);
 
   return (
     <>
@@ -91,7 +100,7 @@ const ActionRenderer: React.FC<ButtonActionProps> = ({ row, actions, strings }) 
               className="p-0 border-0 bg-transparent shadow-none"
               style={{ boxShadow: "none" }}
             >
-              <i className="fas fa-bars"  />
+              <i className="fas fa-bars" />
             </DropdownToggle>
             <DropdownMenu
               style={{

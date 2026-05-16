@@ -66,8 +66,7 @@ export interface TableColumn {
 
 
   excelFunc?: (row: unknown) => unknown;
-  actions?: ActionItem[];
-  actionsGetter?: (row: any) => ActionItem[];
+  buttonList?: (row: any) => ActionItem[];
   visible: boolean;
   excel: boolean;
   format?: string;
@@ -99,11 +98,14 @@ export interface ActionItem {
   onClick?: ((row: unknown) => React.ReactNode);
   className?: string;
   disable?: boolean;
+  visible?: boolean;
+  
 }
 export interface ButtonActionProps {
   row: any;
-  actions: ActionItem[];
-  strings?: translateProp
+  actions?: ActionItem[] | ((row: any) => ActionItem[]);
+  strings?: translateProp;
+  rowIndex: number | string;
 }
 export interface actionColumn {
   visible: boolean;

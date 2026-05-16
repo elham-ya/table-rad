@@ -12,7 +12,6 @@ const DateTime: React.FC<DateTimeProps> = ({
   // examples of date and time
   // endDateTime: "2026-02-01 18:34:00"
   // endTime: "18:34:00"
-  console.log('date time data:', value, format, type, strings);
 
    const isEmpty = (val: any) => {
     return val === undefined || val === null || val === "";
@@ -75,7 +74,6 @@ const DateTime: React.FC<DateTimeProps> = ({
 
   if (type === "datetime") {
     const m = parseDate(value);
-    console.log('m#',m);
     
     if (m && m.isValid()) {
       let date = m.format("jYYYY/jM/jD");

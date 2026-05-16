@@ -3,7 +3,6 @@ import { TagProps, TagItem } from "../../types/index";
 import { findString } from "../../utils/index";
 
 const Tag: React.FC<TagProps> = ({ value, strings, translate = false }) => {
-console.log(777, value);
 
   if (!value || (Array.isArray(value) && value.length === 0)) {
     return null;
