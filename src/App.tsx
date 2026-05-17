@@ -53,7 +53,8 @@ function App() {
   const handleViewInvoice = () => {
     alert("first action");
   };
-  const actionButtons = [
+  const actionButtons = (row: unknown) => {
+    return [
     {
       uniqueId: "1",
       title: "مشاهده فاکتور",
@@ -96,6 +97,7 @@ function App() {
       icon: "fas fa-times-circle fa-lg",
     },
   ];
+  }
   // columns of table
   const cols = [
     {
@@ -104,9 +106,9 @@ function App() {
       width: "100",
       key: "actionbutton",
       type: ContentType.Button,
-      actions: actionButtons.filter((btn) => btn.hasAccess === true),
+      buttonList: (row: unknown) => actionButtons(row),
       visible: true,
-      excel: true,
+      excel: false,
     },
     {
       uniqueId: "ChangeKind",
@@ -418,7 +420,7 @@ function App() {
   };
 
   const config = {
-    "Access-Token": "151626219-7e82c9cb78Be438d91932002d6959a60.XzIwMjY1",
+    "Access-Token": "4206504876-dcf81e641ca345e085901cE94c7bf02a.XzIwMjY1",
     "Client-Id": "17959574q2f0347718971594ccd86f3f4",
     url: `https://api.sandpod.ir/srv/cms-sandbox/api/core/users/setting`,
   };

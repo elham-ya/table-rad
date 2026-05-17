@@ -23,31 +23,17 @@ const ActionRenderer: React.FC<ButtonActionProps> = ({
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const toggle = () => setDropdownOpen((prevState) => !prevState);
 
-
-
   const renderIcon = (icon: string | React.ReactNode) => {
-
     if (!icon) {
-      return (
-        <i
-          className="fas fa-bars"
-          style={{ marginLeft: "8px", width: "20px" }}
-        />
-      );
+      return <i className="fas fa-bars" style={{ width: "20px" }} />;
     }
 
     if (typeof icon === "string") {
-      return (
-        <i className={icon} style={{ marginLeft: "8px", width: "20px" }} />
-      );
+      return <i className={icon} style={{ width: "20px" }} />;
     }
 
     return (
-      <span
-        style={{ marginLeft: "8px", display: "inline-flex", width: "20px" }}
-      >
-        {icon}
-      </span>
+      <span style={{ display: "inline-flex", width: "20px" }}>{icon}</span>
     );
   };
 
@@ -68,8 +54,9 @@ const ActionRenderer: React.FC<ButtonActionProps> = ({
     }
   };
 
-  const actionItems = typeof actions === 'function' ? actions(row) : actions;
-  if (!actionItems || !Array.isArray(actionItems) || actionItems.length === 0) return null;
+  const actionItems = typeof actions === "function" ? actions(row) : actions;
+  if (!actionItems || !Array.isArray(actionItems) || actionItems.length === 0)
+    return null;
   let finalActions = actionItems.filter((item) => item.visible !== false);
 
   if (finalActions.length === 0) return null;
@@ -93,7 +80,8 @@ const ActionRenderer: React.FC<ButtonActionProps> = ({
           <Dropdown
             isOpen={dropdownOpen}
             toggle={toggle}
-            className="border-0 bg-transparent p-0 shadow-none"
+            // className="border-0 bg-transparent p-0 shadow-none"
+            className={`border-0 bg-transparent p-0 shadow-none ${styles.action_dropdown_wrapper}`}
           >
             <DropdownToggle
               caret={false}
@@ -114,17 +102,20 @@ const ActionRenderer: React.FC<ButtonActionProps> = ({
               >
                 عملیات
               </DropdownItem>
-              <DropdownItem divider />
+
               {dropdownActions.map((item, index) => (
-                <DropdownItem
-                  key={item.uniqueId || index}
-                  className={`${styles.dropdownItem} ${item.className || ""}`}
-                  onClick={() => handleActionClick(item)}
-                  disabled={item.disable}
-                >
-                  {renderIcon(item.icon)}
-                  <span>{item.title}</span>
-                </DropdownItem>
+                <>
+                  <DropdownItem
+                    key={item.uniqueId || index}
+                    className={`${styles.dropdownItem} ${item.className || ""}`}
+                    onClick={() => handleActionClick(item)}
+                    disabled={item.disable}
+                  >
+                    {renderIcon(item.icon)}
+                    <span>{item.title}</span>
+                  </DropdownItem>
+                  <DropdownItem className={styles.dropdown_divider_line} divider />
+                </>
               ))}
             </DropdownMenu>
           </Dropdown>
