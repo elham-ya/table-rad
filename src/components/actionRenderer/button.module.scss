@@ -36,10 +36,10 @@
     font-size: 12px;
     font-weight: 500;
     line-height: 20px;
-    &:first-child {
+    &:first-of-type {
       margin-top: 0.5rem;
     }
-    &:last-child {
+    &:last-of-type {
       margin-bottom: 0.5rem;
     }
     i {
