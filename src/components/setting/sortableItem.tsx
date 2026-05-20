@@ -185,7 +185,7 @@ const SortableItem = React.forwardRef<HTMLDivElement, SortableItemProps>(
             <div className={`p-0 ${styles.t_px_input}`}>
               <Input
                 id="selectwidth"
-                type="text"
+                type="number"
                 className={styles.column_input_width}
                 onChange={handleChangeWidth}
                 value={inputValue.width}
