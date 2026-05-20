@@ -55,49 +55,49 @@ function App() {
   };
   const actionButtons = (row: unknown) => {
     return [
-    {
-      uniqueId: "1",
-      title: "مشاهده فاکتور",
-      icon: "fa fa-eye",
-      onClick: () => handleViewInvoice,
-      disable: false,
-      hasAccess: true,
-    },
-    {
-      uniqueId: "2",
-      title: "لیست بلیت ها",
-      onClick: () => console.log("button 2 clicked"),
-      disable: false,
-      hasAccess: false,
-      icon: "fas fa-ticket-alt fa-lg fa-rotate-90",
-    },
-    {
-      uniqueId: "3",
-      title: "چاپ مجدد",
-      onClick: () => console.log("button clicked"),
-      disable: false,
-      hasAccess: true,
-      icon: "fas fa-bars fa-lg",
-    },
-    {
-      uniqueId: "4",
-      title: "استرداد فاکتور",
-      onClick: () => console.log("button clicked"),
-      disable: true,
-      hasAccess: true,
-      icon: "fas fa-print fa-lg",
-    },
-    {
-      uniqueId: "5",
-      title: "پرداخت فاکتور",
-      onClick: () => console.log("button clicked"),
-      disable: false,
-      hasAccess: true,
-      href: "/",
-      icon: "fas fa-times-circle fa-lg",
-    },
-  ];
-  }
+      {
+        uniqueId: "1",
+        title: "مشاهده فاکتور",
+        icon: "fa fa-eye",
+        onClick: () => handleViewInvoice,
+        disable: false,
+        hasAccess: true,
+      },
+      {
+        uniqueId: "2",
+        title: "لیست بلیت ها",
+        onClick: () => console.log("button 2 clicked"),
+        disable: false,
+        hasAccess: false,
+        icon: "fas fa-ticket-alt fa-lg fa-rotate-90",
+      },
+      {
+        uniqueId: "3",
+        title: "چاپ مجدد",
+        onClick: () => console.log("button clicked"),
+        disable: false,
+        hasAccess: true,
+        icon: "fas fa-bars fa-lg",
+      },
+      {
+        uniqueId: "4",
+        title: "استرداد فاکتور",
+        onClick: () => console.log("button clicked"),
+        disable: true,
+        hasAccess: true,
+        icon: "fas fa-print fa-lg",
+      },
+      {
+        uniqueId: "5",
+        title: "پرداخت فاکتور",
+        onClick: () => console.log("button clicked"),
+        disable: false,
+        hasAccess: true,
+        href: "/",
+        icon: "fas fa-times-circle fa-lg",
+      },
+    ];
+  };
   // columns of table
   const cols = [
     {
@@ -420,7 +420,7 @@ function App() {
   };
 
   const config = {
-    "Access-Token": "4206504876-dcf81e641ca345e085901cE94c7bf02a.XzIwMjY1",
+    "Access-Token": "9464635971-b2464cc73d7c429dA6a9a4cc7d293112.XzIwMjY1",
     "Client-Id": "17959574q2f0347718971594ccd86f3f4",
     url: `https://api.sandpod.ir/srv/cms-sandbox/api/core/users/setting`,
   };

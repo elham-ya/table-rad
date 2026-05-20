@@ -49,13 +49,20 @@ const SettingModal: React.FC<SettingModalProps> = ({
     setItems(columns);
   }, [columns]);
 
+  useEffect(() => {
+    if (!isOpen) {
+      setSearchTerm("");
+      setItems(columns);
+    }
+  }, [isOpen, columns]);
+
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
         distance: 3, // حداقل 3 پیکسل حرکت کنه تا درگ شروع بشه (جلوگیری از کلیک اشتباه)
       },
     }),
-    useSensor(KeyboardSensor)
+    useSensor(KeyboardSensor),
   );
 
   const getSetting = (tableId = tableName) => {
@@ -71,7 +78,6 @@ const SettingModal: React.FC<SettingModalProps> = ({
   };
 
   const mergeLists = (apiList: TableColumn[], devList: TableColumn[]) => {
-    
     if (!apiList || apiList.length === 0) return [...devList];
     if (!devList || devList.length === 0) return [...apiList];
 
@@ -79,7 +85,11 @@ const SettingModal: React.FC<SettingModalProps> = ({
 
     const onlyInDev = devList.filter((item) => !apiIds.has(item.uniqueId));
 
-    const noVisible =  onlyInDev.map((item) => ({...item , excel: false, visible: false})); 
+    const noVisible = onlyInDev.map((item) => ({
+      ...item,
+      excel: false,
+      visible: false,
+    }));
 
     if (apiList.length >= devList.length) {
       return [...apiList];
@@ -111,7 +121,7 @@ const SettingModal: React.FC<SettingModalProps> = ({
 
   const updateContentChange = (
     uniqueId: string,
-    updates: Partial<TableColumn>
+    updates: Partial<TableColumn>,
   ) => {
     setItems((prev) => {
       const existingIndex = prev.findIndex((c) => c.uniqueId === uniqueId);
@@ -131,10 +141,10 @@ const SettingModal: React.FC<SettingModalProps> = ({
           ...updates,
         };
         return prev.map((col, index) =>
-          index === existingIndex ? updated : col
+          index === existingIndex ? updated : col,
         );
       }
-    });   
+    });
   };
 
   const handleChangeTitle = (title: string, uniqueId: string) => {
@@ -154,7 +164,7 @@ const SettingModal: React.FC<SettingModalProps> = ({
   };
 
   const requestSetSetting = async (params: any) => {
-   try {
+    try {
       const res = await fetch(requestConfig.url, {
         method: "POST",
         headers: {
@@ -178,25 +188,28 @@ const SettingModal: React.FC<SettingModalProps> = ({
 
   const handleSave = () => {
     const changedColumns = items.filter(
-      (col) => col.visible === true || col.excel === true
+      (col) => col.visible === true || col.excel === true,
     );
-    if(changedColumns && changedColumns.length <= 0) {
+    if (changedColumns && changedColumns.length <= 0) {
       toggle();
       return;
     }
-    
+
     const newCommonColumns = changedColumns
-      .map(changedCol => {
-        const originalCol = columns.find(col => col.uniqueId === changedCol.uniqueId);
+      .map((changedCol) => {
+        const originalCol = columns.find(
+          (col) => col.uniqueId === changedCol.uniqueId,
+        );
         if (!originalCol) return null;
         if (originalCol.title !== changedCol.title) {
           return {
-            ...changedCol,              
-            defaultTitle: originalCol.title  
+            ...changedCol,
+            defaultTitle: originalCol.title,
           };
         }
         return changedCol;
-      }).filter(Boolean);
+      })
+      .filter(Boolean);
 
     const finalColumns: FinalColumnProps = {
       [tableName]: {
@@ -216,7 +229,7 @@ const SettingModal: React.FC<SettingModalProps> = ({
         setting: {
           ...apiConfigData.result[0].setting,
           tables: {
-            ...(apiConfigData.result[0].setting.tables),
+            ...apiConfigData.result[0].setting.tables,
             ...finalColumns,
           },
         },
@@ -227,22 +240,24 @@ const SettingModal: React.FC<SettingModalProps> = ({
           ...currentSetting,
           tables: {
             [tableName]: {
-              columns:[]
-            }
+              columns: [],
+            },
           },
         },
       });
     }
     toggle();
   };
-  
+
   const filteredItems = searchTerm
-  ? items.filter((item) =>
-      (typeof item.title === 'string' && item.title.includes(searchTerm)) ||
-      (typeof item.defaultTitle === 'string' && item.defaultTitle.includes(searchTerm))
-    )
-  : items;
-  
+    ? items.filter(
+        (item) =>
+          (typeof item.title === "string" && item.title.includes(searchTerm)) ||
+          (typeof item.defaultTitle === "string" &&
+            item.defaultTitle.includes(searchTerm)),
+      )
+    : items;
+
   return (
     <Row>
       <Col xs="12">
@@ -260,12 +275,14 @@ const SettingModal: React.FC<SettingModalProps> = ({
             <Row>
               <Col xs="12" className={`${styles.search_setting}`}>
                 <div className={styles.search_wrapper}>
-                  <Input 
-                    name="search"  
-                    type="text" 
+                  <Input
+                    name="search"
+                    type="text"
                     placeholder="جستجو..."
                     value={searchTerm}
-                    onChange={(e: { target: { value: React.SetStateAction<string>; }; }) => setSearchTerm(e.target.value)}
+                    onChange={(e: {
+                      target: { value: React.SetStateAction<string> };
+                    }) => setSearchTerm(e.target.value)}
                   />
                   <button className={styles.search_btn}>
                     <img src={SearchIcon} />
@@ -282,28 +299,25 @@ const SettingModal: React.FC<SettingModalProps> = ({
                     items={filteredItems.map((i) => i.uniqueId)}
                     strategy={verticalListSortingStrategy}
                   >
-                    {
-                      filteredItems.length === 0 ? (
+                    {filteredItems.length === 0 ? (
                       <div className="text-center py-4 text-muted">
                         ستونی با این عنوان یافت نشد
                       </div>
-                    ) : 
-
-                    (filteredItems.map((field) => (
-                      <SortableItem
-                        key={field.uniqueId}
-                        id={field.uniqueId}
-                        tableId={tableName}
-                        row={field}
-                        onChangeTitle={handleChangeTitle}
-                        onChangeWidth={handleChangeWidth}
-                        onChangeVisibility={handleChangeVisibility}
-                        onChangeExcelExport={handleChangeExcelExport}
-                        config={apiConfigData}
-                      />
-                    )))
-                    
-                    }
+                    ) : (
+                      filteredItems.map((field) => (
+                        <SortableItem
+                          key={field.uniqueId}
+                          id={field.uniqueId}
+                          tableId={tableName}
+                          row={field}
+                          onChangeTitle={handleChangeTitle}
+                          onChangeWidth={handleChangeWidth}
+                          onChangeVisibility={handleChangeVisibility}
+                          onChangeExcelExport={handleChangeExcelExport}
+                          config={apiConfigData}
+                        />
+                      ))
+                    )}
                   </SortableContext>
                 </DndContext>
               </Col>
