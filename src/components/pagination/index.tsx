@@ -198,7 +198,7 @@ const TablePagination: React.FC<TablePaginationProps> = ({
               برو به صفحه
             </Label>
             <Input
-              type="text"
+              type="number"
               id="pageSize"
               value={pageNumber}
               onChange={handleGoToPageChange}
