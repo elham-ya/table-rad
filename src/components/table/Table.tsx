@@ -47,7 +47,7 @@ const Table: React.FC<TableProps> = ({
   const [selectedRowIds, setSelectedRowIds] = useState<Set<string | number>>(
     new Set(),
   );
-  console.log("data for table:", data);
+  console.log("main data for table:", data);
 
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(size);
@@ -55,7 +55,6 @@ const Table: React.FC<TableProps> = ({
   const [configData, setConfigData] = useState<ApiResponse | null>(null);
 
   // وضعیت دانلود اکسل
-
   const [abortController, setAbortController] =
     useState<AbortController | null>(null);
   const [exportStatus, setExportStatus] = useState<
@@ -79,82 +78,6 @@ const Table: React.FC<TableProps> = ({
       requestGetSetting();
     }
   }, [requestConfig]);
-
-  // useEffect(() => {
-  //   if (allExportData.length > 0 && exportStatus === "success") {
-  //     const generateAndDownloadExcel = async () => {
-  //       try {
-  //         const workbook = new ExcelJS.Workbook();
-  //         const worksheet = workbook.addWorksheet("داده‌ها");
-
-  //         const excelColumns = cols.filter((col) => col.excel === true);
-
-  //         if (excelColumns.length === 0) {
-  //           console.warn(
-  //             "هیچ ستونی برای اکسپورت اکسل تعریف نشده (excel: true)"
-  //           );
-  //           return;
-  //         }
-
-  //         // ردیف عنوان‌ها
-  //         const headerRow = excelColumns.map(
-  //           (col) => col.defaultTitle || col.title || ""
-  //         );
-  //         worksheet.addRow(headerRow);
-
-  //         // اضافه کردن داده‌ها
-  //         allExportData.forEach((row, rowIndex) => {
-  //           const rowValues = excelColumns.map((col) => {
-  //             if (col.excelFunc && typeof col.excelFunc === "function") {
-  //               return col.excelFunc(row);
-  //             } else if (col.htmlFunc && typeof col.htmlFunc === "function") {
-  //               return col.htmlFunc(row, rowIndex);
-  //             }
-  //             if (col.key) {
-  //               return _.get(row, col.key);
-  //             }
-  //             return "";
-  //           });
-  //           worksheet.addRow(rowValues);
-  //         });
-
-  //         // استایل فارسی
-  //         worksheet.eachRow({ includeEmpty: true }, (row) => {
-  //           row.eachCell({ includeEmpty: true }, (cell) => {
-  //             cell.alignment = { horizontal: "right", vertical: "middle" };
-  //           });
-  //         });
-  //         worksheet.getRow(1).font = { bold: true };
-
-  //         // تولید فایل
-  //         const buffer = await workbook.xlsx.writeBuffer();
-  //         const blob = new Blob([buffer], {
-  //           type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-  //         });
-
-  //         const baseName = id || "tableData";
-  //         const dateStr = new Date()
-  //           .toLocaleDateString("fa-IR")
-  //           .replace(/\//g, "-");
-  //         const fileName = `${baseName}_${dateStr}.xlsx`;
-
-  //         // دانلود
-  //         const url = window.URL.createObjectURL(blob);
-  //         const link = document.createElement("a");
-  //         link.href = url;
-  //         link.download = fileName;
-  //         document.body.appendChild(link);
-  //         link.click();
-  //         document.body.removeChild(link);
-  //         window.URL.revokeObjectURL(url);
-  //       } catch (error) {
-  //         console.error("خطا در ساخت فایل اکسل:", error);
-  //       }
-  //     };
-
-  //     generateAndDownloadExcel();
-  //   }
-  // }, [allExportData, exportStatus, cols, id]);
 
   // get all settings
   const requestGetSetting = async () => {
@@ -189,73 +112,6 @@ const Table: React.FC<TableProps> = ({
     }
   };
 
-  const numberColumn: TableColumn = {
-    uniqueId: "__number__selector__",
-    key: "__number__selector__",
-    width: "50",
-    type: ContentType.Function,
-    title: "#",
-    htmlFunc: (row: any, rowIndex: number) => {
-      return (page - 1) * pageSize + rowIndex + 1;
-    },
-    visible: true,
-    excel: false,
-  };
-
-  const checkboxColumn: TableColumn | null = checkBox
-    ? {
-        uniqueId: "__row_selector__",
-        key: "__row_selector__",
-        width: "50",
-        type: ContentType.Function,
-        title: (
-          <Checkbox
-            checked={data.length > 0 && selectedRowIds.size === data.length}
-            indeterminate={
-              data.length > 0 &&
-              selectedRowIds.size > 0 &&
-              selectedRowIds.size < data.length
-            }
-            onChange={(checked: boolean) => {
-              setSelectedRowIds(
-                checked
-                  ? new Set(
-                      data
-                        .map((row) => (row as any)?.id)
-                        .filter((id) => id != null),
-                    )
-                  : new Set(),
-              );
-            }}
-          />
-        ),
-        htmlFunc: (row: any, rowIndex: number) => {
-          const rowId = row?.id;
-          return (
-            <Checkbox
-              uniqueId={rowId}
-              checked={rowId !== undefined && selectedRowIds.has(rowId)}
-              onChange={(checked) => {
-                setSelectedRowIds((prev) => {
-                  const next = new Set(prev);
-                  const id = row?.id;
-                  if (id === undefined || id === null) return next;
-                  if (checked) {
-                    next.add(id);
-                  } else {
-                    next.delete(id);
-                  }
-                  return next;
-                });
-              }}
-            />
-          );
-        },
-        visible: true,
-        excel: false,
-      }
-    : null;
-
   // final column for mapping and show data on cells
   const finalColumns = useMemo(() => {
     // change cols to array
@@ -264,67 +120,178 @@ const Table: React.FC<TableProps> = ({
       : cols
         ? [cols]
         : [];
-    // add default cols
-    const withPrefix: TableColumn[] = [...baseColumns];
-    if (numberColumn) {
-      withPrefix.unshift(numberColumn);
-    }
-    if (checkBox && checkboxColumn) {
-      withPrefix.unshift(checkboxColumn);
-    }
-    //api setting
+
+    // remove columns start with __
+    const baseColumnsWithoutSpecials = baseColumns.filter(
+      (col) => !col.uniqueId?.startsWith("__"),
+    );
+
+    // withPrefix without number and checkbox
+    const withPrefix: TableColumn[] = [...baseColumnsWithoutSpecials];
+
+    // number column
+    const numberColumnForRender: TableColumn = {
+      uniqueId: "__number__selector__",
+      key: "__number__selector__",
+      width: "50",
+      type: ContentType.Function,
+      title: "#",
+      htmlFunc: (row: any, rowIndex: number) => {
+        return (page - 1) * pageSize + rowIndex + 1;
+      },
+      visible: true,
+      excel: false,
+    };
+
+    // checkboxColumn
+    const checkboxColumnForRender: TableColumn | null = checkBox
+      ? {
+          uniqueId: "__row_selector__",
+          key: "__row_selector__",
+          width: "50",
+          type: ContentType.Function,
+          title: (
+            <Checkbox
+              checked={data.length > 0 && selectedRowIds.size === data.length}
+              indeterminate={
+                data.length > 0 &&
+                selectedRowIds.size > 0 &&
+                selectedRowIds.size < data.length
+              }
+              onChange={(checked: boolean) => {
+                setSelectedRowIds(
+                  checked
+                    ? new Set(
+                        data
+                          .map((row) => (row as any)?.id)
+                          .filter((id) => id != null),
+                      )
+                    : new Set(),
+                );
+              }}
+            />
+          ),
+          htmlFunc: (row: any, rowIndex: number) => {
+            const rowId = row?.id;
+            return (
+              <Checkbox
+                uniqueId={rowId}
+                checked={rowId !== undefined && selectedRowIds.has(rowId)}
+                onChange={(checked) => {
+                  setSelectedRowIds((prev) => {
+                    const next = new Set(prev);
+                    const id = row?.id;
+                    if (id === undefined || id === null) return next;
+                    if (checked) {
+                      next.add(id);
+                    } else {
+                      next.delete(id);
+                    }
+                    return next;
+                  });
+                }}
+              />
+            );
+          },
+          visible: true,
+          excel: false,
+        }
+      : null;
+
+    //api setting columns
     const apiColumns =
       configData !== null &&
       !configData.hasError &&
       configData.result.length > 0 &&
       configData.result[0]?.setting?.tables?.[id]?.columns;
 
-    // if api is empty return default developer cols
+    // return default columns if api is empty
     if (!apiColumns || !Array.isArray(apiColumns) || apiColumns.length === 0) {
-      return withPrefix;
+      const defaultResult: TableColumn[] = [];
+      if (checkboxColumnForRender) {
+        defaultResult.push(checkboxColumnForRender);
+      }
+      defaultResult.push(numberColumnForRender);
+      defaultResult.push(...withPrefix);
+      return defaultResult;
     }
 
     const apiColumnMap = new Map<string, any>();
-
     apiColumns.forEach((saved: any) => {
       if (saved?.uniqueId) {
         apiColumnMap.set(saved.uniqueId, saved);
       }
     });
 
-    // final columns
+    // order of columns from api columns
+    const orderedApiColumns = apiColumns.filter(
+      (saved: any) => saved?.uniqueId && !saved.uniqueId.startsWith("__"),
+    );
+
     const resultColumns: TableColumn[] = [];
 
-    withPrefix.forEach((col) => {
-      if (col?.uniqueId?.startsWith("__")) {
-        resultColumns.push(col);
+    // adding number and checkbox column
+    if (checkboxColumnForRender) {
+      resultColumns.push(checkboxColumnForRender);
+    }
+    resultColumns.push(numberColumnForRender);
+
+    // process columns from api
+    orderedApiColumns.forEach((savedColumn: any) => {
+      const uniqueId = savedColumn.uniqueId;
+      const originalCol = withPrefix.find((col) => col.uniqueId === uniqueId);
+
+      // no columns in developer cols
+      if (!originalCol) {
         return;
       }
 
-      const savedConfig = apiColumnMap.get(col.uniqueId);
-
-      if (!savedConfig) {
-        // column is not in api dont show
+      // dont show visible: false
+      if (savedColumn.visible !== true) {
         return;
       }
 
-      if (savedConfig.visible !== true) {
-        // delete all visible:false
-        return;
-      }
-
-      // visible: true -> added
+      // visible columns to show
       resultColumns.push({
-        ...col,
+        ...originalCol,
         visible: true,
-        width: savedConfig.width ?? col.width,
-        title: savedConfig.title ?? col.title,
-        excel: savedConfig.excel ?? col.excel,
-        // other props is maintened from cols except these 4 fields
+        width: savedColumn.width ?? originalCol.width,
+        title: savedColumn.title ?? originalCol.title,
+        excel: savedColumn.excel ?? originalCol.excel,
       });
     });
+
+    // adding new columns is not in api
+    withPrefix.forEach((originalCol) => {
+      // ignore special columns, recently has been added
+      if (originalCol.uniqueId?.startsWith("__")) {
+        return;
+      }
+
+      // check if this column is added before by api
+      const alreadyAdded = resultColumns.some(
+        (col) => col.uniqueId === originalCol.uniqueId,
+      );
+      if (!alreadyAdded) {
+        // column is new, will added within visible:false(do not show so user can active visibility in modal)
+        resultColumns.push({
+          ...originalCol,
+          visible: false,
+        });
+      }
+    });
+
     return resultColumns;
-  }, [checkBox, checkboxColumn, cols, selectedRowIds, configData]);
+  }, [
+    checkBox,
+    cols,
+    data.length,
+    selectedRowIds,
+    configData,
+    id,
+    page,
+    pageSize,
+  ]);
 
   const handlePageChange = (pageNumber: number) => {
     setPage(pageNumber);
@@ -634,8 +601,6 @@ const Table: React.FC<TableProps> = ({
                       >
                         {finalColumns.map((col) => {
                           const val = col?.key ? _.get(row, col.key) : "";
-                          console.log("col", col);
-                          console.log("val:", val);
                           return (
                             <td
                               key={col.uniqueId}

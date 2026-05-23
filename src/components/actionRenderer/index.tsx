@@ -17,8 +17,6 @@ const ActionRenderer: React.FC<ButtonActionProps> = ({
   actions,
   strings,
 }) => {
-  console.log("row ActionRenderer:", row);
-  console.log("actions:", actions);
 
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const toggle = () => setDropdownOpen((prevState) => !prevState);

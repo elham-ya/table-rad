@@ -4,7 +4,6 @@ import { findString } from "../../utils";
 
 const Price: React.FC<PriceProps> = ({ value, strings }) => {
   if (value === null || value === undefined || value === "") return null;
-  console.log('strings at Price:',strings);
 
   const isArray = Array.isArray(value);
 

@@ -46,15 +46,14 @@ const SettingModal: React.FC<SettingModalProps> = ({
   const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
-    setItems(columns);
-  }, [columns]);
-
-  useEffect(() => {
     if (!isOpen) {
       setSearchTerm("");
-      setItems(columns);
     }
-  }, [isOpen, columns]);
+  }, [isOpen]);
+
+  useEffect(() => {
+    initializeItems();
+  }, [isOpen, apiConfigData, columns]);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -74,6 +73,32 @@ const SettingModal: React.FC<SettingModalProps> = ({
       return setting?.tables[tableId];
     } else {
       return null;
+    }
+  };
+  const targetTable = getSetting(tableName);
+  const initializeItems = () => {
+    // اگر مودال بسته است، کاری نکن
+    if (!isOpen) return;
+
+    // گرفتن ستون‌های ذخیره شده از API
+    const savedColumns = targetTable?.columns;
+
+    // اگر تنظیمات ذخیره شده وجود دارد
+    if (
+      savedColumns &&
+      Array.isArray(savedColumns) &&
+      savedColumns.length > 0
+    ) {
+      // ادغام با استفاده از mergeLists موجود
+      const merged = mergeLists(savedColumns, columns);
+      setItems(merged);
+    } else {
+      // اگر تنظیماتی وجود ندارد، از columns پیش‌فرض استفاده کن
+      // ولی ستون‌های ویژه (__ دار) را حذف کن
+      const filteredDefaultColumns = columns.filter(
+        (col) => !col.uniqueId?.startsWith("__"),
+      );
+      setItems(filteredDefaultColumns);
     }
   };
 
@@ -98,14 +123,12 @@ const SettingModal: React.FC<SettingModalProps> = ({
     return [...apiList, ...noVisible];
   };
 
-  const targetTable = getSetting(tableName);
-
-  useEffect(() => {
-    if (targetTable !== null && targetTable?.columns) {
-      const mergedItems = mergeLists(targetTable.columns, items);
-      setItems(mergedItems);
-    }
-  }, [targetTable]);
+  // useEffect(() => {
+  //   if (targetTable !== null && targetTable?.columns) {
+  //     const mergedItems = mergeLists(targetTable.columns, items);
+  //     setItems(mergedItems);
+  //   }
+  // }, [targetTable]);
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
