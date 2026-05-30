@@ -15,6 +15,7 @@ import {
   Progress,
   Badge,
 } from "reactstrap";
+import moment from "moment-jalaali";
 import Checkbox from "../checkBox";
 import ActionRenderer from "../actionRenderer";
 import TablePagination from "../pagination";
@@ -311,6 +312,35 @@ const Table: React.FC<TableProps> = ({
     setConfigData(data);
   };
 
+  const formatDateForExcel = (
+    value: any,
+    type?: string,
+    format?: string,
+  ): string => {
+    if (!value) return "";
+
+    const momentObj = moment(value);
+    if (!momentObj.isValid()) return String(value);
+
+    let defaultFormat = "";
+    switch (type) {
+      case "date":
+        defaultFormat = "jYYYY/jMM/jDD";
+        break;
+      case "time":
+        defaultFormat = "HH:mm:ss";
+        break;
+      case "datetime":
+        defaultFormat = "jYYYY/jMM/jDD HH:mm:ss";
+        break;
+      default:
+        return String(value);
+    }
+
+    const finalFormat = format || defaultFormat;
+    return momentObj.format(finalFormat);
+  };
+
   const generateAndDownloadExcel = async (fullData: unknown[]) => {
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet("داده‌ها");
@@ -325,17 +355,34 @@ const Table: React.FC<TableProps> = ({
 
     fullData.forEach((row, rowIndex) => {
       const rowValues = excelColumns.map((col) => {
-        if (col.excelFunc && typeof col.excelFunc === "function")
+        console.log("excelColumns:", excelColumns);
+
+        if (col.excelFunc && typeof col.excelFunc === "function") {
           return col.excelFunc(row);
-        if (col.htmlFunc && typeof col.htmlFunc === "function")
+        }
+
+        if (col.htmlFunc && typeof col.htmlFunc === "function") {
           return col.htmlFunc(row, rowIndex);
-        if (col.key) return _.get(row, col.key);
-        return "";
+        }
+
+        let rawValue = "";
+        if (col.key) {
+          rawValue = _.get(row, col.key);
+        }
+
+        if (
+          col.type === "date" ||
+          col.type === "time" ||
+          col.type === "datetime"
+        ) {
+          return formatDateForExcel(rawValue, col.type, col.format);
+        }
+
+        return rawValue;
       });
       worksheet.addRow(rowValues);
     });
 
-    // استایل فارسی
     worksheet.eachRow({ includeEmpty: true }, (row) => {
       row.eachCell({ includeEmpty: true }, (cell) => {
         cell.alignment = { horizontal: "right", vertical: "middle" };

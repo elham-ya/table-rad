@@ -309,7 +309,7 @@ function App() {
   };
 
   const config = {
-    "Access-Token": "7361383533-b0f5c641e4De40c0acbc0620e05cb9aa.XzIwMjY1",
+    "Access-Token": "6309757314-2afe29f6a7834350b6e6a7Dabec31493.XzIwMjY1",
     "Client-Id": "17959574q2f0347718971594ccd86f3f4",
     url: `https://api.sandpod.ir/srv/cms-sandbox/api/core/users/setting`,
   };
@@ -318,7 +318,7 @@ function App() {
     user: "کاربر",
     cash: "نقدی",
     rial: "ریال",
-    hours: "ساعت",
+    hour: "ساعت",
     content: "محتوا",
     product: "محصول",
     invoice_types: "نوع فاکتور",
