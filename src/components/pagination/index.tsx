@@ -95,13 +95,13 @@ const TablePagination: React.FC<TablePaginationProps> = ({
     <div className={`table-pagination ${className} ${styles.table_wrapper}`}>
       <Row className="align-items-center justify-content-between py-2">
         {showTotal && (
-          <Col md="4" className="mb-2 mb-md-0 text-right">
+          <Col md="2" lg="4" className="mb-2 mb-md-0 text-right">
             <span className="text-muted small">
               تعداد کل نتایج: {totalCount.toLocaleString("fa-IR")}
             </span>
           </Col>
         )}
-        <Col md={showSizeChanger ? "4" : "8"} className="text-center">
+        <Col md={showSizeChanger ? "6" : "8"} lg="4" className="text-center">
           <div className="d-flex align-items-center justify-content-center gap-3 flex-wrap py-2">
             {showSizeChanger && (
               <div
@@ -190,7 +190,7 @@ const TablePagination: React.FC<TablePaginationProps> = ({
             </RSPagination>
           </div>
         </Col>
-        <Col md="4" className="text-md-end">
+        <Col md="4" lg="4" className="text-md-end">
           <div
             className={`d-flex align-items-center justify-content-end gap-2 ${styles.goToPageContainer}`}
           >

@@ -29,7 +29,6 @@
 .table_inner_wrapper::-webkit-scrollbar-thumb:hover {
   background: #666;
   cursor: grab;
-  
 }
 .tableContainer {
   width: 100%;
@@ -196,7 +195,6 @@
     float: left;
     margin-left : 5px;
   }
-
   .cancel_btn {
     float: left;
     margin-left: 5px;
@@ -205,5 +203,32 @@
   .download_Excel_wrapper {
     
   }
+}
 
+.table_wrapper {
+  width: 100%;
+  position: relative;
+}
+
+.stickyPagination {
+    position: fixed;
+    bottom: 0;
+    left: auto;
+    right: auto;
+    background: #fff;
+    z-index: 1000;
+    padding: 10px 20px;
+    border-top: 1px solid #ddd;
+    box-shadow: 0 -2px 8px #00000014;
+    width: 86%;
+    margin: 0 auto;
+  // position: fixed;
+  // bottom: 0;
+  // left: 0;
+  // right: 0;
+  // background: #fff;
+  // z-index: 1000;
+  // padding: 10px 20px;
+  // border-top: 1px solid #ddd;
+  // box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.08);
 }

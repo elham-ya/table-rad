@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import _ from "lodash";
 import {
   TableColumn,
@@ -62,6 +62,30 @@ const Table: React.FC<TableProps> = ({
     "idle" | "exporting" | "success" | "error" | "cancelled"
   >("idle");
   const [exportProgress, setExportProgress] = useState(0);
+
+  const paginationRef = useRef<HTMLDivElement>(null);
+  const [showStickyPagination, setShowStickyPagination] = useState(false);
+
+  useEffect(() => {
+    if (totalCount <= 0) {
+      setShowStickyPagination(false);
+      return;
+    }
+    if (!paginationRef.current) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setShowStickyPagination(!entry.isIntersecting);
+      },
+      {
+        threshold: 0.25,
+      },
+    );
+
+    observer.observe(paginationRef.current);
+
+    return () => observer.disconnect();
+  }, [configData]);
 
   // selection of rows send to parent
   useEffect(() => {
@@ -582,7 +606,7 @@ const Table: React.FC<TableProps> = ({
       );
     return null;
   };
-
+  const shouldShowPagination = totalCount > 0;
   if (configData === null || configData?.hasError === true) {
     return null;
   } else {
@@ -609,7 +633,7 @@ const Table: React.FC<TableProps> = ({
             onGetData={handleGetDataAfterChange}
           />
         </Col>
-        <Col xs="12">
+        <div className={styles.table_wrapper}>
           <div className={styles.table_outer_wrapper}>
             <div className={styles.table_inner_wrapper}>
               <ReactstrapTable bordered className={styles.tableContainer}>
@@ -766,19 +790,36 @@ const Table: React.FC<TableProps> = ({
               </ReactstrapTable>
             </div>
           </div>
-        </Col>
-        <Col xs="12">
-          <TablePagination
-            totalCount={totalCount}
-            pageNumber={page}
-            size={size}
-            onPageChange={handlePageChange}
-            onSizeChange={handleSizeChange}
-            pageSizeOptions={pageSizeOptions}
-            showTotal
-            showSizeChanger
-          />
-        </Col>
+          {shouldShowPagination && (
+            <div ref={paginationRef}>
+              <TablePagination
+                totalCount={totalCount}
+                pageNumber={page}
+                size={size}
+                onPageChange={handlePageChange}
+                onSizeChange={handleSizeChange}
+                pageSizeOptions={pageSizeOptions}
+                showTotal
+                showSizeChanger
+              />
+            </div>
+          )}
+
+          {shouldShowPagination && showStickyPagination && (
+            <div className={styles.stickyPagination}>
+              <TablePagination
+                totalCount={totalCount}
+                pageNumber={page}
+                size={size}
+                onPageChange={handlePageChange}
+                onSizeChange={handleSizeChange}
+                pageSizeOptions={pageSizeOptions}
+                showTotal
+                showSizeChanger
+              />
+            </div>
+          )}
+        </div>
       </Row>
     );
   }
