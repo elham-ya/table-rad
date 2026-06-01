@@ -57,6 +57,10 @@
   border-right: 1px solid $table-border;
   &:last-child {
     border-top-left-radius: 10px;
+    position: sticky;
+    left:0;
+    background-color: $table-header !important;
+    z-index: 3;
   }
   &:first-child {
     position: sticky;
@@ -118,6 +122,15 @@
     background-color: white !important;
     box-shadow: -5px 0px 9px rgba(0,0,0,0.1);
     // border-left: 1px solid $table-border !important;
+    z-index: 3;
+  }
+  &:last-child {
+    position: sticky;
+    left:0;
+    background-color: white !important;
+    box-shadow: 5px 0px 9px rgba(0, 0, 0, 0.1);
+    border-right: 1px solid #DEDEDE !important;
+    border-left: none !important;
     z-index: 3;
   }
 }
