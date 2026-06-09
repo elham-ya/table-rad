@@ -69,10 +69,10 @@ const TablePagination: React.FC<TablePaginationProps> = ({
   const [value, setValue] = useState(String(currentPage));
 
   const handleGoToPageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    onPageChange(Number(e.target.value));
+    // onPageChange(Number(e.target.value));
     setValue(e.target.value);
   };
-  
+
   const submit = () => {
     const n = parseInt(value.trim(), 10);
     if (Number.isNaN(n)) return; // ignore invalid input
