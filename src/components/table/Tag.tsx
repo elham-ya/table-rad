@@ -3,7 +3,6 @@ import { TagProps, TagItem } from "../../types/index";
 import { findString } from "../../utils/index";
 
 const Tag: React.FC<TagProps> = ({ value, strings, translate = false }) => {
-
   if (!value || (Array.isArray(value) && value.length === 0)) {
     return null;
   }
@@ -35,7 +34,7 @@ const Tag: React.FC<TagProps> = ({ value, strings, translate = false }) => {
           )}
           {translatedValue}
         </span>
-         <br />
+        <br />
       </React.Fragment>
     );
   };

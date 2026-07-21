@@ -3,6 +3,7 @@ import TableView from "./components/table/Table";
 import { ContentType } from "./types/index";
 import data from "./data.json";
 
+
 function App() {
   const dataNormalized = data.map((item: any, index: number | string) => {
     const newItem = {
@@ -66,7 +67,7 @@ function App() {
         title: "لیست بلیت ها",
         onClick: () => console.log("button 2 clicked"),
         disable: false,
-        hasAccess: false,
+        hasAccess: true,
         icon: "fas fa-ticket-alt fa-lg fa-rotate-90",
       },
       {
@@ -98,16 +99,6 @@ function App() {
   };
   // columns of table
   const cols = [
-    {
-      uniqueId: "actions",
-      title: "عملیات",
-      width: "100",
-      key: "actionbutton",
-      type: ContentType.Button,
-      buttonList: (row: unknown) => actionButtons(row),
-      visible: true,
-      excel: false,
-    },
     {
       uniqueId: "ChangeKind",
       title: "نوع تغییر",
@@ -294,6 +285,16 @@ function App() {
       visible: true,
       excel: true,
     },
+    {
+      uniqueId: "actions",
+      title: "عملیات",
+      width: "150",
+      key: "actionbutton",
+      type: ContentType.Button,
+      buttonList: (row: unknown) => actionButtons(row),
+      visible: true,
+      excel: false,
+    },
   ];
 
   const handleSelect = (selectedRows: unknown[]) => {
@@ -309,7 +310,7 @@ function App() {
   };
 
   const config = {
-    "Access-Token": "9464635971-c5a55581C23947f494fb98159c1858e3.XzIwMjY2",
+    "Access-Token": "9464635971-33c8f2730a414331b372d5aA0bb44e8f.XzIwMjY3",
     "Client-Id": "17959574q2f0347718971594ccd86f3f4",
     url: `https://api.sandpod.ir/srv/cms-sandbox/api/core/users/setting`,
   };
