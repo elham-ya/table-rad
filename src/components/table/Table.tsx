@@ -640,10 +640,20 @@ const Table: React.FC<TableProps> = ({
                 <thead className={styles.theader_container}>
                   <tr className={styles.tr_container}>
                     {finalColumns.map((colItem) => {
+                      const isHeaderActionColumn = colItem && colItem.type === "button";
+                      const isHeaderNumberColumn = colItem && colItem.key === '__number__selector__';
+                      const isHeaderCheckboxColumn = colItem && colItem.key === '__row_selector__';
                       return (
                         <th
                           key={colItem.uniqueId}
-                          className={styles.th_container}
+                          className={
+                            `
+                              ${styles.th_container} 
+                              ${isHeaderActionColumn ? styles.header_action_column : ""}
+                              ${isHeaderNumberColumn ? styles.header_sticky_number_column : ""}
+                              ${isHeaderCheckboxColumn ? styles.header_sticky_checkbox_column : styles.stick_to_right}
+
+                            `}
                           style={{
                             width: `${colItem.width ? colItem.width : "120"}px`,
                           }}
@@ -672,10 +682,20 @@ const Table: React.FC<TableProps> = ({
                       >
                         {finalColumns.map((col) => {
                           const val = col?.key ? _.get(row, col.key) : "";
-                          return (
+                          const isActionColumn = col && col.type === "button";
+                          const isNumberColumn = col && col.key === '__number__selector__';
+                          const isCheckboxColumn = col && col.key === '__row_selector__';
+                                                    return (
                             <td
                               key={col.uniqueId}
-                              className={styles.td_container}
+                              className={
+                                `
+                                ${styles.td_container} ${isActionColumn ? styles.action_column : ""}
+                                ${styles.td_container} ${isNumberColumn ? styles.sticky_number_column : ""}
+                                ${styles.td_container} ${isCheckboxColumn ? styles.sticky_checkbox_column : styles.stick_to_right}
+
+                                `
+                              }
                             >
                               {(() => {
                                 switch (col.type) {
