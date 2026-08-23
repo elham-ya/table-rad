@@ -88,6 +88,11 @@
       font-size: 14px;
       font-weight: 400;
       color: #999;
+      :focus {
+        border: none;
+        outline: 1px solid #2F6B98 !important;
+        box-shadow: 0 0 0 0.17rem rgba(32, 168, 216, 0.25) !important;
+      }
     }
   }
   .drag_icon {
@@ -132,13 +137,12 @@
   }
 
   .dargableItem_wrapper {
-    background-color: #F7F7F7;
+    background-color: #fff;
     border-radius: 12px;
-    box-shadow: 0px 1px 3px 0px #1018281A,
-            0px 1px 2px -1px #1018281A;
-
+    box-shadow: none;
     &:hover {
-      box-shadow: 0px 4px 6px -1px #1018281A, 0px 2px 4px -2px #1018281A;
+      background-color: #F4F4F4;
+      box-shadow: none;
     }
   }
 

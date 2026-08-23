@@ -194,7 +194,7 @@ const TablePagination: React.FC<TablePaginationProps> = ({
           <div
             className={`d-flex align-items-center justify-content-end gap-2 ${styles.goToPageContainer}`}
           >
-            <Label for="pageSize" className="mb-0 small text-muted ml-2">
+            <Label for="pageSize" className="mb-0 small ml-2">
               برو به صفحه
             </Label>
             <Input

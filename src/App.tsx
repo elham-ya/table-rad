@@ -3,7 +3,6 @@ import TableView from "./components/table/Table";
 import { ContentType } from "./types/index";
 import data from "./data.json";
 
-
 function App() {
   const dataNormalized = data.map((item: any, index: number | string) => {
     const newItem = {
@@ -310,7 +309,7 @@ function App() {
   };
 
   const config = {
-    "Access-Token": "9464635971-33c8f2730a414331b372d5aA0bb44e8f.XzIwMjY3",
+    "Access-Token": "4206504876-c82a3b573afd487da60d65a5A379ac8d.XzIwMjY4",
     "Client-Id": "17959574q2f0347718971594ccd86f3f4",
     url: `https://api.sandpod.ir/srv/cms-sandbox/api/core/users/setting`,
   };

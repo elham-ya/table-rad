@@ -556,7 +556,7 @@ const Table: React.FC<TableProps> = ({
             disabled
             className={styles.btn_xcel}
           >
-            <img src={Xcel} alt="در حال تهیه" width={30} />
+            <img src={Xcel} alt="در حال تهیه" width={33} />
           </Button>
           <Progress value={exportProgress} className={styles.progressBar}>
             <span className="fw-bold text-dark">{exportProgress}%</span>
@@ -580,7 +580,7 @@ const Table: React.FC<TableProps> = ({
         onClick={handleExportExcel}
         className={styles.btn_xcel}
       >
-        <img src={Xcel} alt="دانلود اکسل" width={30} />
+        <img src={Xcel} alt="دانلود اکسل" width={33} />
       </Button>
     );
   };
@@ -615,7 +615,7 @@ const Table: React.FC<TableProps> = ({
         <Col xs="6"></Col>
         <Col xs="6" className={`py-2 ${styles.modal_Setting}`}>
           <Button onClick={toggleSetting} className={styles.btn_setting}>
-            <img width={30} src={SettingButtonIcon} />
+            <img width={33} src={SettingButtonIcon} />
           </Button>
           {/* start excel download */}
           <div className={styles.download_Excel_wrapper}>
