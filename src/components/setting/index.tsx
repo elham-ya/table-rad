@@ -290,6 +290,7 @@ const SettingModal: React.FC<SettingModalProps> = ({
           toggle={toggle}
           backdrop="static"
           className={styles.modal_wrapper}
+          scrollable
         >
           <ModalHeader toggle={toggle} className={styles.modal_itemheader}>
             تنظیمات ستون
