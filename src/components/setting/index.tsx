@@ -282,92 +282,88 @@ const SettingModal: React.FC<SettingModalProps> = ({
     : items;
 
   return (
-    <Row>
-      <Col xs="12">
-        <Modal
-          isOpen={isOpen}
-          size="lg"
-          toggle={toggle}
-          backdrop="static"
-          className={styles.modal_wrapper}
-          scrollable
+    <Modal
+      isOpen={isOpen}
+      size="lg"
+      toggle={toggle}
+      backdrop="static"
+      className={styles.modal_wrapper}
+      
+    >
+      <ModalHeader toggle={toggle} className={styles.modal_itemheader}>
+        تنظیمات ستون
+      </ModalHeader>
+      <ModalBody className={styles.modal_body}>
+        <Row>
+          <Col xs="12" className={`${styles.search_setting}`}>
+            <div className={styles.search_wrapper}>
+              <Input
+                name="search"
+                type="text"
+                placeholder="جستجو..."
+                value={searchTerm}
+                onChange={(e: {
+                  target: { value: React.SetStateAction<string> };
+                }) => setSearchTerm(e.target.value)}
+              />
+              <button className={styles.search_btn}>
+                <img src={SearchIcon} />
+              </button>
+            </div>
+          </Col>
+          <Col xs="12" className="py-2">
+            <DndContext
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              onDragEnd={handleDragEnd}
+            >
+              <SortableContext
+                items={filteredItems.map((i) => i.uniqueId)}
+                strategy={verticalListSortingStrategy}
+              >
+                {filteredItems.length === 0 ? (
+                  <div className="text-center py-4 text-muted">
+                    ستونی با این عنوان یافت نشد
+                  </div>
+                ) : (
+                  filteredItems.map((field) => (
+                    <SortableItem
+                      key={field.uniqueId}
+                      id={field.uniqueId}
+                      tableId={tableName}
+                      row={field}
+                      onChangeTitle={handleChangeTitle}
+                      onChangeWidth={handleChangeWidth}
+                      onChangeVisibility={handleChangeVisibility}
+                      onChangeExcelExport={handleChangeExcelExport}
+                      config={apiConfigData}
+                    />
+                  ))
+                )}
+              </SortableContext>
+            </DndContext>
+          </Col>
+        </Row>
+      </ModalBody>
+      <ModalFooter className={styles.modal_footer}>
+        <Button
+          color="secondary"
+          className={styles.cancel_btn}
+          onClick={toggle}
         >
-          <ModalHeader toggle={toggle} className={styles.modal_itemheader}>
-            تنظیمات ستون
-          </ModalHeader>
-          <ModalBody>
-            <Row>
-              <Col xs="12" className={`${styles.search_setting}`}>
-                <div className={styles.search_wrapper}>
-                  <Input
-                    name="search"
-                    type="text"
-                    placeholder="جستجو..."
-                    value={searchTerm}
-                    onChange={(e: {
-                      target: { value: React.SetStateAction<string> };
-                    }) => setSearchTerm(e.target.value)}
-                  />
-                  <button className={styles.search_btn}>
-                    <img src={SearchIcon} />
-                  </button>
-                </div>
-              </Col>
-              <Col xs="12" className="py-2">
-                <DndContext
-                  sensors={sensors}
-                  collisionDetection={closestCenter}
-                  onDragEnd={handleDragEnd}
-                >
-                  <SortableContext
-                    items={filteredItems.map((i) => i.uniqueId)}
-                    strategy={verticalListSortingStrategy}
-                  >
-                    {filteredItems.length === 0 ? (
-                      <div className="text-center py-4 text-muted">
-                        ستونی با این عنوان یافت نشد
-                      </div>
-                    ) : (
-                      filteredItems.map((field) => (
-                        <SortableItem
-                          key={field.uniqueId}
-                          id={field.uniqueId}
-                          tableId={tableName}
-                          row={field}
-                          onChangeTitle={handleChangeTitle}
-                          onChangeWidth={handleChangeWidth}
-                          onChangeVisibility={handleChangeVisibility}
-                          onChangeExcelExport={handleChangeExcelExport}
-                          config={apiConfigData}
-                        />
-                      ))
-                    )}
-                  </SortableContext>
-                </DndContext>
-              </Col>
-            </Row>
-          </ModalBody>
-          <ModalFooter>
-            <Button
-              color="secondary"
-              className={styles.cancel_btn}
-              onClick={toggle}
-            >
-              انصراف
-            </Button>
-            <Button
-              color="primary"
-              className={styles.save_btn}
-              onClick={() => {
-                handleSave();
-              }}
-            >
-              تایید
-            </Button>
-          </ModalFooter>
-        </Modal>
-      </Col>
-    </Row>
+          انصراف
+        </Button>
+        <Button
+          color="primary"
+          className={styles.save_btn}
+          onClick={() => {
+            handleSave();
+          }}
+        >
+          تایید
+        </Button>
+      </ModalFooter>
+    </Modal>
   );
 };
 
