@@ -99,43 +99,42 @@ const Table: React.FC<TableProps> = ({
   }, [selectedRowIds, data, onRowSelect]);
 
   useEffect(() => {
-    if (requestConfig?.url && requestConfig["Access-Token"]) {
+    if (requestConfig?.url && requestConfig["Access-Token"] && !configData) {
+      // get all settings
+      const requestGetSetting = async () => {
+        if (
+          !requestConfig ||
+          !requestConfig.url ||
+          !requestConfig["Access-Token"] ||
+          !requestConfig["Client-Id"]
+        ) {
+          console.warn(
+            "requestConfig ناقص است یا وجود ندارد. درخواست تنظیمات ارسال نشد.",
+            requestConfig,
+          );
+          return;
+        }
+        try {
+          const res = await fetch(requestConfig.url, {
+            method: "GET",
+            headers: {
+              "Access-Token": requestConfig["Access-Token"],
+              "Client-Id": requestConfig["Client-Id"],
+              "Content-Type": "application/json",
+            },
+          });
+          if (!res.ok) {
+            throw new Error(`Error: ${res.statusText}`);
+          }
+          const data = await res.json();
+          setConfigData(data);
+        } catch (error) {
+          console.log("error fetching setting:", error);
+        }
+      };
       requestGetSetting();
     }
-  }, [requestConfig]);
-
-  // get all settings
-  const requestGetSetting = async () => {
-    if (
-      !requestConfig ||
-      !requestConfig.url ||
-      !requestConfig["Access-Token"] ||
-      !requestConfig["Client-Id"]
-    ) {
-      console.warn(
-        "requestConfig ناقص است یا وجود ندارد. درخواست تنظیمات ارسال نشد.",
-        requestConfig,
-      );
-      return;
-    }
-    try {
-      const res = await fetch(requestConfig.url, {
-        method: "GET",
-        headers: {
-          "Access-Token": requestConfig["Access-Token"],
-          "Client-Id": requestConfig["Client-Id"],
-          "Content-Type": "application/json",
-        },
-      });
-      if (!res.ok) {
-        throw new Error(`Error: ${res.statusText}`);
-      }
-      const data = await res.json();
-      setConfigData(data);
-    } catch (error) {
-      console.log("error fetching setting:", error);
-    }
-  };
+  }, [requestConfig, configData]);
 
   // final column for mapping and show data on cells
   const finalColumns = useMemo(() => {
@@ -556,7 +555,7 @@ const Table: React.FC<TableProps> = ({
             disabled
             className={styles.btn_xcel}
           >
-            <img src={Xcel} alt="در حال تهیه" width={30} />
+            <img src={Xcel} alt="در حال تهیه" width={33} />
           </Button>
           <Progress value={exportProgress} className={styles.progressBar}>
             <span className="fw-bold text-dark">{exportProgress}%</span>
@@ -580,7 +579,7 @@ const Table: React.FC<TableProps> = ({
         onClick={handleExportExcel}
         className={styles.btn_xcel}
       >
-        <img src={Xcel} alt="دانلود اکسل" width={30} />
+        <img src={Xcel} alt="دانلود اکسل" width={33} />
       </Button>
     );
   };
@@ -615,7 +614,7 @@ const Table: React.FC<TableProps> = ({
         <Col xs="6"></Col>
         <Col xs="6" className={`py-2 ${styles.modal_Setting}`}>
           <Button onClick={toggleSetting} className={styles.btn_setting}>
-            <img width={30} src={SettingButtonIcon} />
+            <img width={33} src={SettingButtonIcon} />
           </Button>
           {/* start excel download */}
           <div className={styles.download_Excel_wrapper}>
@@ -640,14 +639,16 @@ const Table: React.FC<TableProps> = ({
                 <thead className={styles.theader_container}>
                   <tr className={styles.tr_container}>
                     {finalColumns.map((colItem) => {
-                      const isHeaderActionColumn = colItem && colItem.type === "button";
-                      const isHeaderNumberColumn = colItem && colItem.key === '__number__selector__';
-                      const isHeaderCheckboxColumn = colItem && colItem.key === '__row_selector__';
+                      const isHeaderActionColumn =
+                        colItem && colItem.type === "button";
+                      const isHeaderNumberColumn =
+                        colItem && colItem.key === "__number__selector__";
+                      const isHeaderCheckboxColumn =
+                        colItem && colItem.key === "__row_selector__";
                       return (
                         <th
                           key={colItem.uniqueId}
-                          className={
-                            `
+                          className={`
                               ${styles.th_container} 
                               ${isHeaderActionColumn ? styles.header_action_column : ""}
                               ${isHeaderNumberColumn ? styles.header_sticky_number_column : ""}
@@ -683,19 +684,19 @@ const Table: React.FC<TableProps> = ({
                         {finalColumns.map((col) => {
                           const val = col?.key ? _.get(row, col.key) : "";
                           const isActionColumn = col && col.type === "button";
-                          const isNumberColumn = col && col.key === '__number__selector__';
-                          const isCheckboxColumn = col && col.key === '__row_selector__';
-                                                    return (
+                          const isNumberColumn =
+                            col && col.key === "__number__selector__";
+                          const isCheckboxColumn =
+                            col && col.key === "__row_selector__";
+                          return (
                             <td
                               key={col.uniqueId}
-                              className={
-                                `
+                              className={`
                                 ${styles.td_container} ${isActionColumn ? styles.action_column : ""}
                                 ${styles.td_container} ${isNumberColumn ? styles.sticky_number_column : ""}
                                 ${styles.td_container} ${isCheckboxColumn ? styles.sticky_checkbox_column : styles.stick_to_right}
 
-                                `
-                              }
+                                `}
                             >
                               {(() => {
                                 switch (col.type) {

@@ -24,10 +24,10 @@ const Tag: React.FC<TagProps> = ({ value, strings, translate = false }) => {
 
     return (
       <React.Fragment key={key || item.value}>
-        <span className={`badge badge-${item.class} badge-pill mb-1`}>
+        <span className={`badge badge-${item.class} badge-pill mb-1 p-2`}>
           {hasExtraValue && (
             <h6 className="d-inline ml-2">
-              <span className="badge badge-light badge-pill display-3">
+              <span className="badge badge-light badge-pill display-3 p-2">
                 {translatedExtraValue && translatedExtraValue}
               </span>
             </h6>
