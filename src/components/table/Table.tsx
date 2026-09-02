@@ -48,7 +48,6 @@ const Table: React.FC<TableProps> = ({
   const [selectedRowIds, setSelectedRowIds] = useState<Set<string | number>>(
     new Set(),
   );
-  console.log("main data for table:", data);
 
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(size);

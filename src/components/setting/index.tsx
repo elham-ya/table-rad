@@ -187,6 +187,8 @@ const SettingModal: React.FC<SettingModalProps> = ({
   };
 
   const requestSetSetting = async (params: any) => {
+    console.log("requestSetSetting");
+
     try {
       const res = await fetch(requestConfig.url, {
         method: "POST",
@@ -217,6 +219,7 @@ const SettingModal: React.FC<SettingModalProps> = ({
       toggle();
       return;
     }
+    console.log("handleSave is called");
 
     const newCommonColumns = changedColumns
       .map((changedCol) => {
@@ -288,7 +291,6 @@ const SettingModal: React.FC<SettingModalProps> = ({
       toggle={toggle}
       backdrop="static"
       className={styles.modal_wrapper}
-      
     >
       <ModalHeader toggle={toggle} className={styles.modal_itemheader}>
         تنظیمات ستون
@@ -356,9 +358,7 @@ const SettingModal: React.FC<SettingModalProps> = ({
         <Button
           color="primary"
           className={styles.save_btn}
-          onClick={() => {
-            handleSave();
-          }}
+          onClick={handleSave}
         >
           تایید
         </Button>
