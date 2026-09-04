@@ -282,6 +282,7 @@ const SettingModal: React.FC<SettingModalProps> = ({
       apiConfigData,
     );
     if (!apiConfigData?.result[0]) {
+       console.warn(" apiConfigData خالی است! درخواست ارسال نشد.");
       toggle();
       return;
     }
