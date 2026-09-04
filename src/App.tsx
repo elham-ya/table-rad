@@ -309,7 +309,7 @@ function App() {
   };
 
   const config = {
-    "Access-Token": "4206504876-37D1e5fbd98a40ee8f4f8148f838f4a1.XzIwMjY4",
+    "Access-Token": "6309757314-3e6C8b432bd5473b97712b5c9ed698e8.XzIwMjY5",
     "Client-Id": "17959574q2f0347718971594ccd86f3f4",
     url: `https://api.sandpod.ir/srv/cms-sandbox/api/core/users/setting`,
   };

@@ -41,16 +41,7 @@ const SortableItem = React.forwardRef<HTMLDivElement, SortableItemProps>(
       visible: row.visible,
     });
 
-    const [badgeValue, setBadgeValue] = useState(row.title);
-
-    useEffect(() => {
-      // const specificTable = config.result[0]?.setting?.tables[tableId];
-      if (row && row.defaultTitle) {
-        setBadgeValue(row.defaultTitle);
-      } else {
-        setBadgeValue(row.title);
-      }
-    }, []);
+    const badgeValue = row.defaultTitle || row.title;
 
     const IconExcel = ({ isActive }: { isActive: boolean }) =>
       isActive ? (

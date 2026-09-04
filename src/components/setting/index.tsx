@@ -51,8 +51,14 @@ const SettingModal: React.FC<SettingModalProps> = ({
     }
   }, [isOpen]);
 
+  // useEffect(() => {
+  //   initializeItems();
+  // }, [isOpen, apiConfigData, columns]);
+
   useEffect(() => {
-    initializeItems();
+    if (isOpen && !items.length) {
+      initializeItems();
+    }
   }, [isOpen, apiConfigData, columns]);
 
   const sensors = useSensors(
@@ -69,13 +75,16 @@ const SettingModal: React.FC<SettingModalProps> = ({
       return null;
     }
     const { setting } = apiConfigData.result[0];
-    if (Object.hasOwn(setting, "tables")) {
+
+    if (setting && "tables" in setting) {
       return setting?.tables[tableId];
     } else {
       return null;
     }
   };
+
   const targetTable = getSetting(tableName);
+
   const initializeItems = () => {
     // اگر مودال بسته است، کاری نکن
     if (!isOpen) return;
@@ -98,6 +107,7 @@ const SettingModal: React.FC<SettingModalProps> = ({
       const filteredDefaultColumns = columns.filter(
         (col) => !col.uniqueId?.startsWith("__"),
       );
+
       setItems(filteredDefaultColumns);
     }
   };
@@ -123,13 +133,6 @@ const SettingModal: React.FC<SettingModalProps> = ({
     return [...apiList, ...noVisible];
   };
 
-  // useEffect(() => {
-  //   if (targetTable !== null && targetTable?.columns) {
-  //     const mergedItems = mergeLists(targetTable.columns, items);
-  //     setItems(mergedItems);
-  //   }
-  // }, [targetTable]);
-
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
     if (over && active.id !== over.id) {
@@ -146,8 +149,15 @@ const SettingModal: React.FC<SettingModalProps> = ({
     uniqueId: string,
     updates: Partial<TableColumn>,
   ) => {
+    console.log("876 updateContentChange called:", { uniqueId, updates });
     setItems((prev) => {
       const existingIndex = prev.findIndex((c) => c.uniqueId === uniqueId);
+      console.log(
+        "876 existingIndex:",
+        existingIndex,
+        "876 items length:",
+        prev.length,
+      );
       if (existingIndex === -1) {
         const newItem: TableColumn = {
           uniqueId,
@@ -155,7 +165,7 @@ const SettingModal: React.FC<SettingModalProps> = ({
           width: updates.width ?? "",
           visible: updates.visible ?? true,
           excel: updates.excel ?? true,
-          key: prev[existingIndex].key,
+          key: updates.key ?? "",
         };
         return [...prev, newItem];
       } else {
@@ -170,8 +180,24 @@ const SettingModal: React.FC<SettingModalProps> = ({
     });
   };
 
-  const handleChangeTitle = (title: string, uniqueId: string) => {
+  const handleChangeTitle2 = (title: string, uniqueId: string) => {
     updateContentChange(uniqueId, { title });
+  };
+
+  const handleChangeTitle = (title: string, uniqueId: string) => {
+    const currentItem = items.find((item) => item.uniqueId === uniqueId);
+    const originalCol = columns.find((col) => col.uniqueId === uniqueId);
+    
+    // اولین باری که title تغییر می‌کند، defaultTitle را ست کن
+    if (currentItem && originalCol && !currentItem.defaultTitle && originalCol.title !== title) {
+      const defaultTitleValue = typeof originalCol.title === 'string' 
+        ? originalCol.title 
+        : String(originalCol.title);
+      
+      updateContentChange(uniqueId, { title, defaultTitle: defaultTitleValue });
+    } else {
+      updateContentChange(uniqueId, { title });
+    }
   };
 
   const handleChangeWidth = (width: string, uniqueId: string) => {
@@ -212,14 +238,19 @@ const SettingModal: React.FC<SettingModalProps> = ({
   };
 
   const handleSave = () => {
+    console.log("apiConfigData first of handleSave:", apiConfigData);
+    console.log("items:", items);
     const changedColumns = items.filter(
       (col) => col.visible === true || col.excel === true,
     );
+
+    console.log("changedColumns:", changedColumns);
+
     if (changedColumns && changedColumns.length <= 0) {
+      console.warn("هیچ ستونی برای ذخیره وجود ندارد");
       toggle();
       return;
     }
-    console.log("handleSave is called");
 
     const newCommonColumns = changedColumns
       .map((changedCol) => {
@@ -230,12 +261,14 @@ const SettingModal: React.FC<SettingModalProps> = ({
         if (originalCol.title !== changedCol.title) {
           return {
             ...changedCol,
-            defaultTitle: originalCol.title,
+            defaultTitle: changedCol.defaultTitle || originalCol.title,
           };
         }
         return changedCol;
       })
       .filter(Boolean);
+
+    console.log("newCommonColumns:", newCommonColumns);
 
     const finalColumns: FinalColumnProps = {
       [tableName]: {
@@ -244,17 +277,21 @@ const SettingModal: React.FC<SettingModalProps> = ({
     };
 
     // apiConfigData from api
+    console.log(
+      "apiConfigData before !apiConfigData?.result[0]:",
+      apiConfigData,
+    );
     if (!apiConfigData?.result[0]) {
       toggle();
       return;
     }
-    const currentSetting = apiConfigData.result[0].setting;
-    if (currentSetting.tables && typeof currentSetting.tables === "object") {
+    const currentSetting = apiConfigData.result[0]?.setting;
+    if (currentSetting?.tables && typeof currentSetting.tables === "object") {
       // find related table
       requestSetSetting({
         setting: {
           ...apiConfigData.result[0].setting,
-          tables: {
+           tables: {
             ...apiConfigData.result[0].setting.tables,
             ...finalColumns,
           },
@@ -272,6 +309,7 @@ const SettingModal: React.FC<SettingModalProps> = ({
         },
       });
     }
+
     toggle();
   };
 
@@ -283,6 +321,8 @@ const SettingModal: React.FC<SettingModalProps> = ({
             item.defaultTitle.includes(searchTerm)),
       )
     : items;
+
+  console.log("apiConfigData inside component:", apiConfigData);
 
   return (
     <Modal
@@ -351,6 +391,7 @@ const SettingModal: React.FC<SettingModalProps> = ({
         <Button
           color="secondary"
           className={styles.cancel_btn}
+          type="button"
           onClick={toggle}
         >
           انصراف
@@ -358,6 +399,7 @@ const SettingModal: React.FC<SettingModalProps> = ({
         <Button
           color="primary"
           className={styles.save_btn}
+          type="button"
           onClick={handleSave}
         >
           تایید
