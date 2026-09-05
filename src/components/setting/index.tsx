@@ -64,7 +64,7 @@ const SettingModal: React.FC<SettingModalProps> = ({
     useSensor(KeyboardSensor),
   );
 
-  const getSetting = (tableId = tableName) => {
+  const getSetting2 = (tableId = tableName) => {
     if (!apiConfigData?.result[0]) {
       return null;
     }
@@ -74,6 +74,29 @@ const SettingModal: React.FC<SettingModalProps> = ({
     } else {
       return null;
     }
+  };
+    const getSetting = (tableId = tableName) => {
+    if (
+      !apiConfigData ||
+      !Array.isArray(apiConfigData.result) ||
+      apiConfigData.result.length === 0
+    ) {
+      return {
+        columns: columns.filter((col) => !col.uniqueId?.startsWith("__")),
+      };
+    } else if (
+      apiConfigData &&
+      apiConfigData?.result &&
+      Array.isArray(apiConfigData?.result) &&
+      apiConfigData.result?.length > 0
+    ) {
+      // const { setting } = apiConfigData?.result[0];
+      const setting = apiConfigData?.result?.[0]?.setting;
+      if (setting && "tables" in setting) {
+        return setting?.tables[tableId] ?? null;
+      }
+    }
+    return null;
   };
   const targetTable = getSetting(tableName);
   const initializeItems = () => {
@@ -209,7 +232,102 @@ const SettingModal: React.FC<SettingModalProps> = ({
     }
   };
 
-  const handleSave = () => {
+    const handleSave = () => {
+    console.log("apiConfigData first of handleSave:", apiConfigData);
+    console.log("items:", items);
+
+    const hasResult =
+      apiConfigData &&
+      Array.isArray(apiConfigData?.result) &&
+      apiConfigData.result?.length > 0;
+
+    console.log("hasResult:", hasResult);
+
+    const changedColumns = items.filter(
+      (col) => col.visible === true || col.excel === true,
+    );
+
+    console.log("changedColumns:", changedColumns);
+
+    if (changedColumns && changedColumns.length <= 0) {
+      console.warn("هیچ ستونی برای ذخیره وجود ندارد");
+      toggle();
+      return;
+    }
+
+    const newCommonColumns = changedColumns
+      .map((changedCol) => {
+        const originalCol = columns.find(
+          (col) => col.uniqueId === changedCol.uniqueId,
+        );
+        if (!originalCol) return null;
+        if (originalCol.title !== changedCol.title) {
+          return {
+            ...changedCol,
+            defaultTitle: changedCol.defaultTitle || originalCol.title,
+          };
+        }
+        return changedCol;
+      })
+      .filter(Boolean);
+
+    console.log("newCommonColumns:", newCommonColumns);
+
+    const finalColumns: FinalColumnProps = {
+      [tableName]: {
+        columns: [...newCommonColumns],
+      },
+    };
+
+    // apiConfigData from api
+    // console.log(
+    //   "apiConfigData before !apiConfigData?.result[0]:",
+    //   apiConfigData,
+    // );
+    // if (!apiConfigData?.result[0]) {
+    //   console.warn(" apiConfigData خالی است! درخواست ارسال نشد.");
+    //   toggle();
+    //   return;
+    // }
+    if (hasResult) {
+      const currentSetting = apiConfigData?.result[0]?.setting || {};
+      console.log("currentSetting:", currentSetting);
+
+      if (currentSetting?.tables && typeof currentSetting.tables === "object") {
+        // find related table
+        requestSetSetting({
+          setting: {
+            ...currentSetting,
+            tables: {
+              ...currentSetting?.tables,
+              ...finalColumns,
+            },
+          },
+        });
+      } else {
+        requestSetSetting({
+          setting: {
+            ...currentSetting,
+            tables: {
+              [tableName]: {
+                columns: [],
+              },
+            },
+          },
+        });
+      }
+    } else {
+      requestSetSetting({
+        setting: {
+          tables: { ...finalColumns },
+        },
+      });
+    }
+
+    toggle();
+  };
+  
+  const handleSave2 = () => {
     const changedColumns = items.filter(
       (col) => col.visible === true || col.excel === true,
     );
@@ -356,9 +474,7 @@ const SettingModal: React.FC<SettingModalProps> = ({
         <Button
           color="primary"
           className={styles.save_btn}
-          onClick={() => {
-            handleSave();
-          }}
+          onClick={handleSave}
         >
           تایید
         </Button>
