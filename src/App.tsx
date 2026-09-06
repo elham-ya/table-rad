@@ -230,60 +230,60 @@ function App() {
       excel: true,
       translate: true,
     },
-    {
-      uniqueId: "invoiceId",
-      title: "شناسه فاکتور",
-      width: "160",
-      key: "metadata.invoiceId",
-      type: ContentType.Text,
-      visible: true,
-      excel: true,
-    },
-    {
-      uniqueId: "issuanceStatus",
-      title: "وضعیت صدور",
-      width: "130",
-      key: "metadata.issuanceStatus",
-      type: ContentType.Text,
-      visible: true,
-      excel: true,
-    },
-    {
-      uniqueId: "cellPhone",
-      title: "شماره موبایل",
-      width: "200",
-      key: "cellphoneNumber",
-      type: ContentType.Text,
-      visible: true,
-      excel: true,
-    },
-    {
-      uniqueId: "paymentStatus",
-      title: "وضعیت پرداخت",
-      width: "200",
-      key: "metadata.orderStatus.paymentStatus",
-      type: ContentType.Text,
-      visible: true,
-      excel: true,
-    },
-    {
-      uniqueId: "invoice",
-      title: "فاکتور ",
-      width: "190",
-      key: "metadata.invoice",
-      type: ContentType.Text,
-      visible: true,
-      excel: true,
-    },
-    {
-      uniqueId: "phoneNumber",
-      title: "شماره تلفن",
-      width: "200",
-      key: "cellphoneNumber",
-      type: ContentType.Text,
-      visible: true,
-      excel: true,
-    },
+    // {
+    //   uniqueId: "invoiceId",
+    //   title: "شناسه فاکتور",
+    //   width: "160",
+    //   key: "metadata.invoiceId",
+    //   type: ContentType.Text,
+    //   visible: true,
+    //   excel: true,
+    // },
+    // {
+    //   uniqueId: "issuanceStatus",
+    //   title: "وضعیت صدور",
+    //   width: "130",
+    //   key: "metadata.issuanceStatus",
+    //   type: ContentType.Text,
+    //   visible: true,
+    //   excel: true,
+    // },
+    // {
+    //   uniqueId: "cellPhone",
+    //   title: "شماره موبایل",
+    //   width: "200",
+    //   key: "cellphoneNumber",
+    //   type: ContentType.Text,
+    //   visible: true,
+    //   excel: true,
+    // },
+    // {
+    //   uniqueId: "paymentStatus",
+    //   title: "وضعیت پرداخت",
+    //   width: "200",
+    //   key: "metadata.orderStatus.paymentStatus",
+    //   type: ContentType.Text,
+    //   visible: true,
+    //   excel: true,
+    // },
+    // {
+    //   uniqueId: "invoice",
+    //   title: "فاکتور ",
+    //   width: "190",
+    //   key: "metadata.invoice",
+    //   type: ContentType.Text,
+    //   visible: true,
+    //   excel: true,
+    // },
+    // {
+    //   uniqueId: "phoneNumber",
+    //   title: "شماره تلفن",
+    //   width: "200",
+    //   key: "cellphoneNumber",
+    //   type: ContentType.Text,
+    //   visible: true,
+    //   excel: true,
+    // },
     {
       uniqueId: "actions",
       title: "عملیات",
@@ -297,7 +297,7 @@ function App() {
   ];
 
   const handleSelect = (selectedRows: unknown[]) => {
-    console.log("ردیف‌های انتخاب‌شده :", selectedRows);
+    // console.log("ردیف‌های انتخاب‌شده :", selectedRows);
   };
 
   const handlePageChange = (_pageNumber: number) => {
@@ -309,7 +309,7 @@ function App() {
   };
 
   const config = {
-    "Access-Token": "2109789618-449db62ce78d4e329e27042F798c0d9a.XzIwMjY5",
+    "Access-Token": "8413009752-3c1dd8d799c249d0b3e09918D7fd62a4.XzIwMjY5",
     "Client-Id": "17959574q2f0347718971594ccd86f3f4",
     url: `https://api.sandpod.ir/srv/cms-sandbox/api/core/users/setting`,
   };
@@ -339,11 +339,11 @@ function App() {
 
   return (
     <TableView
-      id="test2"
+      id="test"
       data={dataNormalized}
       cols={cols}
       totalCount={data.length}
-      checkBox={true}
+      checkBox={false}
       onRowSelect={handleSelect}
       onPageChange={handlePageChange}
       onSizeChange={handleSizeChange}

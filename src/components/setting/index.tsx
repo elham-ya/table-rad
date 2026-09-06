@@ -64,18 +64,7 @@ const SettingModal: React.FC<SettingModalProps> = ({
     useSensor(KeyboardSensor),
   );
 
-  const getSetting2 = (tableId = tableName) => {
-    if (!apiConfigData?.result[0]) {
-      return null;
-    }
-    const { setting } = apiConfigData.result[0];
-    if (Object.hasOwn(setting, "tables")) {
-      return setting?.tables[tableId];
-    } else {
-      return null;
-    }
-  };
-    const getSetting = (tableId = tableName) => {
+  const getSetting = (tableId = tableName) => {
     if (
       !apiConfigData ||
       !Array.isArray(apiConfigData.result) ||
@@ -98,10 +87,13 @@ const SettingModal: React.FC<SettingModalProps> = ({
     }
     return null;
   };
+
   const targetTable = getSetting(tableName);
+
   const initializeItems = () => {
-    // اگر مودال بسته است، کاری نکن
+
     if (!isOpen) return;
+
 
     // گرفتن ستون‌های ذخیره شده از API
     const savedColumns = targetTable?.columns;
@@ -114,13 +106,14 @@ const SettingModal: React.FC<SettingModalProps> = ({
     ) {
       // ادغام با استفاده از mergeLists موجود
       const merged = mergeLists(savedColumns, columns);
+
       setItems(merged);
     } else {
-      // اگر تنظیماتی وجود ندارد، از columns پیش‌فرض استفاده کن
-      // ولی ستون‌های ویژه (__ دار) را حذف کن
+
       const filteredDefaultColumns = columns.filter(
         (col) => !col.uniqueId?.startsWith("__"),
       );
+
       setItems(filteredDefaultColumns);
     }
   };
@@ -169,8 +162,10 @@ const SettingModal: React.FC<SettingModalProps> = ({
     uniqueId: string,
     updates: Partial<TableColumn>,
   ) => {
+
     setItems((prev) => {
       const existingIndex = prev.findIndex((c) => c.uniqueId === uniqueId);
+
       if (existingIndex === -1) {
         const newItem: TableColumn = {
           uniqueId,
@@ -178,7 +173,7 @@ const SettingModal: React.FC<SettingModalProps> = ({
           width: updates.width ?? "",
           visible: updates.visible ?? true,
           excel: updates.excel ?? true,
-          key: prev[existingIndex].key,
+          key: updates.key ?? uniqueId,
         };
         return [...prev, newItem];
       } else {
@@ -232,30 +227,13 @@ const SettingModal: React.FC<SettingModalProps> = ({
     }
   };
 
-    const handleSave = () => {
-    console.log("apiConfigData first of handleSave:", apiConfigData);
-    console.log("items:", items);
-
+  const handleSave = () => {
     const hasResult =
       apiConfigData &&
       Array.isArray(apiConfigData?.result) &&
       apiConfigData.result?.length > 0;
 
-    console.log("hasResult:", hasResult);
-
-    const changedColumns = items.filter(
-      (col) => col.visible === true || col.excel === true,
-    );
-
-    console.log("changedColumns:", changedColumns);
-
-    if (changedColumns && changedColumns.length <= 0) {
-      console.warn("هیچ ستونی برای ذخیره وجود ندارد");
-      toggle();
-      return;
-    }
-
-    const newCommonColumns = changedColumns
+    const newCommonColumns = items
       .map((changedCol) => {
         const originalCol = columns.find(
           (col) => col.uniqueId === changedCol.uniqueId,
@@ -271,27 +249,14 @@ const SettingModal: React.FC<SettingModalProps> = ({
       })
       .filter(Boolean);
 
-    console.log("newCommonColumns:", newCommonColumns);
-
     const finalColumns: FinalColumnProps = {
       [tableName]: {
         columns: [...newCommonColumns],
       },
     };
 
-    // apiConfigData from api
-    // console.log(
-    //   "apiConfigData before !apiConfigData?.result[0]:",
-    //   apiConfigData,
-    // );
-    // if (!apiConfigData?.result[0]) {
-    //   console.warn(" apiConfigData خالی است! درخواست ارسال نشد.");
-    //   toggle();
-    //   return;
-    // }
     if (hasResult) {
       const currentSetting = apiConfigData?.result[0]?.setting || {};
-      console.log("currentSetting:", currentSetting);
 
       if (currentSetting?.tables && typeof currentSetting.tables === "object") {
         // find related table
@@ -326,7 +291,7 @@ const SettingModal: React.FC<SettingModalProps> = ({
 
     toggle();
   };
-  
+
   const handleSave2 = () => {
     const changedColumns = items.filter(
       (col) => col.visible === true || col.excel === true,
@@ -406,7 +371,6 @@ const SettingModal: React.FC<SettingModalProps> = ({
       toggle={toggle}
       backdrop="static"
       className={styles.modal_wrapper}
-      
     >
       <ModalHeader toggle={toggle} className={styles.modal_itemheader}>
         تنظیمات ستون

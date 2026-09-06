@@ -48,7 +48,6 @@ const Table: React.FC<TableProps> = ({
   const [selectedRowIds, setSelectedRowIds] = useState<Set<string | number>>(
     new Set(),
   );
-  console.log("main data for table:", data);
 
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(size);
@@ -270,15 +269,10 @@ const Table: React.FC<TableProps> = ({
         return;
       }
 
-      // dont show visible: false
-      if (savedColumn.visible !== true) {
-        return;
-      }
-
       // visible columns to show
       resultColumns.push({
         ...originalCol,
-        visible: true,
+        visible: savedColumn.visible === true,
         width: savedColumn.width ?? originalCol.width,
         title: savedColumn.title ?? originalCol.title,
         excel: savedColumn.excel ?? originalCol.excel,
@@ -316,6 +310,15 @@ const Table: React.FC<TableProps> = ({
     page,
     pageSize,
   ]);
+
+  const visibleColumns = useMemo(() => {
+    return finalColumns.filter((col) => {
+      if (col.key === "__row_selector__") return true;
+      if (col.key === "__number__selector__") return true;
+
+      return col.visible !== false;
+    });
+  }, [finalColumns]);
 
   const handlePageChange = (pageNumber: number) => {
     setPage(pageNumber);
@@ -638,7 +641,7 @@ const Table: React.FC<TableProps> = ({
               <ReactstrapTable bordered className={styles.tableContainer}>
                 <thead className={styles.theader_container}>
                   <tr className={styles.tr_container}>
-                    {finalColumns.map((colItem) => {
+                    {visibleColumns.map((colItem) => {
                       const isHeaderActionColumn =
                         colItem && colItem.type === "button";
                       const isHeaderNumberColumn =
@@ -669,7 +672,7 @@ const Table: React.FC<TableProps> = ({
                   {data.length === 0 ? (
                     <tr>
                       <td
-                        colSpan={finalColumns.length}
+                        colSpan={visibleColumns.length}
                         className={styles.td_container}
                       >
                         داده‌ای وجود ندارد.
@@ -681,7 +684,7 @@ const Table: React.FC<TableProps> = ({
                         key={(row as any).id ?? rowIndex}
                         className={styles.tr_container}
                       >
-                        {finalColumns.map((col) => {
+                        {visibleColumns.map((col) => {
                           const val = col?.key ? _.get(row, col.key) : "";
                           const isActionColumn = col && col.type === "button";
                           const isNumberColumn =
