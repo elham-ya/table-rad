@@ -54,6 +54,7 @@
   vertical-align: middle;
   border:none;
   border-right: 1px solid $table-border;
+  box-sizing: border-box;
 }
 
 .theader_container {
@@ -213,12 +214,16 @@
     position: sticky;
     right: 50px;
     background-color: $table-header !important;
+    box-shadow: -5px 0 9px #0000001a;
+    box-sizing: border-box;
     z-index: 3;
   }
   .sticky_checkbox_column{
     position: sticky;
     right: 0;
     background-color: white !important;
+    box-shadow: -5px 0 9px #0000001a;
+    box-sizing: border-box;
     z-index: 3;
   }
   .sticky_number_column {

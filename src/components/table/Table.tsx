@@ -44,6 +44,8 @@ const Table: React.FC<TableProps> = ({
   size = 10,
   translates = null,
 }) => {
+  console.log(66666);
+
   // just keeping index
   const [selectedRowIds, setSelectedRowIds] = useState<Set<string | number>>(
     new Set(),
@@ -635,7 +637,7 @@ const Table: React.FC<TableProps> = ({
             onGetData={handleGetDataAfterChange}
           />
         </Col>
-        <div className={styles.table_wrapper}>
+        <div className={`${styles.table_wrapper} px-3`}>
           <div className={styles.table_outer_wrapper}>
             <div className={styles.table_inner_wrapper}>
               <ReactstrapTable bordered className={styles.tableContainer}>
