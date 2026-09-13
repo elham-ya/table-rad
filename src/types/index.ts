@@ -42,7 +42,7 @@ export interface TableProps {
   checkBox?: boolean;
   onRowSelect?: (selectedRows: unknown[]) => void;
   onPageChange?:(pageNumber: number) => void;
-  onSizeChange?:(pageNumber: number) => void;
+  onSizeChange: (event: React.ChangeEvent<HTMLSelectElement>) => void; 
   requestConfig: AppConfig;
   pageSizeOptions?: number[];
   size?: number;
@@ -113,13 +113,13 @@ export interface actionColumn {
   onClick: () => void;
 }
 export interface TablePaginationProps {
-  totalCount: number;       
+  totalItems: number;     
   pageNumber: number;        
   size: number;              
   onPageChange: (page: number) => void; 
-  onSizeChange?: (size: number) => void;  
+  onSizeChange: (event: React.ChangeEvent<HTMLSelectElement>) => void; 
   pageSizeOptions?: number[];  
-  showSizeChanger?: boolean; 
+  showSizeChanger?: boolean;
   showTotal?: boolean;  
   className?: string;
 }

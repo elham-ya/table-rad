@@ -18,7 +18,7 @@ import {
 import moment from "moment-jalaali";
 import Checkbox from "../checkBox";
 import ActionRenderer from "../actionRenderer";
-import TablePagination from "../pagination";
+import { PaginationToolbar } from "../pagination/index";
 import SettingModal from "../setting";
 import SettingButtonIcon from "../../assets/icons/SettingButton.svg";
 import Xcel from "../../assets/icons/Xcel.svg";
@@ -26,7 +26,7 @@ import ExcelJS from "exceljs";
 import DateTime from "./DateTime";
 import Text from "./Text";
 import Tag from "./Tag";
-import Number from "./Number";
+import NumberCell from "./Number";
 import Price from "./Price";
 
 const Table: React.FC<TableProps> = ({
@@ -44,8 +44,6 @@ const Table: React.FC<TableProps> = ({
   size = 10,
   translates = null,
 }) => {
-  console.log(66666);
-
   // just keeping index
   const [selectedRowIds, setSelectedRowIds] = useState<Set<string | number>>(
     new Set(),
@@ -67,26 +65,51 @@ const Table: React.FC<TableProps> = ({
   const paginationRef = useRef<HTMLDivElement>(null);
   const [showStickyPagination, setShowStickyPagination] = useState(false);
 
+  // useEffect(() => {
+  //   if (totalCount <= 0) {
+  //     setShowStickyPagination(false);
+  //     return;
+  //   }
+  //   if (!paginationRef.current) return;
+  //   const element = paginationRef.current;
+
+  //   const observer = new IntersectionObserver(
+  //     ([entry]) => {
+  //       setShowStickyPagination(!entry.isIntersecting);
+  //     },
+  //     {
+  //       threshold: 0.1,
+  //     },
+  //   );
+
+  //   observer.observe(paginationRef.current);
+
+  //   return () => observer.disconnect();
+  // }, [configData, totalCount]);
+
   useEffect(() => {
     if (totalCount <= 0) {
       setShowStickyPagination(false);
       return;
     }
+
     if (!paginationRef.current) return;
+
+    const element = paginationRef.current;
 
     const observer = new IntersectionObserver(
       ([entry]) => {
         setShowStickyPagination(!entry.isIntersecting);
       },
       {
-        threshold: 0.25,
+        threshold: 0.1,
       },
     );
 
-    observer.observe(paginationRef.current);
+    observer.observe(element);
 
     return () => observer.disconnect();
-  }, [configData]);
+  }, [configData, totalCount]);  // ← totalCount هم اضافه شد
 
   // selection of rows send to parent
   useEffect(() => {
@@ -327,9 +350,15 @@ const Table: React.FC<TableProps> = ({
     onPageChange?.(pageNumber);
   };
 
-  const handleSizeChange = (pageSize: number) => {
+  // const handleSizeChange2 = (pageSize: number) => {
+  //   setPageSize(pageSize);
+  //   onSizeChange?.(pageSize);
+  // };
+
+  const handleSizeChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    const pageSize = Number(event.target.value);
     setPageSize(pageSize);
-    onSizeChange?.(pageSize);
+    onSizeChange?.(event); // حالا خودِ event به مصرف‌کننده‌ی بیرونیِ کامپوننت Table هم پاس داده می‌شود
   };
 
   const toggleSetting = () => {
@@ -637,7 +666,7 @@ const Table: React.FC<TableProps> = ({
             onGetData={handleGetDataAfterChange}
           />
         </Col>
-        <div className={`${styles.table_wrapper} px-3`}>
+        <div className={styles.table_wrapper}>
           <div className={styles.table_outer_wrapper}>
             <div className={styles.table_inner_wrapper}>
               <ReactstrapTable bordered className={styles.tableContainer}>
@@ -720,7 +749,7 @@ const Table: React.FC<TableProps> = ({
                                     );
 
                                   case "number":
-                                    return <Number value={val} />;
+                                    return <NumberCell value={val} />;
 
                                   case "badge":
                                     return (
@@ -818,23 +847,21 @@ const Table: React.FC<TableProps> = ({
           </div>
           {shouldShowPagination && (
             <div ref={paginationRef}>
-              <TablePagination
-                totalCount={totalCount}
+              <PaginationToolbar
+                totalItems={totalCount}
                 pageNumber={page}
                 size={size}
                 onPageChange={handlePageChange}
                 onSizeChange={handleSizeChange}
                 pageSizeOptions={pageSizeOptions}
-                showTotal
-                showSizeChanger
               />
             </div>
           )}
 
           {shouldShowPagination && showStickyPagination && (
-            <div className={styles.stickyPagination}>
-              <TablePagination
-                totalCount={totalCount}
+            <div className={styles.paginationSticky}>
+              <PaginationToolbar
+                totalItems={totalCount}
                 pageNumber={page}
                 size={size}
                 onPageChange={handlePageChange}

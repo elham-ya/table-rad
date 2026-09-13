@@ -88,7 +88,7 @@
 }
 
 .sidebar_right {
-  position: fixed;        
+  position: sticky;        
   top: 0;
   right: 0;  
   width: 300px;       
@@ -169,29 +169,37 @@
     
   }
 }
-
+.paginationSticky {
+  position: fixed;
+  bottom: 0;
+  left: auto;
+  right: auto;
+  background: #fff;
+  padding: 10px 20px;
+  border-top: 1px solid #ddd;
+  box-shadow: 0 -2px 8px #00000014;
+  width: 85%;
+  margin: 0 auto;
+  z-index: 1000;
+}
 .table_wrapper {
-  width: 100%;
   position: relative;
-  .stickyPagination {
-      position: fixed;
-      bottom: 0;
-      left: auto;
-      right: auto;
-      background: #fff;
-      z-index: 1000;
-      padding: 10px 20px;
-      border-top: 1px solid #ddd;
-      box-shadow: 0 -2px 8px #00000014;
-      width: 86%;
-      margin: 0 auto;
-  }
+  width: 100%;
+  padding: 0 15px;
+
+
   .header_action_column {
     border-top-left-radius: 10px;
     position: sticky;
     left:0;
     background-color: $table-header !important;
     z-index: 3;
+    @media (max-width: 1024px) {
+      width: 90px !important;
+    }
+    @media (max-width: 600px) {
+      width: 60px !important;
+    }
   }
   .action_column {
     position: sticky;
@@ -202,7 +210,7 @@
     border-left: none !important;
     z-index: 3;
   }
-     .header_sticky_checkbox_column {
+    .header_sticky_checkbox_column {
     position: sticky;
     border-top-right-radius: 10px;
     right: 0;

@@ -304,12 +304,12 @@ function App() {
     // dispatch getlist by new pageNumber
   };
 
-  const handleSizeChange = (_pageNumber: number) => {
+  const handleSizeChange = () => {
     // dispatch getlist by new pageSize
   };
 
   const config = {
-    "Access-Token": "4206504876-e21ce182eaf043e7884d0f606836609A.XzIwMjY5",
+    "Access-Token": "6309757314-0cbab172F48047f38df3c23c4dc0b11c.XzIwMjY5",
     "Client-Id": "17959574q2f0347718971594ccd86f3f4",
     url: `https://api.sandpod.ir/srv/cms-sandbox/api/core/users/setting`,
   };
