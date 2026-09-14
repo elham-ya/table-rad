@@ -402,7 +402,7 @@ const Table: React.FC<TableProps> = ({
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet("داده‌ها");
 
-    const excelColumns = cols.filter((col) => col.excel === true);
+    const excelColumns = finalColumns.filter((col) => col.excel === true);
     if (excelColumns.length === 0) return;
 
     const headerRow = excelColumns.map(

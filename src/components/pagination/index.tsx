@@ -133,8 +133,14 @@ function Pagination({
     }
   }, [currentPage, totalPages, onPageChange]);
 
-  const goToPage = (page: number) => {
+  const goToPage2 = (page: number) => {
     onPageChange(Math.min(Math.max(page, 1), totalPages));
+  };
+
+  const goToPage = (page: number) => {
+    const target = Math.min(Math.max(page, 1), totalPages);
+    if (target === currentPage) return; // از فراخوانیِ تکراریِ onPageChange برای همان صفحه جلوگیری می‌کند
+    onPageChange(target);
   };
 
   return (
@@ -172,6 +178,7 @@ function Pagination({
                 type="button"
                 aria-current={item === currentPage ? "page" : undefined}
                 onClick={() => goToPage(item)}
+                disabled={item === currentPage}
                 className={`${styles.pgNavPage} ${item === currentPage ? styles.pgNavPageActive : ""}`}
               >
                 {toPersianDigits(item)}
