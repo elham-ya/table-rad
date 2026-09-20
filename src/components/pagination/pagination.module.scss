@@ -12,8 +12,8 @@ $pg-accent-bg: #DFEFFF;
 $pg-accent-icon: #1991FF;
 $pg-accent-text: #0369CD;
 $pg-hover-bg: #F8FAFC;
-$pg-radius-lg: 12px;
-$pg-radius-md: 8px;
+$pg-radius-lg: 8px;
+$pg-radius-md: 6px;
 $pg-font: "Vazirmatn", system-ui, sans-serif;
 
 // ---------- نوار کلی (تعداد کل + کنترل‌ها) ----------
@@ -46,7 +46,7 @@ $pg-font: "Vazirmatn", system-ui, sans-serif;
 .pgSize {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   height: 40px;
   padding: 0 12px;
   border: 1px solid $pg-border;
@@ -71,6 +71,7 @@ $pg-font: "Vazirmatn", system-ui, sans-serif;
   font-size: 13px;
   line-height: 1;
   color: $pg-muted-icon;
+  margin-bottom: 5px;
 }
 
 // ---------- کارت اصلیِ صفحه‌بندی ----------
@@ -97,7 +98,7 @@ $pg-font: "Vazirmatn", system-ui, sans-serif;
   border-radius: $pg-radius-md;
   color: inherit;
   cursor: pointer;
-  font-size: 16px;
+  font-size: 18px;
   line-height: 1;
   transition: background-color 0.15s ease;
 
@@ -139,7 +140,7 @@ $pg-font: "Vazirmatn", system-ui, sans-serif;
   background: transparent;
   color: $pg-text;
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 400;
   cursor: pointer;
   transition: background-color 0.15s ease;
 
@@ -181,7 +182,7 @@ $pg-font: "Vazirmatn", system-ui, sans-serif;
   align-items: center;
   gap: 6px;
   height: 40px;
-  padding: 4px 12px 4px 6px;
+  padding: 4px 12px 4px 4px;
   margin-bottom: 0;
   border: 1px solid $pg-border;
   border-radius: $pg-radius-lg;
@@ -197,6 +198,9 @@ $pg-font: "Vazirmatn", system-ui, sans-serif;
   font-family: inherit;
   color: $pg-text;
   outline: none;
+  ::placeholder{
+    color: #d2d3d8;
+  }
 }
 
 .pgGotoSubmit {
