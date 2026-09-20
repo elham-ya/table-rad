@@ -64,6 +64,7 @@ const Table: React.FC<TableProps> = ({
   const [exportProgress, setExportProgress] = useState(0);
 
   const paginationRef = useRef<HTMLDivElement>(null);
+  const cleanupTimerRef = useRef<NodeJS.Timeout | null>(null);
   const [showStickyPagination, setShowStickyPagination] = useState(false);
 
   useEffect(() => {
@@ -536,11 +537,26 @@ const Table: React.FC<TableProps> = ({
     window.URL.revokeObjectURL(url);
   };
 
+  // const cleanup1 = (timeout = 0) => {
+  //   setTimeout(() => {
+  //     setExportStatus("idle");
+  //     setExportProgress(0);
+  //     setAbortController(null);
+  //   }, timeout);
+  // };
+
   const cleanup = (timeout = 0) => {
-    setTimeout(() => {
+    //  لغو timer قبلی اگر وجود دارد
+    if (cleanupTimerRef.current) {
+      clearTimeout(cleanupTimerRef.current);
+    }
+
+    //  ذخیره timer جدید
+    cleanupTimerRef.current = setTimeout(() => {
       setExportStatus("idle");
       setExportProgress(0);
       setAbortController(null);
+      cleanupTimerRef.current = null; // پاکسازی ref
     }, timeout);
   };
 
@@ -595,12 +611,16 @@ const Table: React.FC<TableProps> = ({
       return;
     }
 
+    //  لغو cleanup قبلی قبل از شروع دانلود جدید
+    if (cleanupTimerRef.current) {
+      clearTimeout(cleanupTimerRef.current);
+      cleanupTimerRef.current = null;
+    }
+
     const controller = new AbortController();
     setAbortController(controller);
-
     setExportStatus("exporting");
     setExportProgress(0);
-    console.log("start export page:", page);
 
     let collectedData: unknown[] = [];
     const totalPages = Math.ceil(totalCount / 50);
