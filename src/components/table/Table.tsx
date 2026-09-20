@@ -66,28 +66,6 @@ const Table: React.FC<TableProps> = ({
   const paginationRef = useRef<HTMLDivElement>(null);
   const [showStickyPagination, setShowStickyPagination] = useState(false);
 
-  // useEffect(() => {
-  //   if (totalCount <= 0) {
-  //     setShowStickyPagination(false);
-  //     return;
-  //   }
-  //   if (!paginationRef.current) return;
-  //   const element = paginationRef.current;
-
-  //   const observer = new IntersectionObserver(
-  //     ([entry]) => {
-  //       setShowStickyPagination(!entry.isIntersecting);
-  //     },
-  //     {
-  //       threshold: 0.1,
-  //     },
-  //   );
-
-  //   observer.observe(paginationRef.current);
-
-  //   return () => observer.disconnect();
-  // }, [configData, totalCount]);
-
   useEffect(() => {
     if (totalCount <= 0) {
       setShowStickyPagination(false);

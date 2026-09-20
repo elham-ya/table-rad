@@ -91,9 +91,7 @@ const SettingModal: React.FC<SettingModalProps> = ({
   const targetTable = getSetting(tableName);
 
   const initializeItems = () => {
-
-    if (!isOpen) return;
-
+    // if (!isOpen) return;  //  خط if (!isOpen) return; حذف شد تا همگام‌سازی همیشه انجام شود
 
     // گرفتن ستون‌های ذخیره شده از API
     const savedColumns = targetTable?.columns;
@@ -109,7 +107,6 @@ const SettingModal: React.FC<SettingModalProps> = ({
 
       setItems(merged);
     } else {
-
       const filteredDefaultColumns = columns.filter(
         (col) => !col.uniqueId?.startsWith("__"),
       );
@@ -162,7 +159,6 @@ const SettingModal: React.FC<SettingModalProps> = ({
     uniqueId: string,
     updates: Partial<TableColumn>,
   ) => {
-
     setItems((prev) => {
       const existingIndex = prev.findIndex((c) => c.uniqueId === uniqueId);
 
@@ -227,7 +223,7 @@ const SettingModal: React.FC<SettingModalProps> = ({
     }
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     const hasResult =
       apiConfigData &&
       Array.isArray(apiConfigData?.result) &&
@@ -260,7 +256,7 @@ const SettingModal: React.FC<SettingModalProps> = ({
 
       if (currentSetting?.tables && typeof currentSetting.tables === "object") {
         // find related table
-        requestSetSetting({
+        await requestSetSetting({
           setting: {
             ...currentSetting,
             tables: {
@@ -270,7 +266,7 @@ const SettingModal: React.FC<SettingModalProps> = ({
           },
         });
       } else {
-        requestSetSetting({
+        await requestSetSetting({
           setting: {
             ...currentSetting,
             tables: {
@@ -282,76 +278,13 @@ const SettingModal: React.FC<SettingModalProps> = ({
         });
       }
     } else {
-      requestSetSetting({
+      await requestSetSetting({
         setting: {
           tables: { ...finalColumns },
         },
       });
     }
 
-    toggle();
-  };
-
-  const handleSave2 = () => {
-    const changedColumns = items.filter(
-      (col) => col.visible === true || col.excel === true,
-    );
-    if (changedColumns && changedColumns.length <= 0) {
-      toggle();
-      return;
-    }
-
-    const newCommonColumns = changedColumns
-      .map((changedCol) => {
-        const originalCol = columns.find(
-          (col) => col.uniqueId === changedCol.uniqueId,
-        );
-        if (!originalCol) return null;
-        if (originalCol.title !== changedCol.title) {
-          return {
-            ...changedCol,
-            defaultTitle: originalCol.title,
-          };
-        }
-        return changedCol;
-      })
-      .filter(Boolean);
-
-    const finalColumns: FinalColumnProps = {
-      [tableName]: {
-        columns: [...newCommonColumns],
-      },
-    };
-
-    // apiConfigData from api
-    if (!apiConfigData?.result[0]) {
-      toggle();
-      return;
-    }
-    const currentSetting = apiConfigData.result[0].setting;
-    if (currentSetting.tables && typeof currentSetting.tables === "object") {
-      // find related table
-      requestSetSetting({
-        setting: {
-          ...apiConfigData.result[0].setting,
-          tables: {
-            ...apiConfigData.result[0].setting.tables,
-            ...finalColumns,
-          },
-        },
-      });
-    } else {
-      requestSetSetting({
-        setting: {
-          ...currentSetting,
-          tables: {
-            [tableName]: {
-              columns: [],
-            },
-          },
-        },
-      });
-    }
     toggle();
   };
 
