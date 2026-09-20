@@ -632,9 +632,14 @@ const Table: React.FC<TableProps> = ({
         }
 
         const offset = (page - 1) * 50;
+
         const pageData = await fetchPageWithRetry(offset, controller.signal);
 
         if (pageData === null) {
+          //  بررسی abort قبل از throw Error
+          if (controller.signal.aborted) {
+            throw new DOMException("Aborted", "AbortError");
+          }
           throw new Error("دریافت داده ناموفق پس از تلاش‌ها");
         }
 
