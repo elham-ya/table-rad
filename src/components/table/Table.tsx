@@ -7,6 +7,7 @@ import {
   ContentType,
   ApiResponse,
 } from "../../types/index";
+import { findString } from "../../utils/index";
 import styles from "./table.module.scss";
 import {
   Table as ReactstrapTable,
@@ -485,28 +486,90 @@ const Table: React.FC<TableProps> = ({
 
     fullData.forEach((row, rowIndex) => {
       const rowValues = excelColumns.map((col) => {
+        // اولویت با excelFunc
         if (col.excelFunc && typeof col.excelFunc === "function") {
           return col.excelFunc(row);
         }
 
+        // دومین اولویت با htmlFunc
         if (col.htmlFunc && typeof col.htmlFunc === "function") {
           return reactNodeToPlainText(col.htmlFunc(row, rowIndex));
         }
 
-        let rawValue = "";
+        let rawValue: any = "";
         if (col.key) {
           rawValue = _.get(row, col.key);
         }
 
-        if (
-          col.type === "date" ||
-          col.type === "time" ||
-          col.type === "datetime"
-        ) {
-          return formatDateForExcel(rawValue, col.type, col.format);
-        }
+        // پردازش بر اساس نوع ستون
+        switch (col.type) {
+          case "date":
+          case "time":
+          case "datetime":
+            return formatDateForExcel(rawValue, col.type, col.format);
 
-        return rawValue;
+          case "badge":
+            // پردازش badge: می‌تواند یک شیء یا آرایه‌ای از اشیا باشد
+            if (Array.isArray(rawValue)) {
+              return rawValue
+                .map((item: any) => {
+                  if (typeof item === "object" && item !== null) {
+                    let value = item.value || "";
+                    let extraValue = item.extraValue || "";
+
+                    if (col.translate && translates) {
+                      value = findString(value, translates) ?? value;
+                      if (extraValue) {
+                        extraValue =
+                          findString(extraValue, translates) ?? extraValue;
+                      }
+                    }
+
+                    if (extraValue) {
+                      return `${value} (${extraValue})`;
+                    }
+                    return value;
+                  }
+                  return String(item);
+                })
+                .join("، ");
+            } else if (typeof rawValue === "object" && rawValue !== null) {
+              const tagItem = rawValue as any;
+              let value = tagItem.value || "";
+              let extraValue = tagItem.extraValue || "";
+
+              if (col.translate && translates) {
+                value = findString(value, translates) ?? value;
+                if (extraValue) {
+                  extraValue = findString(extraValue, translates) ?? extraValue;
+                }
+              }
+              if (extraValue) {
+                return `${value} (${extraValue})`;
+              }
+              return value;
+            }
+            return rawValue;
+
+          case "text":
+            // پردازش ترجمه برای ستون‌های متنی
+            if (col.translate && translates && rawValue) {
+              const findString = (key: string, strings: any) => {
+                if (!strings || !key) return key;
+                return strings[key] || key;
+              };
+              return findString(String(rawValue), translates) || rawValue;
+            }
+            return rawValue;
+
+          case "price":
+          case "number":
+            // اعداد و مبالغ را به صورت خام برمی‌گردانیم
+            return rawValue;
+
+          default:
+            return rawValue;
+        }
       });
       worksheet.addRow(rowValues);
     });
