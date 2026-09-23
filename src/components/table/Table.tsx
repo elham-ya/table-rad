@@ -337,7 +337,7 @@ const Table: React.FC<TableProps> = ({
   // };
 
   const handleSizeChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    const pageSize = Number(event.target.value);
+    const pageSize = Number(event);
     setPageSize(pageSize);
     onSizeChange?.(event); // حالا خودِ event به مصرف‌کننده‌ی بیرونیِ کامپوننت Table هم پاس داده می‌شود
   };
@@ -552,15 +552,11 @@ const Table: React.FC<TableProps> = ({
             return rawValue;
 
           case "text":
-            // پردازش ترجمه برای ستون‌های متنی
-            if (col.translate && translates && rawValue) {
-              const findString = (key: string, strings: any) => {
-                if (!strings || !key) return key;
-                return strings[key] || key;
-              };
-              return findString(String(rawValue), translates) || rawValue;
-            }
-            return rawValue;
+          // پردازش ترجمه برای ستون‌های متنی
+          if (col.translate && translates && rawValue) {
+            return findString(String(rawValue), translates) || rawValue;
+          }
+          return rawValue;
 
           case "price":
           case "number":
