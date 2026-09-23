@@ -43,12 +43,12 @@ $pg-font: "Vazirmatn", system-ui, sans-serif;
 
 // ---------- انتخاب تعداد ردیف در هر صفحه ----------
 
+
 .pgSize {
+  position: relative;
   display: flex;
   align-items: center;
-  gap: 10px;
   height: 40px;
-  padding: 0 12px;
   border: 1px solid $pg-border;
   border-radius: $pg-radius-lg;
   background: #FFFFFF;
@@ -65,13 +65,21 @@ $pg-font: "Vazirmatn", system-ui, sans-serif;
   color: $pg-text;
   outline: none;
   cursor: pointer;
+  width: 100%;
+  height: 100%;
+  padding: 0 32px 0 12px;
 }
 
 .pgSizeIcon {
+  position: absolute;
+  left: 12px;
+  top: 40%;
+  transform: translateY(-50%);
+  pointer-events: none;
   font-size: 13px;
   line-height: 1;
   color: $pg-muted-icon;
-  margin-bottom: 5px;
+  font-weight: bold;
 }
 
 // ---------- کارت اصلیِ صفحه‌بندی ----------
