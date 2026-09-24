@@ -7,7 +7,6 @@ import {
   ContentType,
   ApiResponse,
 } from "../../types/index";
-import { findString } from "../../utils/index";
 import styles from "./table.module.scss";
 import {
   Table as ReactstrapTable,
@@ -50,6 +49,8 @@ const Table: React.FC<TableProps> = ({
   const [selectedRowIds, setSelectedRowIds] = useState<Set<string | number>>(
     new Set(),
   );
+  console.log("main data:", data);
+  console.log("main cols:", cols);
 
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(size);
@@ -157,6 +158,9 @@ const Table: React.FC<TableProps> = ({
 
     // withPrefix without number and checkbox
     const withPrefix: TableColumn[] = [...baseColumnsWithoutSpecials];
+
+    console.log("page at table:", page);
+    console.log("pageSize at table:", pageSize);
 
     // number column
     const numberColumnForRender: TableColumn = {
@@ -337,6 +341,7 @@ const Table: React.FC<TableProps> = ({
   // };
 
   const handleSizeChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    console.log("handleSizeChange at table:", event);
     const pageSize = Number(event);
     setPageSize(pageSize);
     onSizeChange?.(event); // حالا خودِ event به مصرف‌کننده‌ی بیرونیِ کامپوننت Table هم پاس داده می‌شود
@@ -408,6 +413,7 @@ const Table: React.FC<TableProps> = ({
 
   // React Element (خروجیِ htmlFunc) را به متنِ خامِ قابل‌نمایش در اکسل تبدیل می‌کند.
   // مثلاً <><div>علی</div><div>محمد</div></> را به "علی\nمحمد" تبدیل می‌کند.
+
   const reactNodeToPlainText = (node: unknown): string => {
     if (node === null || node === undefined || typeof node === "boolean") {
       return "";
@@ -421,13 +427,25 @@ const Table: React.FC<TableProps> = ({
         .filter(Boolean)
         .join("\n");
     }
+
+    // ✅ اضافه شده: مدیریت آبجکت‌های ساده (مثل آیتم‌های badge)
+    if (
+      typeof node === "object" &&
+      node !== null &&
+      !React.isValidElement(node)
+    ) {
+      const obj = node as Record<string, any>;
+      // اگر آبجکت دارای فیلد value باشد (ساختار badge ها)
+      if ("value" in obj) {
+        const label = obj.label ?? obj.value;
+        return String(label);
+      }
+      // در غیر این صورت stringify
+      return JSON.stringify(obj);
+    }
+
     if (React.isValidElement(node)) {
       const props = (node.props as Record<string, any>) || {};
-
-      // حالتِ اول: قراردادِ data-excel-label / data-excel-value: اگر خودِ
-      // عنصر این مقدار را دارد، مستقیم همان را استفاده کن، نه children‌اش را —
-      // چون children ممکن است شاملِ کامپوننتی مثلِ NumberFormat باشد که
-      // فرمت‌شدنِ عددش فقط داخلِ رندرِ واقعیِ React اتفاق می‌افتد.
       if (props["data-excel-value"] !== undefined) {
         const rawValue = props["data-excel-value"];
         const label = props["data-excel-label"];
@@ -438,20 +456,12 @@ const Table: React.FC<TableProps> = ({
             : String(rawValue);
         return label ? `${label}: ${formattedValue}` : formattedValue;
       }
-
-      // یک تگِ خامِ HTML است (div/span/p/...) → فقط برو داخلِ children‌اش
       if (typeof node.type === "string") {
         return reactNodeToPlainText(props.children);
       }
-
-      // یک Fragment است (<>...</>) → همان‌طور برو داخلِ children‌اش
       if (node.type === React.Fragment) {
         return reactNodeToPlainText(props.children);
       }
-
-      // حالتِ دوم: قراردادِ data-excel-* وجود ندارد و این یک کامپوننتِ
-      // سفارشیِ تابعی است — خودش را صدا می‌زنیم تا JSXِ واقعی‌ای که
-      // برمی‌گرداند به‌دست بیاید (سریع‌تر از SSR).
       if (typeof node.type === "function") {
         try {
           const rendered = (node.type as (p: unknown) => React.ReactNode)(
@@ -459,18 +469,14 @@ const Table: React.FC<TableProps> = ({
           );
           return reactNodeToPlainText(rendered);
         } catch {
-          // این کامپوننت امن برای اجرای دستی نبود (کلاس یا هوک‌دار،
-          // مثلِ NumberFormat) → آخرین راهِ چاره: بگذار React خودش رندرش کند
           return renderNodeViaSSR(node);
         }
       }
-
-      // هر نوعِ دیگری (forwardRef، memo، کلاس‌کامپوننت و ...) →
-      // مستقیم به رندرِ واقعی بسپاریم
       return renderNodeViaSSR(node);
     }
     return "";
   };
+  console.log("finalColumns:", finalColumns);
 
   const generateAndDownloadExcel = async (fullData: unknown[]) => {
     const workbook = new ExcelJS.Workbook();
@@ -480,16 +486,18 @@ const Table: React.FC<TableProps> = ({
     if (excelColumns.length === 0) return;
 
     const headerRow = excelColumns.map(
-      (col) => col.defaultTitle || col.title || "",
+      (col) => col.title || col.defaultTitle || "",
     );
     worksheet.addRow(headerRow);
-
+    console.log("full data:", fullData);
+    
     fullData.forEach((row, rowIndex) => {
       const rowValues = excelColumns.map((col) => {
         // اولویت با excelFunc
         if (col.excelFunc && typeof col.excelFunc === "function") {
           return col.excelFunc(row);
         }
+        console.log("col:", col);
 
         // دومین اولویت با htmlFunc
         if (col.htmlFunc && typeof col.htmlFunc === "function") {
@@ -498,75 +506,73 @@ const Table: React.FC<TableProps> = ({
 
         let rawValue: any = "";
         if (col.key) {
-          rawValue = _.get(row, col.key);
+          rawValue = _.get(row, col.key.trim());
+          console.log("col with key gets rawValue:", rawValue);
         }
 
-        // پردازش بر اساس نوع ستون
+        // پردازش بر اساس نوع ستون — دقیقاً با همان کامپوننت‌هایی که خودِ
+        // جدول روی صفحه برای نمایش استفاده می‌کند، تا اکسل همیشه با
+        // چیزی که کاربر روی صفحه می‌بیند یکسان بماند.
         switch (col.type) {
           case "date":
           case "time":
           case "datetime":
             return formatDateForExcel(rawValue, col.type, col.format);
 
+          case "text":
+            return reactNodeToPlainText(
+              <Text
+                value={rawValue}
+                strings={translates}
+                translate={col?.translate}
+              />,
+            );
+
+          case "price":
+            return reactNodeToPlainText(
+              <Price value={rawValue} strings={translates} />,
+            );
+
+          case "number":
+            if (typeof rawValue === "string" || typeof rawValue === "number") {
+              return String(rawValue);
+            }
+            return reactNodeToPlainText(<NumberCell value={rawValue} />);
+
           case "badge":
-            // پردازش badge: می‌تواند یک شیء یا آرایه‌ای از اشیا باشد
             if (Array.isArray(rawValue)) {
+              console.log('badge excel',rawValue);
+              
               return rawValue
                 .map((item: any) => {
-                  if (typeof item === "object" && item !== null) {
-                    let value = item.value || "";
-                    let extraValue = item.extraValue || "";
-
-                    if (col.translate && translates) {
-                      value = findString(value, translates) ?? value;
-                      if (extraValue) {
-                        extraValue =
-                          findString(extraValue, translates) ?? extraValue;
-                      }
-                    }
-
-                    if (extraValue) {
-                      return `${value} (${extraValue})`;
-                    }
-                    return value;
+                  if (item && typeof item === "object") {
+                    return item.value || item.label || "";
                   }
                   return String(item);
                 })
-                .join("، ");
-            } else if (typeof rawValue === "object" && rawValue !== null) {
-              const tagItem = rawValue as any;
-              let value = tagItem.value || "";
-              let extraValue = tagItem.extraValue || "";
-
-              if (col.translate && translates) {
-                value = findString(value, translates) ?? value;
-                if (extraValue) {
-                  extraValue = findString(extraValue, translates) ?? extraValue;
-                }
-              }
-              if (extraValue) {
-                return `${value} (${extraValue})`;
-              }
-              return value;
+                .filter(Boolean)
+                .join(", ");
+            } else if (rawValue && typeof rawValue === "object") {
+              return String(
+                (rawValue as any).value || (rawValue as any).label || "",
+              );
             }
-            return rawValue;
 
-          case "text":
-          // پردازش ترجمه برای ستون‌های متنی
-          if (col.translate && translates && rawValue) {
-            return findString(String(rawValue), translates) || rawValue;
-          }
-          return rawValue;
-
-          case "price":
-          case "number":
-            // اعداد و مبالغ را به صورت خام برمی‌گردانیم
-            return rawValue;
+            return reactNodeToPlainText(
+              <Tag
+                value={rawValue as any}
+                strings={translates}
+                translate={col?.translate}
+              />,
+            );
 
           default:
             return rawValue;
         }
       });
+
+      console.log("rowValues:", rowValues);
+
       worksheet.addRow(rowValues);
     });
 
