@@ -330,11 +330,6 @@ const Table: React.FC<TableProps> = ({
     onPageChange?.(pageNumber);
   };
 
-  // const handleSizeChange2 = (pageSize: number) => {
-  //   setPageSize(pageSize);
-  //   onSizeChange?.(pageSize);
-  // };
-
   const handleSizeChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     console.log("handleSizeChange at table:", event);
     const pageSize = Number(event);
