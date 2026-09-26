@@ -49,8 +49,6 @@ const Table: React.FC<TableProps> = ({
   const [selectedRowIds, setSelectedRowIds] = useState<Set<string | number>>(
     new Set(),
   );
-  console.log("main data:", data);
-  console.log("main cols:", cols);
 
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(size);
@@ -158,9 +156,6 @@ const Table: React.FC<TableProps> = ({
 
     // withPrefix without number and checkbox
     const withPrefix: TableColumn[] = [...baseColumnsWithoutSpecials];
-
-    console.log("page at table:", page);
-    console.log("pageSize at table:", pageSize);
 
     // number column
     const numberColumnForRender: TableColumn = {
@@ -476,7 +471,6 @@ const Table: React.FC<TableProps> = ({
     }
     return "";
   };
-  console.log("finalColumns:", finalColumns);
 
   const generateAndDownloadExcel = async (fullData: unknown[]) => {
     const workbook = new ExcelJS.Workbook();
@@ -497,8 +491,6 @@ const Table: React.FC<TableProps> = ({
         if (col.excelFunc && typeof col.excelFunc === "function") {
           return col.excelFunc(row);
         }
-        console.log("col:", col);
-
         // دومین اولویت با htmlFunc
         if (col.htmlFunc && typeof col.htmlFunc === "function") {
           return reactNodeToPlainText(col.htmlFunc(row, rowIndex));
@@ -507,7 +499,6 @@ const Table: React.FC<TableProps> = ({
         let rawValue: any = "";
         if (col.key) {
           rawValue = _.get(row, col.key.trim());
-          console.log("col with key gets rawValue:", rawValue);
         }
 
         // پردازش بر اساس نوع ستون — دقیقاً با همان کامپوننت‌هایی که خودِ
@@ -540,9 +531,7 @@ const Table: React.FC<TableProps> = ({
             return reactNodeToPlainText(<NumberCell value={rawValue} />);
 
           case "badge":
-            if (Array.isArray(rawValue)) {
-              console.log('badge excel',rawValue);
-              
+            if (Array.isArray(rawValue)) {              
               return rawValue
                 .map((item: any) => {
                   if (item && typeof item === "object") {
@@ -570,8 +559,6 @@ const Table: React.FC<TableProps> = ({
             return rawValue;
         }
       });
-
-      console.log("rowValues:", rowValues);
 
       worksheet.addRow(rowValues);
     });
