@@ -479,7 +479,7 @@ const Table: React.FC<TableProps> = ({
     );
     worksheet.addRow(headerRow);
     console.log("full data:", fullData);
-    
+
     fullData.forEach((row, rowIndex) => {
       const rowValues = excelColumns.map((col) => {
         // اولویت با excelFunc
@@ -526,7 +526,7 @@ const Table: React.FC<TableProps> = ({
             return reactNodeToPlainText(<NumberCell value={rawValue} />);
 
           case "badge":
-            if (Array.isArray(rawValue)) {              
+            if (Array.isArray(rawValue)) {
               return rawValue
                 .map((item: any) => {
                   if (item && typeof item === "object") {
@@ -871,8 +871,8 @@ const Table: React.FC<TableProps> = ({
                                 ${styles.td_container} ${isActionColumn ? styles.action_column : ""}
                                 ${styles.td_container} ${isNumberColumn ? styles.sticky_number_column : ""}
                                 ${styles.td_container} ${isCheckboxColumn ? styles.sticky_checkbox_column : styles.stick_to_right}
-
                                 `}
+                              style={col.style || undefined}
                             >
                               {(() => {
                                 switch (col.type) {

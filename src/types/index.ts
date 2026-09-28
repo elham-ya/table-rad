@@ -72,6 +72,7 @@ export interface TableColumn {
   format?: string;
   value?: any;
   translate?: boolean;
+  style?: React.CSSProperties;
 }
 export interface CheckboxProps<T = unknown> {
   checked?: boolean;
