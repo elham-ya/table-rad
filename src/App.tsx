@@ -297,7 +297,7 @@ function App() {
   ];
 
   const handleSelect = (selectedRows: unknown[]) => {
-    // console.log("ردیف‌های انتخاب‌شده :", selectedRows);
+    console.log("ردیف‌های انتخاب‌شده :", selectedRows);
   };
 
   const handlePageChange = (_pageNumber: number) => {

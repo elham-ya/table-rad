@@ -98,6 +98,7 @@ const Table: React.FC<TableProps> = ({
         const rowId = (row as any)?.id;
         return rowId != null && selectedRowIds.has(rowId);
       });
+      console.log("selectedDataa:", selectedData);
       onRowSelect(selectedData);
     }
   }, [selectedRowIds, data, onRowSelect]);
