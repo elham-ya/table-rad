@@ -8,6 +8,7 @@ import {
   ModalBody,
   ModalFooter,
   Input,
+  Spinner,
 } from "reactstrap";
 import {
   DndContext,
@@ -44,6 +45,7 @@ const SettingModal: React.FC<SettingModalProps> = ({
 }) => {
   const [items, setItems] = useState(columns);
   const [searchTerm, setSearchTerm] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     if (!isOpen) {
@@ -223,7 +225,88 @@ const SettingModal: React.FC<SettingModalProps> = ({
     }
   };
 
+  const saveSettings = async () => {
+    const hasResult =
+      apiConfigData &&
+      Array.isArray(apiConfigData?.result) &&
+      apiConfigData.result?.length > 0;
+
+    const newCommonColumns = items
+      .map((changedCol) => {
+        const originalCol = columns.find(
+          (col) => col.uniqueId === changedCol.uniqueId,
+        );
+        if (!originalCol) return null;
+        if (originalCol.title !== changedCol.title) {
+          return {
+            ...changedCol,
+            defaultTitle: changedCol.defaultTitle || originalCol.title,
+          };
+        }
+        return changedCol;
+      })
+      .filter(Boolean);
+
+    const finalColumns: FinalColumnProps = {
+      [tableName]: {
+        columns: [...newCommonColumns],
+      },
+    };
+
+    if (hasResult) {
+      const currentSetting = apiConfigData?.result[0]?.setting || {};
+
+      if (currentSetting?.tables && typeof currentSetting.tables === "object") {
+        // find related table
+        await requestSetSetting({
+          setting: {
+            ...currentSetting,
+            tables: {
+              ...currentSetting?.tables,
+              ...finalColumns,
+            },
+          },
+        });
+      } else {
+        await requestSetSetting({
+          setting: {
+            ...currentSetting,
+            tables: {
+              [tableName]: {
+                columns: [],
+              },
+            },
+          },
+        });
+      }
+    } else {
+      await requestSetSetting({
+        setting: {
+          tables: { ...finalColumns },
+        },
+      });
+    }
+  };
+
   const handleSave = async () => {
+    if (isSaving) return; // جلوگیری از ارسال هم‌زمانِ دو درخواست
+    setIsSaving(true);
+    try {
+      await saveSettings();
+      toggle();
+    } finally {
+      // در هر حالت (موفق، خطا یا قطعی شبکه) حالت لودینگ باید تمام شود
+      setIsSaving(false);
+    }
+  };
+
+  // در طولِ ذخیره، بستنِ مودال (انصراف، ضربدر) نباید کار کند
+  const handleToggle = () => {
+    if (isSaving) return;
+    toggle();
+  };
+
+  const handleSave2 = async () => {
     const hasResult =
       apiConfigData &&
       Array.isArray(apiConfigData?.result) &&
@@ -301,11 +384,22 @@ const SettingModal: React.FC<SettingModalProps> = ({
     <Modal
       isOpen={isOpen}
       size="lg"
-      toggle={toggle}
+      toggle={handleToggle}
+      keyboard={!isSaving}
       backdrop="static"
       className={styles.modal_wrapper}
     >
-      <ModalHeader toggle={toggle} className={styles.modal_itemheader}>
+      <ModalHeader
+        toggle={handleToggle}
+        className={styles.modal_itemheader}
+        close={
+          isSaving ? (
+            <button type="button" className="close" aria-label="Close" disabled>
+              <span aria-hidden="true">&times;</span>
+            </button>
+          ) : undefined
+        }
+      >
         تنظیمات ستون
       </ModalHeader>
       <ModalBody className={styles.modal_body}>
@@ -364,7 +458,8 @@ const SettingModal: React.FC<SettingModalProps> = ({
         <Button
           color="secondary"
           className={styles.cancel_btn}
-          onClick={toggle}
+          onClick={handleToggle}
+          disabled={isSaving}
         >
           انصراف
         </Button>
@@ -372,8 +467,15 @@ const SettingModal: React.FC<SettingModalProps> = ({
           color="primary"
           className={styles.save_btn}
           onClick={handleSave}
+          disabled={isSaving}
+          aria-busy={isSaving}
         >
-          تایید
+          {isSaving && (
+            <Spinner size="sm" tag="span" className={styles.save_spinner}>
+              در حال ذخیره...
+            </Spinner>
+          )}
+          ذخیره
         </Button>
       </ModalFooter>
     </Modal>
