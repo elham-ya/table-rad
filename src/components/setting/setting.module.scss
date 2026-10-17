@@ -54,6 +54,7 @@
     font-size: 13px;
     font-weight: 500;
     color: #ffffff;
+    // عرضِ ثابت: با آمدنِ اسپینر، دکمه بزرگ‌تر نشود و دکمه‌ی «انصراف» جابه‌جا نشود
     min-width: 88px;
     display: inline-flex;
     align-items: center;
@@ -83,6 +84,31 @@
       color: #0C0E10;
       cursor: not-allowed;
     }
+  }
+  // هشدارِ خطای ذخیره: بین بدنه و فوتر، پس با اسکرولِ فهرست از دید خارج نمی‌شود
+  .save_error {
+    flex-shrink: 0; // مودال flex-column است؛ هشدار فشرده نشود
+    padding: 12px 2rem 0;
+  }
+  .save_error_alert {
+    // flex به‌جای position:absolute: جای دکمه‌ی بستن در راست‌به‌چپ خودکار درست می‌شود
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 12px;
+    padding: 0.75rem 1rem;
+    font-size: 13px;
+    white-space: pre-line; // هر پیام در یک سطر
+    :global(.close) {
+      flex-shrink: 0;
+      margin-inline-start: 12px;
+      color: inherit;
+      font-size: 1.25rem;
+      line-height: 1;
+    }
+  }
+  .save_error_text {
+    flex: 1 1 auto;
   }
   .search_setting {
     padding: 0 2rem;

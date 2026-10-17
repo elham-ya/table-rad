@@ -333,8 +333,9 @@ const Table: React.FC<TableProps> = ({
 
   const handleSizeChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     console.log("handleSizeChange at table:", event);
-    const pageSize = Number(event);
-    setPageSize(pageSize);
+    const newSize = Number(event.target.value);
+    setPageSize(newSize);
+    setPage(1);
     onSizeChange?.(event); // حالا خودِ event به مصرف‌کننده‌ی بیرونیِ کامپوننت Table هم پاس داده می‌شود
   };
 
