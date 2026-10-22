@@ -44,13 +44,14 @@ const Table: React.FC<TableProps> = ({
   onExcelExportRequest,
   size = 10,
   translates = null,
+  defaultPage = 1,
 }) => {
   // just keeping index
   const [selectedRowIds, setSelectedRowIds] = useState<Set<string | number>>(
     new Set(),
   );
 
-  const [page, setPage] = useState(1);
+  const [page, setPage] = useState(defaultPage);
   const [pageSize, setPageSize] = useState(size);
   const [settingModal, setSettingModal] = useState(false);
   const [configData, setConfigData] = useState<ApiResponse | null>(null);

@@ -48,6 +48,7 @@ export interface TableProps {
   size?: number;
   onExcelExportRequest?: (offset: number, signal:AbortSignal) => Promise<ExcelExportResponse>;
   translates?: translateProp;
+  defaultPage?: number;
 }
 
 export interface TableColumn {
