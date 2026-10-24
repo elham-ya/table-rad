@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from "react";
+import { toast } from "react-toastify";
 import ReactDOMServer from "react-dom/server";
 import _ from "lodash";
 import {
@@ -14,7 +15,6 @@ import {
   Col,
   Button,
   Progress,
-  Badge,
 } from "reactstrap";
 import moment from "moment-jalaali";
 import Checkbox from "../checkBox";
@@ -29,6 +29,44 @@ import Text from "./Text";
 import Tag from "./Tag";
 import NumberCell from "./Number";
 import Price from "./Price";
+
+// ---------- پیام‌های خروجی اکسل (toast) ----------
+// ToastContainer باید در صفحه‌ی اصلیِ پروژه (والدِ جدول) رندر شده باشد؛ جدول
+// خودش ToastContainer نمی‌سازد و فقط توست را به همان ظرفِ صفحه می‌فرستد.
+const EXPORT_TOAST_POSITION = "bottom-left" as const; // گوشه‌ی پایین سمت چپ
+const EXPORT_SUCCESS_MESSAGE = "فایل اکسل با موفقیت دانلود شد";
+const EXPORT_ERROR_MESSAGE = "دانلود فایل اکسل ناموفق بود";
+const EXPORT_EMPTY_MESSAGE = "داده‌ای برای دانلود وجود ندارد";
+const EXPORT_NO_COLUMNS_MESSAGE = "هیچ ستونی برای خروجی اکسل فعال نیست";
+const EXPORT_CANCELLED_MESSAGE = "دانلود توسط کاربر لغو شد";
+
+const showExportToast = (
+  type: "success" | "error" | "info",
+  message: string,
+) => {
+  // pre-line: اگر چند پیام داشتیم، هر کدام در یک سطر نمایش داده شود
+  toast[type](<span style={{ whiteSpace: "pre-line" }}>{message}</span>, {
+    position: EXPORT_TOAST_POSITION,
+  });
+};
+
+// message در پاسخِ API (وقتی hasError: true است) آرایه‌ای از رشته‌هاست.
+// اگر چیزی قابل‌نمایش نبود، رشته‌ی خالی برمی‌گرداند تا پیامِ عمومی استفاده شود.
+const extractApiMessage = (message: unknown): string => {
+  const items = Array.isArray(message) ? message : [message];
+  return items
+    .map((item) => {
+      if (typeof item === "string") return item.trim();
+      if (item && typeof item === "object") {
+        const obj = item as Record<string, unknown>;
+        const text = obj.message ?? obj.text ?? obj.title ?? obj.description;
+        return typeof text === "string" ? text.trim() : "";
+      }
+      return "";
+    })
+    .filter(Boolean)
+    .join("\n");
+};
 
 const Table: React.FC<TableProps> = ({
   id,
@@ -59,13 +97,15 @@ const Table: React.FC<TableProps> = ({
   // وضعیت دانلود اکسل
   const [abortController, setAbortController] =
     useState<AbortController | null>(null);
-  const [exportStatus, setExportStatus] = useState<
-    "idle" | "exporting" | "success" | "error" | "cancelled"
-  >("idle");
+  const [exportStatus, setExportStatus] = useState<"idle" | "exporting">(
+    "idle",
+  );
   const [exportProgress, setExportProgress] = useState(0);
 
   const paginationRef = useRef<HTMLDivElement>(null);
   const cleanupTimerRef = useRef<NodeJS.Timeout | null>(null);
+  // آخرین پیامِ خطای API (hasError: true) در دریافتِ داده‌ی اکسل؛ خالی = پیامِ عمومی
+  const exportErrorMessageRef = useRef("");
   const [showStickyPagination, setShowStickyPagination] = useState(false);
 
   useEffect(() => {
@@ -635,13 +675,14 @@ const Table: React.FC<TableProps> = ({
           continue;
         }
 
+        exportErrorMessageRef.current = "";
         return response.result ?? [];
       } catch (error: any) {
         if (error.name === "AbortError") {
-          setExportStatus("cancelled");
           return null;
         }
         console.warn(`تلاش ${attempt} ناموفق`, error);
+        exportErrorMessageRef.current = ""; // خطای کلی (شبکه/...) → پیامِ عمومی
         if (attempt === 3) return null;
         await new Promise((resolve) => setTimeout(resolve, 1000 * attempt));
       }
@@ -656,8 +697,14 @@ const Table: React.FC<TableProps> = ({
     }
 
     if (totalCount === 0) {
-      setExportStatus("error");
-      setTimeout(() => setExportStatus("idle"), 4000);
+      showExportToast("error", EXPORT_EMPTY_MESSAGE);
+      return;
+    }
+
+    // بدونِ ستونِ فعال برای اکسل فایلی ساخته نمی‌شود؛ بی‌خودی داده نگیریم و
+    // پیامِ «موفق» هم نشان ندهیم
+    if (!finalColumns.some((col) => col.excel === true)) {
+      showExportToast("error", EXPORT_NO_COLUMNS_MESSAGE);
       return;
     }
 
@@ -702,17 +749,21 @@ const Table: React.FC<TableProps> = ({
       // ساخت و دانلود فایل
       await generateAndDownloadExcel(collectedData);
 
-      setExportStatus("success");
-      cleanup(4000);
+      showExportToast("success", EXPORT_SUCCESS_MESSAGE);
+      cleanup();
     } catch (error: any) {
       if (error.name === "AbortError") {
-        setExportStatus("cancelled");
+        // پیامِ «لغو» فقط یک بار و از handleCancelExport نشان داده می‌شود
+        cleanup();
         return;
-      } else {
-        console.error("خطا در اکسپورت:", error);
-        setExportStatus("error");
       }
-      cleanup(4000);
+      console.error("خطا در اکسپورت:", error);
+      // اگر API با hasError پیام داده، همان نمایش داده می‌شود؛ وگرنه پیامِ عمومی
+      showExportToast(
+        "error",
+        exportErrorMessageRef.current || EXPORT_ERROR_MESSAGE,
+      );
+      cleanup();
     }
   };
 
@@ -720,8 +771,8 @@ const Table: React.FC<TableProps> = ({
     if (abortController) {
       abortController.abort();
     }
-    setExportStatus("cancelled");
-    cleanup(4000);
+    showExportToast("info", EXPORT_CANCELLED_MESSAGE);
+    cleanup();
   };
 
   const renderExportButton = () => {
@@ -763,27 +814,6 @@ const Table: React.FC<TableProps> = ({
     );
   };
 
-  const renderExportMessage = () => {
-    if (exportStatus === "success")
-      return (
-        <Badge color="success" pill>
-          فایل با موفقیت دانلود شد
-        </Badge>
-      );
-    if (exportStatus === "error")
-      return (
-        <Badge color="danger" pill>
-          دانلود ناموفق بود
-        </Badge>
-      );
-    if (exportStatus === "cancelled")
-      return (
-        <Badge color="secondary" pill>
-          دانلود توسط کاربر لغو شد
-        </Badge>
-      );
-    return null;
-  };
   const shouldShowPagination = totalCount > 0;
   if (configData === null || configData?.hasError === true) {
     return null;
@@ -798,7 +828,6 @@ const Table: React.FC<TableProps> = ({
           {/* start excel download */}
           <div className={styles.download_Excel_wrapper}>
             {renderExportButton()}
-            {renderExportMessage()}
           </div>
           {/* end excel download */}
           <SettingModal
@@ -1018,6 +1047,18 @@ const Table: React.FC<TableProps> = ({
             </div>
           )}
         </div>
+        {/* <ToastContainer
+          position="bottom-left"
+          autoClose={4000}
+          hideProgressBar={false}
+          newestOnTop={true}
+          closeOnClick
+          rtl
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+          theme="light"
+        /> */}
       </Row>
     );
   }

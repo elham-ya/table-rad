@@ -309,7 +309,7 @@ function App() {
   };
 
   const config = {
-    "Access-Token": "8234390608-5b69510c0A1547c0aab17781d8738039.XzIwMjY5",
+    "Access-Token": "3154878657-f821ee4507c945fdb27aB7a18efa88fd.XzIwMjYxMA",
     "Client-Id": "17959574q2f0347718971594ccd86f3f4",
     url: `https://api.sandpod.ir/srv/cms-sandbox/api/core/users/setting`,
   };
@@ -337,6 +337,49 @@ function App() {
     podcms_Test: "پنل تست cms",
   };
 
+  const fetchPage = async (offset = 0, signal) => {
+
+    return dataNormalized;
+    // console.log("fetchPage offset list:", offset);
+    // const excelUrl =
+    //   props.mode === "supervisor"
+    //     ? `${config.urls.invoice}/supervisor`
+    //     : config.urls.invoiceManage;
+
+    // // ۱. ارسال درخواست
+    // const response = await axios.get(excelUrl, {
+    //   headers: {
+    //     "Client-Id": config.global.clientId,
+    //     "Access-Token": token,
+    //   },
+    //   params: {
+    //     ...apiParams,
+    //     size: 50,
+    //     offset,
+    //   },
+    //   signal,
+    // });
+
+    // console.log("پاسخ خام axios:", response.data);
+
+    // // ۲. استخراج آرایه فاکتورها از ساختار تو در توی بک‌اند
+    // // توجه: در بک‌اند شما داده‌ها داخل data.result.invoices هستند
+    // const rawInvoices = response?.data?.result?.invoices;
+
+    // // ۳. نرمال‌سازی داده‌ها دقیقاً مشابه آنچه در صفحه نمایش داده می‌شود
+    // // اگر rawInvoices وجود نداشت یا آرایه نبود، آرایه خالی برگردان
+    // const normalizedInvoices = Array.isArray(rawInvoices)
+    //   ? rawInvoices.map(normalizeInvoiceRow).filter(Boolean)
+    //   : [];
+
+    // // ۴. بازگرداندن ساختاری که Table.tsx انتظار دارد
+    // // یعنی یک آبجکت که فیلد result آن آرایه‌ای از ردیف‌هاست
+    // return {
+    //   ...response.data,
+    //   result: normalizedInvoices,
+    // };
+  };
+
   return (
     <TableView
       id="test"
@@ -351,6 +394,7 @@ function App() {
       pageSizeOptions={[10, 20, 25, 30, 40, 50]}
       size={10}
       translates={myTranslate}
+      onExcelExportRequest={fetchPage}
     />
   );
 }
