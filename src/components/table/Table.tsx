@@ -1,4 +1,10 @@
-import React, { useState, useEffect, useMemo, useRef } from "react";
+import React, {
+  useState,
+  useEffect,
+  useMemo,
+  useRef,
+  useCallback,
+} from "react";
 import { toast } from "react-toastify";
 import ReactDOMServer from "react-dom/server";
 import _ from "lodash";
@@ -83,6 +89,7 @@ const Table: React.FC<TableProps> = ({
   size = 10,
   translates = null,
   defaultPage = 1,
+  rowKey = "id",
 }) => {
   // just keeping index
   const [selectedRowIds, setSelectedRowIds] = useState<Set<string | number>>(
@@ -107,6 +114,40 @@ const Table: React.FC<TableProps> = ({
   // آخرین پیامِ خطای API (hasError: true) در دریافتِ داده‌ی اکسل؛ خالی = پیامِ عمومی
   const exportErrorMessageRef = useRef("");
   const [showStickyPagination, setShowStickyPagination] = useState(false);
+
+  const getRowUniqueId = useCallback(
+    (row: any, rowIndex: number): string | number => {
+      // گام ۱: تبدیل cols به آرایه
+      const columnsArray: TableColumn[] = Array.isArray(cols)
+        ? cols
+        : cols
+          ? [cols]
+          : [];
+
+      // گام ۲: پیدا کردن ستونی که uniqueId آن برابر با مقدارِ پراپِ «کلیدِ یکتا» است
+      const targetColumn = columnsArray.find((col) => col.uniqueId === rowKey);
+
+      // گام ۳: استخراجِ فیلدِ «key» از آن ستون (مسیرِ واقعی در داده، مثل "barCode" یا "metadata.billNumber")
+      const dataKey = targetColumn?.key;
+
+      // گام ۴: خواندن مقدار از ردیف با استفاده از آن مسیر
+      if (dataKey) {
+        const value = _.get(row, dataKey);
+        if (value != null && value !== "") {
+          return value;
+        }
+      }
+
+      // اولویت بعدی: فیلد id (برای سازگاری با کد قبلی)
+      if (row?.id != null) {
+        return row.id;
+      }
+
+      // اولویت نهایی: استفاده از شماره ردیف (برای جلوگیری از تکرار)
+      return `row-${rowIndex}`;
+    },
+    [rowKey, cols],
+  );
 
   useEffect(() => {
     if (totalCount <= 0) {
@@ -135,14 +176,13 @@ const Table: React.FC<TableProps> = ({
   // selection of rows send to parent
   useEffect(() => {
     if (onRowSelect) {
-      const selectedData = data.filter((row) => {
-        const rowId = (row as any)?.id;
-        return rowId != null && selectedRowIds.has(rowId);
+      const selectedData = data.filter((row, index) => {
+        const rowId = getRowUniqueId(row, index);
+        return selectedRowIds.has(rowId);
       });
-      console.log("selectedDataa:", selectedData);
       onRowSelect(selectedData);
     }
-  }, [selectedRowIds, data, onRowSelect]);
+  }, [selectedRowIds, data, onRowSelect, getRowUniqueId]);
 
   useEffect(() => {
     if (requestConfig?.url && requestConfig["Access-Token"] && !configData) {
@@ -232,9 +272,7 @@ const Table: React.FC<TableProps> = ({
                 setSelectedRowIds(
                   checked
                     ? new Set(
-                        data
-                          .map((row) => (row as any)?.id)
-                          .filter((id) => id != null),
+                        data.map((row, index) => getRowUniqueId(row, index)),
                       )
                     : new Set(),
                 );
@@ -242,20 +280,18 @@ const Table: React.FC<TableProps> = ({
             />
           ),
           htmlFunc: (row: any, rowIndex: number) => {
-            const rowId = row?.id;
+            const rowId = getRowUniqueId(row, rowIndex);
             return (
               <Checkbox
-                uniqueId={rowId}
-                checked={rowId !== undefined && selectedRowIds.has(rowId)}
+                uniqueId={String(rowId)}
+                checked={selectedRowIds.has(rowId)}
                 onChange={(checked) => {
                   setSelectedRowIds((prev) => {
                     const next = new Set(prev);
-                    const id = row?.id;
-                    if (id === undefined || id === null) return next;
                     if (checked) {
-                      next.add(id);
+                      next.add(rowId);
                     } else {
-                      next.delete(id);
+                      next.delete(rowId);
                     }
                     return next;
                   });
@@ -356,6 +392,7 @@ const Table: React.FC<TableProps> = ({
     id,
     page,
     pageSize,
+    getRowUniqueId,
   ]);
 
   const visibleColumns = useMemo(() => {
@@ -886,7 +923,7 @@ const Table: React.FC<TableProps> = ({
                   ) : (
                     data.map((row, rowIndex) => (
                       <tr
-                        key={(row as any).id ?? rowIndex}
+                        key={getRowUniqueId(row, rowIndex)}
                         className={styles.tr_container}
                       >
                         {visibleColumns.map((col) => {
