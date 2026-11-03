@@ -363,7 +363,9 @@ const Table: React.FC<TableProps> = ({
     });
 
     // adding new columns is not in api
-    withPrefix.forEach((originalCol) => {
+    // ستون جدید به‌جای چسبیدن به انتها، در همان جایگاهی که دولوپر در cols
+    // تعریف کرده درج می‌شود: قبل از اولین ستونِ بعدیِ همسایه‌اش که در نتیجه حضور دارد.
+    withPrefix.forEach((originalCol, devIndex) => {
       // ignore special columns, recently has been added
       if (originalCol.uniqueId?.startsWith("__")) {
         return;
@@ -373,12 +375,29 @@ const Table: React.FC<TableProps> = ({
       const alreadyAdded = resultColumns.some(
         (col) => col.uniqueId === originalCol.uniqueId,
       );
-      if (!alreadyAdded) {
-        // column is new, will added within visible:false(do not show so user can active visibility in modal)
-        resultColumns.push({
-          ...originalCol,
-          visible: false,
-        });
+      if (alreadyAdded) {
+        return;
+      }
+
+      // لنگر: اولین ستونی که در ترتیبِ دولوپر «بعد» از ستون جدید می‌آید
+      // و هم‌اکنون در resultColumns وجود دارد
+      let anchorId: string | undefined;
+      for (let j = devIndex + 1; j < withPrefix.length; j++) {
+        const nextId = withPrefix[j].uniqueId;
+        if (resultColumns.some((col) => col.uniqueId === nextId)) {
+          anchorId = nextId;
+          break;
+        }
+      }
+
+      if (anchorId) {
+        const insertIndex = resultColumns.findIndex(
+          (col) => col.uniqueId === anchorId,
+        );
+        resultColumns.splice(insertIndex, 0, { ...originalCol });
+      } else {
+        // هیچ همسایه‌ی شناخته‌شده‌ای بعد از آن نیست → انتها
+        resultColumns.push({ ...originalCol });
       }
     });
 

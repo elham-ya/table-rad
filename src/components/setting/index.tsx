@@ -144,7 +144,7 @@ const SettingModal: React.FC<SettingModalProps> = ({
     }
   };
 
-  const mergeLists = (apiList: TableColumn[], devList: TableColumn[]) => {
+  const mergeLists2 = (apiList: TableColumn[], devList: TableColumn[]) => {
     if (!apiList || apiList.length === 0) return [...devList];
     if (!devList || devList.length === 0) return [...apiList];
 
@@ -163,6 +163,50 @@ const SettingModal: React.FC<SettingModalProps> = ({
     }
 
     return [...apiList, ...noVisible];
+  };
+
+  const mergeLists = (apiList: TableColumn[], devList: TableColumn[]) => {
+    if (!apiList || apiList.length === 0) return [...devList];
+    if (!devList || devList.length === 0) return [...apiList];
+
+    const apiIds = new Set(apiList.map((item) => item.uniqueId));
+    const devIds = new Set(devList.map((item) => item.uniqueId));
+
+    // ستون‌های معتبر از سرور (با تنظیمات و ترتیب ذخیره‌شده)
+    const merged = apiList.filter(
+      (item) => devIds.has(item.uniqueId) && !item.uniqueId?.startsWith("__"),
+    );
+
+    // ستون‌های جدید (فقط در کد دولوپر)
+    const onlyInDev = devList.filter(
+      (item) => !apiIds.has(item.uniqueId) && !item.uniqueId?.startsWith("__"),
+    );
+
+    //  درج ستون جدید در جایگاه تعریف‌شده توسط دولوپر (نه انتها)
+    const result = [...merged];
+    onlyInDev.forEach((newCol) => {
+      const devIndex = devList.findIndex(
+        (item) => item.uniqueId === newCol.uniqueId,
+      );
+      let anchorId: string | undefined;
+      for (let j = devIndex + 1; j < devList.length; j++) {
+        const nextId = devList[j].uniqueId;
+        if (result.some((col) => col.uniqueId === nextId)) {
+          anchorId = nextId;
+          break;
+        }
+      }
+      if (anchorId) {
+        const insertIndex = result.findIndex(
+          (col) => col.uniqueId === anchorId,
+        );
+        result.splice(insertIndex, 0, newCol);
+      } else {
+        result.push(newCol);
+      }
+    });
+
+    return result;
   };
 
   // useEffect(() => {
@@ -290,7 +334,6 @@ const SettingModal: React.FC<SettingModalProps> = ({
       });
       data = await res.json();
       console.log("success data:", data);
-      
     } catch (err) {
       // قطعیِ شبکه یا پاسخِ غیر JSON
       console.log("Post request faild!:", err);
@@ -300,8 +343,8 @@ const SettingModal: React.FC<SettingModalProps> = ({
     // فقط hasError تعیین می‌کند: false یعنی موفق، هر چیز دیگر (true یا بدنه‌ی نامعتبر) خطا.
     // مهم: در خطا نباید onGetData صدا زده شود؛ جدول با hasError: true هیچ چیز رندر نمی‌کند.
     if (data?.hasError !== false) {
-      console.log("data 1:",data);
-      
+      console.log("data 1:", data);
+
       throw new Error(extractErrorMessage(data?.message));
     }
 
