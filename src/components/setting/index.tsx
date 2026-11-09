@@ -80,9 +80,15 @@ const SettingModal: React.FC<SettingModalProps> = ({
     }
   }, [isOpen]);
 
+  // useEffect(() => {
+  //   initializeItems();
+  // }, [isOpen, apiConfigData, columns]);
+
   useEffect(() => {
+    if (!isOpen) return;
     initializeItems();
-  }, [isOpen, apiConfigData, columns]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen, apiConfigData]);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -120,11 +126,8 @@ const SettingModal: React.FC<SettingModalProps> = ({
   const targetTable = getSetting(tableName);
 
   const initializeItems = () => {
-    // if (!isOpen) return;  //  خط if (!isOpen) return; حذف شد تا همگام‌سازی همیشه انجام شود
-
     // گرفتن ستون‌های ذخیره شده از API
     const savedColumns = targetTable?.columns;
-
     // اگر تنظیمات ذخیره شده وجود دارد
     if (
       savedColumns &&
@@ -142,27 +145,6 @@ const SettingModal: React.FC<SettingModalProps> = ({
 
       setItems(filteredDefaultColumns);
     }
-  };
-
-  const mergeLists2 = (apiList: TableColumn[], devList: TableColumn[]) => {
-    if (!apiList || apiList.length === 0) return [...devList];
-    if (!devList || devList.length === 0) return [...apiList];
-
-    const apiIds = new Set(apiList.map((item) => item.uniqueId));
-
-    const onlyInDev = devList.filter((item) => !apiIds.has(item.uniqueId));
-
-    const noVisible = onlyInDev.map((item) => ({
-      ...item,
-      excel: false,
-      visible: false,
-    }));
-
-    if (apiList.length >= devList.length) {
-      return [...apiList];
-    }
-
-    return [...apiList, ...noVisible];
   };
 
   const mergeLists = (apiList: TableColumn[], devList: TableColumn[]) => {
@@ -242,7 +224,6 @@ const SettingModal: React.FC<SettingModalProps> = ({
           width: updates.width ?? "",
           visible: updates.visible ?? true,
           excel: updates.excel ?? true,
-          key: updates.key ?? uniqueId,
         };
         return [...prev, newItem];
       } else {
@@ -273,7 +254,6 @@ const SettingModal: React.FC<SettingModalProps> = ({
     updateContentChange(uniqueId, { excel: flag });
   };
 
-
   // قرارداد: در موفقیت resolve می‌شود (و داده‌ی جدید را به جدول می‌دهد).
   // در هر خطا یک Error پرتاب می‌کند که message آن همان «متنِ قابل‌نمایش به کاربر» است.
   const requestSetSetting = async (params: any) => {
@@ -289,7 +269,6 @@ const SettingModal: React.FC<SettingModalProps> = ({
         body: JSON.stringify(params),
       });
       data = await res.json();
-      console.log("success data:", data);
     } catch (err) {
       // قطعیِ شبکه یا پاسخِ غیر JSON
       console.log("Post request faild!:", err);
@@ -299,8 +278,6 @@ const SettingModal: React.FC<SettingModalProps> = ({
     // فقط hasError تعیین می‌کند: false یعنی موفق، هر چیز دیگر (true یا بدنه‌ی نامعتبر) خطا.
     // مهم: در خطا نباید onGetData صدا زده شود؛ جدول با hasError: true هیچ چیز رندر نمی‌کند.
     if (data?.hasError !== false) {
-      console.log("data 1:", data);
-
       throw new Error(extractErrorMessage(data?.message));
     }
 
@@ -313,19 +290,32 @@ const SettingModal: React.FC<SettingModalProps> = ({
       Array.isArray(apiConfigData?.result) &&
       apiConfigData.result?.length > 0;
 
+    // قرارداد فهرست‌سفید: payload تنظیمات فقط «ترجیحات کاربر» را حمل می‌کند:
+    // uniqueId، title، width، visible، excel و نشانگر defaultTitle.
+    // فیلدهای ساختاری (type، key، translate، format، style، htmlFunc و ...)
+    // همیشه با uniqueId از cols دولوپر حل می‌شوند و هرگز به سرور نمی‌روند.
     const newCommonColumns = items
       .map((changedCol) => {
         const originalCol = columns.find(
           (col) => col.uniqueId === changedCol.uniqueId,
         );
         if (!originalCol) return null;
-        if (originalCol.title !== changedCol.title) {
-          return {
-            ...changedCol,
-            defaultTitle: changedCol.defaultTitle || originalCol.title,
-          };
-        }
-        return changedCol;
+
+        // منطق فعلی defaultTitle (نشانگر شخصی‌سازی عنوان) عیناً حفظ می‌شود
+        const defaultTitle =
+          originalCol.title !== changedCol.title
+            ? changedCol.defaultTitle || originalCol.title
+            : changedCol.defaultTitle;
+
+        // تصویرِ فهرست‌سفید: هر فیلد غیرترجیحاتی همین‌جا جا می‌ماند
+        return {
+          uniqueId: changedCol.uniqueId,
+          title: changedCol.title,
+          width: changedCol.width,
+          visible: changedCol.visible,
+          excel: changedCol.excel,
+          ...(defaultTitle ? { defaultTitle } : {}),
+        };
       })
       .filter(Boolean);
 

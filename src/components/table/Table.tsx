@@ -429,7 +429,6 @@ const Table: React.FC<TableProps> = ({
   };
 
   const handleSizeChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    console.log("handleSizeChange at table:", event);
     const newSize = Number(event.target.value);
     setPageSize(newSize);
     setPage(1);
@@ -577,7 +576,6 @@ const Table: React.FC<TableProps> = ({
       (col) => col.title || col.defaultTitle || "",
     );
     worksheet.addRow(headerRow);
-    console.log("full data:", fullData);
 
     fullData.forEach((row, rowIndex) => {
       const rowValues = excelColumns.map((col) => {
@@ -710,7 +708,6 @@ const Table: React.FC<TableProps> = ({
     offset: number,
     signal: AbortSignal,
   ): Promise<unknown[] | null> => {
-    console.log("page fetchPageWithRetry:", offset);
 
     for (let attempt = 1; attempt <= 3; attempt++) {
       try {
@@ -719,9 +716,6 @@ const Table: React.FC<TableProps> = ({
         }
 
         if (!onExcelExportRequest) return null;
-
-        console.log("offset at fetchPageWithRetry:", offset);
-
         const response = await onExcelExportRequest(offset, signal);
 
         if (response.hasError) {

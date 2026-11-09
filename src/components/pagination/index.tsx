@@ -403,14 +403,12 @@ export default function App() {
 
   // این‌جا محلی است که می‌توانید به رویداد تغییر صفحه دسترسی داشته باشید
   const handlePageChange = (page: number) => {
-    console.log("onPageChange ->", page);
     setCurrentPage(page);
   };
 
   // این‌جا محلی است که می‌توانید به رویداد تغییر تعداد ردیف دسترسی داشته باشید
   // توجه: ورودی این تابع خودِ event دراپ‌داون است، نه عدد آماده
   const handleSizeChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    console.log("onSizeChange event ->", event);
     const newSize = Number(event.target.value);
     setSize(newSize);
     setCurrentPage(1);
