@@ -517,7 +517,7 @@ const Table: React.FC<TableProps> = ({
         .join("\n");
     }
 
-    // ✅ اضافه شده: مدیریت آبجکت‌های ساده (مثل آیتم‌های badge)
+    //  اضافه شده: مدیریت آبجکت‌های ساده (مثل آیتم‌های badge)
     if (
       typeof node === "object" &&
       node !== null &&

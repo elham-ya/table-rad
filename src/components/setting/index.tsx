@@ -273,50 +273,6 @@ const SettingModal: React.FC<SettingModalProps> = ({
     updateContentChange(uniqueId, { excel: flag });
   };
 
-  // متد تست خطای نتورک
-  // const requestSetSetting = async (params: any) => {
-  //   let data: ApiResponse;
-
-  //   // 🔴🔴🔴 کد موقت فقط برای تست — بعد از تست حتماً حذف کنید 🔴🔴🔴
-  //   const FORCE_ERROR_FOR_TEST = true;
-  //   if (FORCE_ERROR_FOR_TEST) {
-  //     // شبیه‌سازی پاسخ واقعی سرور با خطا
-  //     data = {
-  //       hasError: true,
-  //       errorCode: 1001,
-  //       message: ["دسترسی شما برای ذخیره‌ی تنظیمات این جدول مجاز نیست."],
-  //       result: [],
-  //       refId: "test-123",
-  //       referenceNumber: 0,
-  //       count: 0,
-  //       aggregations: 0,
-  //       metaData: [],
-  //     } as unknown as ApiResponse;
-  //   } else {
-  //     // کد اصلی
-  //     try {
-  //       const res = await fetch(requestConfig.url, {
-  //         method: "POST",
-  //         headers: {
-  //           "Access-Token": `${requestConfig["Access-Token"]}`,
-  //           "Client-Id": requestConfig["Client-Id"],
-  //           "Content-Type": "application/json",
-  //         },
-  //         body: JSON.stringify(params),
-  //       });
-  //       data = await res.json();
-  //     } catch (err) {
-  //       console.log("Post request faild!:", err);
-  //       throw new Error(GENERIC_ERROR_MESSAGE);
-  //     }
-  //   }
-  //   // 🔴🔴🔴 پایان کد موقت 🔴🔴🔴
-
-  //   if (data?.hasError !== false) {
-  //     throw new Error(extractErrorMessage(data?.message));
-  //   }
-  //   onGetData(data);
-  // };
 
   // قرارداد: در موفقیت resolve می‌شود (و داده‌ی جدید را به جدول می‌دهد).
   // در هر خطا یک Error پرتاب می‌کند که message آن همان «متنِ قابل‌نمایش به کاربر» است.
@@ -387,6 +343,11 @@ const SettingModal: React.FC<SettingModalProps> = ({
         await requestSetSetting({
           setting: {
             ...currentSetting,
+            // tables: {
+            //   'businessAlphaTicket': {
+            //     columns: []
+            //   }
+            // },
             tables: {
               ...currentSetting?.tables,
               ...finalColumns,
