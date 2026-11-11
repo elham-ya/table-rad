@@ -8,6 +8,8 @@ import {
   ModalBody,
   ModalFooter,
   Input,
+  Spinner,
+  Alert,
 } from "reactstrap";
 import {
   DndContext,
@@ -31,7 +33,31 @@ import {
   TableColumn,
   FinalColumnProps,
   TableSchema,
+  ApiResponse,
 } from "../../types/index";
+
+// متنِ خطای عمومی: وقتی پاسخ اصلاً نرسید (قطعی شبکه / پاسخِ غیر JSON)
+// یا message خالی بود
+const GENERIC_ERROR_MESSAGE =
+  "ذخیره‌ی تنظیمات ناموفق بود. لطفاً دوباره تلاش کنید.";
+
+// message در پاسخِ API یک آرایه است و هر عضو معمولاً یک رشته. اگر عضوی آبجکت
+// بود، متنش را از فیلدهای رایج برمی‌داریم. چند پیام در چند سطر نمایش داده می‌شوند.
+const extractErrorMessage = (message: unknown): string => {
+  const items = Array.isArray(message) ? message : [message];
+  const texts = items
+    .map((item) => {
+      if (typeof item === "string") return item.trim();
+      if (item && typeof item === "object") {
+        const obj = item as Record<string, unknown>;
+        const text = obj.message ?? obj.text ?? obj.title ?? obj.description;
+        return typeof text === "string" ? text.trim() : "";
+      }
+      return "";
+    })
+    .filter(Boolean);
+  return texts.length > 0 ? texts.join("\n") : GENERIC_ERROR_MESSAGE;
+};
 
 const SettingModal: React.FC<SettingModalProps> = ({
   tableName = "",
@@ -44,16 +70,25 @@ const SettingModal: React.FC<SettingModalProps> = ({
 }) => {
   const [items, setItems] = useState(columns);
   const [searchTerm, setSearchTerm] = useState("");
+  const [isSaving, setIsSaving] = useState(false); // true = درخواست ذخیره در جریان است
+  const [errorMessage, setErrorMessage] = useState<string | null>(null); // خطای ذخیره (نمایش در هشدار)
 
   useEffect(() => {
     if (!isOpen) {
       setSearchTerm("");
+      setErrorMessage(null);
     }
   }, [isOpen]);
 
+  // useEffect(() => {
+  //   initializeItems();
+  // }, [isOpen, apiConfigData, columns]);
+
   useEffect(() => {
+    if (!isOpen) return;
     initializeItems();
-  }, [isOpen, apiConfigData, columns]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen, apiConfigData]);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -65,24 +100,34 @@ const SettingModal: React.FC<SettingModalProps> = ({
   );
 
   const getSetting = (tableId = tableName) => {
-    if (!apiConfigData?.result[0]) {
-      return null;
+    if (
+      !apiConfigData ||
+      !Array.isArray(apiConfigData.result) ||
+      apiConfigData.result.length === 0
+    ) {
+      return {
+        columns: columns.filter((col) => !col.uniqueId?.startsWith("__")),
+      };
+    } else if (
+      apiConfigData &&
+      apiConfigData?.result &&
+      Array.isArray(apiConfigData?.result) &&
+      apiConfigData.result?.length > 0
+    ) {
+      // const { setting } = apiConfigData?.result[0];
+      const setting = apiConfigData?.result?.[0]?.setting;
+      if (setting && "tables" in setting) {
+        return setting?.tables[tableId] ?? null;
+      }
     }
-    const { setting } = apiConfigData.result[0];
-    if (Object.hasOwn(setting, "tables")) {
-      return setting?.tables[tableId];
-    } else {
-      return null;
-    }
+    return null;
   };
-  const targetTable = getSetting(tableName);
-  const initializeItems = () => {
-    // اگر مودال بسته است، کاری نکن
-    if (!isOpen) return;
 
+  const targetTable = getSetting(tableName);
+
+  const initializeItems = () => {
     // گرفتن ستون‌های ذخیره شده از API
     const savedColumns = targetTable?.columns;
-
     // اگر تنظیمات ذخیره شده وجود دارد
     if (
       savedColumns &&
@@ -91,13 +136,13 @@ const SettingModal: React.FC<SettingModalProps> = ({
     ) {
       // ادغام با استفاده از mergeLists موجود
       const merged = mergeLists(savedColumns, columns);
+
       setItems(merged);
     } else {
-      // اگر تنظیماتی وجود ندارد، از columns پیش‌فرض استفاده کن
-      // ولی ستون‌های ویژه (__ دار) را حذف کن
       const filteredDefaultColumns = columns.filter(
         (col) => !col.uniqueId?.startsWith("__"),
       );
+
       setItems(filteredDefaultColumns);
     }
   };
@@ -107,20 +152,43 @@ const SettingModal: React.FC<SettingModalProps> = ({
     if (!devList || devList.length === 0) return [...apiList];
 
     const apiIds = new Set(apiList.map((item) => item.uniqueId));
+    const devIds = new Set(devList.map((item) => item.uniqueId));
 
-    const onlyInDev = devList.filter((item) => !apiIds.has(item.uniqueId));
+    // ستون‌های معتبر از سرور (با تنظیمات و ترتیب ذخیره‌شده)
+    const merged = apiList.filter(
+      (item) => devIds.has(item.uniqueId) && !item.uniqueId?.startsWith("__"),
+    );
 
-    const noVisible = onlyInDev.map((item) => ({
-      ...item,
-      excel: false,
-      visible: false,
-    }));
+    // ستون‌های جدید (فقط در کد دولوپر)
+    const onlyInDev = devList.filter(
+      (item) => !apiIds.has(item.uniqueId) && !item.uniqueId?.startsWith("__"),
+    );
 
-    if (apiList.length >= devList.length) {
-      return [...apiList];
-    }
+    //  درج ستون جدید در جایگاه تعریف‌شده توسط دولوپر (نه انتها)
+    const result = [...merged];
+    onlyInDev.forEach((newCol) => {
+      const devIndex = devList.findIndex(
+        (item) => item.uniqueId === newCol.uniqueId,
+      );
+      let anchorId: string | undefined;
+      for (let j = devIndex + 1; j < devList.length; j++) {
+        const nextId = devList[j].uniqueId;
+        if (result.some((col) => col.uniqueId === nextId)) {
+          anchorId = nextId;
+          break;
+        }
+      }
+      if (anchorId) {
+        const insertIndex = result.findIndex(
+          (col) => col.uniqueId === anchorId,
+        );
+        result.splice(insertIndex, 0, newCol);
+      } else {
+        result.push(newCol);
+      }
+    });
 
-    return [...apiList, ...noVisible];
+    return result;
   };
 
   // useEffect(() => {
@@ -148,6 +216,7 @@ const SettingModal: React.FC<SettingModalProps> = ({
   ) => {
     setItems((prev) => {
       const existingIndex = prev.findIndex((c) => c.uniqueId === uniqueId);
+
       if (existingIndex === -1) {
         const newItem: TableColumn = {
           uniqueId,
@@ -155,7 +224,6 @@ const SettingModal: React.FC<SettingModalProps> = ({
           width: updates.width ?? "",
           visible: updates.visible ?? true,
           excel: updates.excel ?? true,
-          key: prev[existingIndex].key,
         };
         return [...prev, newItem];
       } else {
@@ -186,7 +254,10 @@ const SettingModal: React.FC<SettingModalProps> = ({
     updateContentChange(uniqueId, { excel: flag });
   };
 
+  // قرارداد: در موفقیت resolve می‌شود (و داده‌ی جدید را به جدول می‌دهد).
+  // در هر خطا یک Error پرتاب می‌کند که message آن همان «متنِ قابل‌نمایش به کاربر» است.
   const requestSetSetting = async (params: any) => {
+    let data: ApiResponse;
     try {
       const res = await fetch(requestConfig.url, {
         method: "POST",
@@ -197,40 +268,54 @@ const SettingModal: React.FC<SettingModalProps> = ({
         },
         body: JSON.stringify(params),
       });
-
-      if (!res.ok) {
-        throw new Error(`http error! status:${res.status}`);
-      }
-      const data = await res.json();
-      onGetData(data);
+      data = await res.json();
     } catch (err) {
+      // قطعیِ شبکه یا پاسخِ غیر JSON
       console.log("Post request faild!:", err);
-      return null;
+      throw new Error(GENERIC_ERROR_MESSAGE);
     }
+
+    // فقط hasError تعیین می‌کند: false یعنی موفق، هر چیز دیگر (true یا بدنه‌ی نامعتبر) خطا.
+    // مهم: در خطا نباید onGetData صدا زده شود؛ جدول با hasError: true هیچ چیز رندر نمی‌کند.
+    if (data?.hasError !== false) {
+      throw new Error(extractErrorMessage(data?.message));
+    }
+
+    onGetData(data);
   };
 
-  const handleSave = () => {
-    const changedColumns = items.filter(
-      (col) => col.visible === true || col.excel === true,
-    );
-    if (changedColumns && changedColumns.length <= 0) {
-      toggle();
-      return;
-    }
+  const saveSettings = async () => {
+    const hasResult =
+      apiConfigData &&
+      Array.isArray(apiConfigData?.result) &&
+      apiConfigData.result?.length > 0;
 
-    const newCommonColumns = changedColumns
+    // قرارداد فهرست‌سفید: payload تنظیمات فقط «ترجیحات کاربر» را حمل می‌کند:
+    // uniqueId، title، width، visible، excel و نشانگر defaultTitle.
+    // فیلدهای ساختاری (type، key، translate، format، style، htmlFunc و ...)
+    // همیشه با uniqueId از cols دولوپر حل می‌شوند و هرگز به سرور نمی‌روند.
+    const newCommonColumns = items
       .map((changedCol) => {
         const originalCol = columns.find(
           (col) => col.uniqueId === changedCol.uniqueId,
         );
         if (!originalCol) return null;
-        if (originalCol.title !== changedCol.title) {
-          return {
-            ...changedCol,
-            defaultTitle: originalCol.title,
-          };
-        }
-        return changedCol;
+
+        // منطق فعلی defaultTitle (نشانگر شخصی‌سازی عنوان) عیناً حفظ می‌شود
+        const defaultTitle =
+          originalCol.title !== changedCol.title
+            ? changedCol.defaultTitle || originalCol.title
+            : changedCol.defaultTitle;
+
+        // تصویرِ فهرست‌سفید: هر فیلد غیرترجیحاتی همین‌جا جا می‌ماند
+        return {
+          uniqueId: changedCol.uniqueId,
+          title: changedCol.title,
+          width: changedCol.width,
+          visible: changedCol.visible,
+          excel: changedCol.excel,
+          ...(defaultTitle ? { defaultTitle } : {}),
+        };
       })
       .filter(Boolean);
 
@@ -240,35 +325,66 @@ const SettingModal: React.FC<SettingModalProps> = ({
       },
     };
 
-    // apiConfigData from api
-    if (!apiConfigData?.result[0]) {
-      toggle();
-      return;
-    }
-    const currentSetting = apiConfigData.result[0].setting;
-    if (currentSetting.tables && typeof currentSetting.tables === "object") {
-      // find related table
-      requestSetSetting({
-        setting: {
-          ...apiConfigData.result[0].setting,
-          tables: {
-            ...apiConfigData.result[0].setting.tables,
-            ...finalColumns,
-          },
-        },
-      });
-    } else {
-      requestSetSetting({
-        setting: {
-          ...currentSetting,
-          tables: {
-            [tableName]: {
-              columns: [],
+    if (hasResult) {
+      const currentSetting = apiConfigData?.result[0]?.setting || {};
+
+      if (currentSetting?.tables && typeof currentSetting.tables === "object") {
+        // find related table
+        await requestSetSetting({
+          setting: {
+            ...currentSetting,
+            // tables: {
+            //   'businessAlphaTicket': {
+            //     columns: []
+            //   }
+            // },
+            tables: {
+              ...currentSetting?.tables,
+              ...finalColumns,
             },
           },
+        });
+      } else {
+        await requestSetSetting({
+          setting: {
+            ...currentSetting,
+            tables: {
+              [tableName]: {
+                columns: [],
+              },
+            },
+          },
+        });
+      }
+    } else {
+      await requestSetSetting({
+        setting: {
+          tables: { ...finalColumns },
         },
       });
     }
+  };
+
+  const handleSave = async () => {
+    if (isSaving) return; // جلوگیری از ارسال هم‌زمانِ دو درخواست
+    setIsSaving(true);
+    setErrorMessage(null); // خطای تلاشِ قبلی پاک شود
+    try {
+      await saveSettings();
+      toggle(); // فقط در موفقیت مودال بسته می‌شود
+    } catch (err) {
+      setErrorMessage(
+        err instanceof Error ? err.message : GENERIC_ERROR_MESSAGE,
+      );
+    } finally {
+      // در هر حالت (موفق، خطا یا قطعی شبکه) حالت لودینگ باید تمام شود
+      setIsSaving(false);
+    }
+  };
+
+  // در طولِ ذخیره، بستنِ مودال (انصراف، ضربدر) نباید کار کند
+  const handleToggle = () => {
+    if (isSaving) return;
     toggle();
   };
 
@@ -285,12 +401,22 @@ const SettingModal: React.FC<SettingModalProps> = ({
     <Modal
       isOpen={isOpen}
       size="lg"
-      toggle={toggle}
+      toggle={handleToggle}
+      keyboard={!isSaving}
       backdrop="static"
       className={styles.modal_wrapper}
-      
     >
-      <ModalHeader toggle={toggle} className={styles.modal_itemheader}>
+      <ModalHeader
+        toggle={handleToggle}
+        className={styles.modal_itemheader}
+        close={
+          isSaving ? (
+            <button type="button" className="close" aria-label="Close" disabled>
+              <span aria-hidden="true">&times;</span>
+            </button>
+          ) : undefined
+        }
+      >
         تنظیمات ستون
       </ModalHeader>
       <ModalBody className={styles.modal_body}>
@@ -345,21 +471,46 @@ const SettingModal: React.FC<SettingModalProps> = ({
           </Col>
         </Row>
       </ModalBody>
+      {errorMessage && (
+        <div className={styles.save_error}>
+          <Alert
+            color="danger"
+            fade={false}
+            className={styles.save_error_alert}
+          >
+            <span className={styles.save_error_text}>{errorMessage}</span>
+            <button
+              type="button"
+              className="close"
+              aria-label="Close"
+              onClick={() => setErrorMessage(null)}
+            >
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </Alert>
+        </div>
+      )}
       <ModalFooter className={styles.modal_footer}>
         <Button
           color="secondary"
           className={styles.cancel_btn}
-          onClick={toggle}
+          onClick={handleToggle}
+          disabled={isSaving}
         >
           انصراف
         </Button>
         <Button
           color="primary"
           className={styles.save_btn}
-          onClick={() => {
-            handleSave();
-          }}
+          onClick={handleSave}
+          disabled={isSaving}
+          aria-busy={isSaving}
         >
+          {isSaving && (
+            <Spinner size="sm" tag="span" className={styles.save_spinner}>
+              در حال ذخیره...
+            </Spinner>
+          )}
           تایید
         </Button>
       </ModalFooter>

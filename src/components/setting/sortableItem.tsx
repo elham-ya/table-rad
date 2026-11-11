@@ -308,11 +308,14 @@ const SortableItem = React.forwardRef<HTMLDivElement, SortableItemProps>(
                   className={styles.badgeItem}
                   color="light"
                   pill
-                  id="myBadge"
+                  id={`myBadge-${id}`}
                 >
                   {badgeValue}
                 </Badge>
-                <UncontrolledTooltip target="myBadge" placement="bottom">
+                <UncontrolledTooltip
+                  target={`myBadge-${id}`}
+                  placement="bottom"
+                >
                   نام اصلی
                 </UncontrolledTooltip>
               </div>
@@ -339,18 +342,23 @@ const SortableItem = React.forwardRef<HTMLDivElement, SortableItemProps>(
           <Col xs="2" className="d-flex align-items-center justify-content-end">
             <div className={styles.setting_icons}>
               <button
-                id="myVisible"
+                id={`myVisible-${id}`}
                 onClick={handleChangeFieldVisibility}
-                title=""
               >
                 <IconVisible isActive={inputValue.visible} />
-                <UncontrolledTooltip target="myVisible" placement="bottom">
+                <UncontrolledTooltip
+                  target={`myVisible-${id}`}
+                  placement="bottom"
+                >
                   نمایش در جدول
                 </UncontrolledTooltip>
               </button>
-              <button id="myExcel" onClick={handleChangeExcelExport}>
+              <button id={`myExcel-${id}`} onClick={handleChangeExcelExport}>
                 <IconExcel isActive={inputValue.excel} />
-                <UncontrolledTooltip target="myExcel" placement="bottom">
+                <UncontrolledTooltip
+                  target={`myExcel-${id}`}
+                  placement="bottom"
+                >
                   دانلود فایل اکسل
                 </UncontrolledTooltip>
               </button>

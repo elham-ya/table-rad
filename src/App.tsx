@@ -230,60 +230,60 @@ function App() {
       excel: true,
       translate: true,
     },
-    {
-      uniqueId: "invoiceId",
-      title: "شناسه فاکتور",
-      width: "160",
-      key: "metadata.invoiceId",
-      type: ContentType.Text,
-      visible: true,
-      excel: true,
-    },
-    {
-      uniqueId: "issuanceStatus",
-      title: "وضعیت صدور",
-      width: "130",
-      key: "metadata.issuanceStatus",
-      type: ContentType.Text,
-      visible: true,
-      excel: true,
-    },
-    {
-      uniqueId: "cellPhone",
-      title: "شماره موبایل",
-      width: "200",
-      key: "cellphoneNumber",
-      type: ContentType.Text,
-      visible: true,
-      excel: true,
-    },
-    {
-      uniqueId: "paymentStatus",
-      title: "وضعیت پرداخت",
-      width: "200",
-      key: "metadata.orderStatus.paymentStatus",
-      type: ContentType.Text,
-      visible: true,
-      excel: true,
-    },
-    {
-      uniqueId: "invoice",
-      title: "فاکتور ",
-      width: "190",
-      key: "metadata.invoice",
-      type: ContentType.Text,
-      visible: true,
-      excel: true,
-    },
-    {
-      uniqueId: "phoneNumber",
-      title: "شماره تلفن",
-      width: "200",
-      key: "cellphoneNumber",
-      type: ContentType.Text,
-      visible: true,
-      excel: true,
-    },
+    // {
+    //   uniqueId: "invoiceId",
+    //   title: "شناسه فاکتور",
+    //   width: "160",
+    //   key: "metadata.invoiceId",
+    //   type: ContentType.Text,
+    //   visible: true,
+    //   excel: true,
+    // },
+    // {
+    //   uniqueId: "issuanceStatus",
+    //   title: "وضعیت صدور",
+    //   width: "130",
+    //   key: "metadata.issuanceStatus",
+    //   type: ContentType.Text,
+    //   visible: true,
+    //   excel: true,
+    // },
+    // {
+    //   uniqueId: "cellPhone",
+    //   title: "شماره موبایل",
+    //   width: "200",
+    //   key: "cellphoneNumber",
+    //   type: ContentType.Text,
+    //   visible: true,
+    //   excel: true,
+    // },
+    // {
+    //   uniqueId: "paymentStatus",
+    //   title: "وضعیت پرداخت",
+    //   width: "200",
+    //   key: "metadata.orderStatus.paymentStatus",
+    //   type: ContentType.Text,
+    //   visible: true,
+    //   excel: true,
+    // },
+    // {
+    //   uniqueId: "invoice",
+    //   title: "فاکتور ",
+    //   width: "190",
+    //   key: "metadata.invoice",
+    //   type: ContentType.Text,
+    //   visible: true,
+    //   excel: true,
+    // },
+    // {
+    //   uniqueId: "phoneNumber",
+    //   title: "شماره تلفن",
+    //   width: "200",
+    //   key: "cellphoneNumber",
+    //   type: ContentType.Text,
+    //   visible: true,
+    //   excel: true,
+    // },
     {
       uniqueId: "actions",
       title: "عملیات",
@@ -304,12 +304,12 @@ function App() {
     // dispatch getlist by new pageNumber
   };
 
-  const handleSizeChange = (_pageNumber: number) => {
+  const handleSizeChange = () => {
     // dispatch getlist by new pageSize
   };
 
   const config = {
-    "Access-Token": "4206504876-37D1e5fbd98a40ee8f4f8148f838f4a1.XzIwMjY4",
+    "Access-Token": "3154878657-f821ee4507c945fdb27aB7a18efa88fd.XzIwMjYxMA",
     "Client-Id": "17959574q2f0347718971594ccd86f3f4",
     url: `https://api.sandpod.ir/srv/cms-sandbox/api/core/users/setting`,
   };
@@ -337,13 +337,56 @@ function App() {
     podcms_Test: "پنل تست cms",
   };
 
+  const fetchPage = async (offset = 0, signal) => {
+
+    return dataNormalized;
+    // console.log("fetchPage offset list:", offset);
+    // const excelUrl =
+    //   props.mode === "supervisor"
+    //     ? `${config.urls.invoice}/supervisor`
+    //     : config.urls.invoiceManage;
+
+    // // ۱. ارسال درخواست
+    // const response = await axios.get(excelUrl, {
+    //   headers: {
+    //     "Client-Id": config.global.clientId,
+    //     "Access-Token": token,
+    //   },
+    //   params: {
+    //     ...apiParams,
+    //     size: 50,
+    //     offset,
+    //   },
+    //   signal,
+    // });
+
+    // console.log("پاسخ خام axios:", response.data);
+
+    // // ۲. استخراج آرایه فاکتورها از ساختار تو در توی بک‌اند
+    // // توجه: در بک‌اند شما داده‌ها داخل data.result.invoices هستند
+    // const rawInvoices = response?.data?.result?.invoices;
+
+    // // ۳. نرمال‌سازی داده‌ها دقیقاً مشابه آنچه در صفحه نمایش داده می‌شود
+    // // اگر rawInvoices وجود نداشت یا آرایه نبود، آرایه خالی برگردان
+    // const normalizedInvoices = Array.isArray(rawInvoices)
+    //   ? rawInvoices.map(normalizeInvoiceRow).filter(Boolean)
+    //   : [];
+
+    // // ۴. بازگرداندن ساختاری که Table.tsx انتظار دارد
+    // // یعنی یک آبجکت که فیلد result آن آرایه‌ای از ردیف‌هاست
+    // return {
+    //   ...response.data,
+    //   result: normalizedInvoices,
+    // };
+  };
+
   return (
     <TableView
       id="test"
       data={dataNormalized}
       cols={cols}
       totalCount={data.length}
-      checkBox={true}
+      checkBox={false}
       onRowSelect={handleSelect}
       onPageChange={handlePageChange}
       onSizeChange={handleSizeChange}
@@ -351,6 +394,7 @@ function App() {
       pageSizeOptions={[10, 20, 25, 30, 40, 50]}
       size={10}
       translates={myTranslate}
+      onExcelExportRequest={fetchPage}
     />
   );
 }

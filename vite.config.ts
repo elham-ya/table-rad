@@ -24,12 +24,15 @@ export default defineConfig({
       formats: ['es', 'umd'], 
     },
     rollupOptions: {
-      external: ['react', 'react-dom', 'reactstrap'],
+      // react-toastify باید external باشد، وگرنه یک کپیِ جدا از آن داخلِ dist می‌نشیند
+      // و توست‌ها به ToastContainerِ پروژه‌ی اصلی نمی‌رسند
+      external: ['react', 'react-dom', 'reactstrap', 'react-toastify'],
       output: {
         globals: {
           react: 'React',
           'react-dom': 'ReactDOM',
           reactstrap: 'Reactstrap',
+          'react-toastify': 'ReactToastify',
         },
         assetFileNames: 'index.[ext]',
       },

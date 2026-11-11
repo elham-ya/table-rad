@@ -21,18 +21,40 @@ const ActionRenderer: React.FC<ButtonActionProps> = ({
   const calculatePosition = useCallback(() => {
     const btn = toggleRef.current;
     if (!btn) return;
-
     const rect = btn.getBoundingClientRect();
+
+    const GAP = 4; // فاصله‌ی منو از دکمه
+    const EDGE = 8; // حداقل فاصله‌ی امن از لبه‌های viewport
+
     const menuWidth = menuRef.current?.offsetWidth || 180;
     const menuHeight = menuRef.current?.offsetHeight || 0;
+
     const spaceBelow = window.innerHeight - rect.bottom;
+    const spaceAbove = rect.top;
 
+    // تصمیم بالا/پایین با معیار یکپارچه (همان ارتفاعِ اندازه‌گیری‌شده):
+    // پیش‌فرض پایین است؛ فقط وقتی بالا می‌رویم که پایین جا نشود و بالا جا شود.
+    const fitsBelow = spaceBelow >= menuHeight + GAP;
+    const fitsAbove = spaceAbove >= menuHeight + GAP;
+    const openAbove = !fitsBelow && fitsAbove;
+
+    let top = openAbove ? rect.top - menuHeight - GAP : rect.bottom + GAP;
+
+    // مهار ایمنی در viewport (بدون اسکرول و بدون بریدن محتوا):
+    // فقط جلوگیری از بیرون‌زدن تصادفی منو از لبه‌های صفحه
+    const maxTop = window.innerHeight - menuHeight - EDGE;
+    if (maxTop >= EDGE) {
+      top = Math.max(EDGE, Math.min(top, maxTop));
+    }
+
+    // افقی: تراز لبه‌ی راست منو با لبه‌ی راست دکمه (RTL) + مهار در viewport
     let left = rect.right - menuWidth;
-    if (left < 8) left = rect.left;
-
-    const openAbove =
-      spaceBelow < (menuHeight || 150) && rect.top > (menuHeight || 150);
-    const top = openAbove ? rect.top - (menuHeight || 0) - 4 : rect.bottom + 4;
+    const maxLeft = window.innerWidth - menuWidth - EDGE;
+    if (maxLeft >= EDGE) {
+      left = Math.max(EDGE, Math.min(left, maxLeft));
+    } else {
+      left = EDGE; // منو عریض‌تر از viewport: چسبیدن به لبه
+    }
 
     setMenuStyle({
       position: "fixed",
@@ -52,7 +74,9 @@ const ActionRenderer: React.FC<ButtonActionProps> = ({
     if (!dropdownOpen) return;
 
     calculatePosition();
-
+    // پاس دوم بعد از اولین paint: اگر در محاسبه‌ی اول ارتفاع منو
+    // قابل اندازه‌گیری نبوده، اکنون واقعی است و موقعیت اصلاح می‌شود.
+    scheduleReposition();
     // فقط کلیک باعث بسته شدن میشه: بیرون از منو، روی toggle خودش، یا روی toggle هر دراپ‌داون دیگه
     const handleClickOutside = (e: MouseEvent) => {
       const target = e.target as Node;
