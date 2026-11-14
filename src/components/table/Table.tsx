@@ -21,6 +21,7 @@ import {
   Col,
   Button,
   Progress,
+  CustomInput,
 } from "reactstrap";
 import moment from "moment-jalaali";
 import Checkbox from "../checkBox";
@@ -90,6 +91,7 @@ const Table: React.FC<TableProps> = ({
   translates = null,
   defaultPage = 1,
   rowKey = "id",
+  switch: switchConfig,
 }) => {
   // just keeping index
   const [selectedRowIds, setSelectedRowIds] = useState<Set<string | number>>(
@@ -114,6 +116,25 @@ const Table: React.FC<TableProps> = ({
   // آخرین پیامِ خطای API (hasError: true) در دریافتِ داده‌ی اکسل؛ خالی = پیامِ عمومی
   const exportErrorMessageRef = useRef("");
   const [showStickyPagination, setShowStickyPagination] = useState(false);
+  const [switchOn, setSwitchOn] = useState<boolean>(
+    Boolean(switchConfig?.value),
+  );
+
+  // همگام‌سازی نیمه‌کنترل‌شده: اگر دولوپر مقدار switch.value را
+  // از بیرون عوض کرد (مثلاً بعد از خواندن کوئری‌استرینگ)، UI همگام می‌شود.
+  useEffect(() => {
+    setSwitchOn(Boolean(switchConfig?.value));
+  }, [switchConfig?.value]);
+
+  // هشدار یک‌باره در mount: سوئیچ بدون callback یعنی مقدار به بیرون نمی‌رسد
+  useEffect(() => {
+    if (switchConfig && typeof switchConfig.onSwitchChange !== "function") {
+      console.warn(
+        "[TableRad] پروپ switch بدون تابع onSwitchChange پاس داده شده است؛ مقدار سوئیچ به بیرون ارسال نمی‌شود.",
+      );
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const getRowUniqueId = useCallback(
     (row: any, rowIndex: number): string | number => {
@@ -439,6 +460,25 @@ const Table: React.FC<TableProps> = ({
     setSettingModal(!settingModal);
   };
 
+  // هر بار سوئیچ عوض می‌شود: وضعیت داخلی به‌روز + اطلاع به دولوپر
+  // payload دقیقاً به شکل { [paramName]: boolean } ساخته می‌شود.
+  const handleSwitchToggle = (next: boolean) => {
+    setSwitchOn(next);
+    const paramName = switchConfig?.paramName ?? "";
+    if (!paramName) {
+      console.warn(
+        "[TableRad] پروپ switch بدون paramName پاس داده شده است؛ کلید payload خالی خواهد بود.",
+      );
+    }
+    if (typeof switchConfig?.onSwitchChange === "function") {
+      switchConfig.onSwitchChange({ [paramName]: next });
+    } else {
+      console.warn(
+        "[TableRad] onSwitchChange تعریف نشده است؛ مقدار سوئیچ دور ریخته شد.",
+      );
+    }
+  };
+
   const handleGetDataAfterChange = (data: any) => {
     setConfigData(data);
   };
@@ -708,7 +748,6 @@ const Table: React.FC<TableProps> = ({
     offset: number,
     signal: AbortSignal,
   ): Promise<unknown[] | null> => {
-
     for (let attempt = 1; attempt <= 3; attempt++) {
       try {
         if (signal.aborted) {
@@ -880,6 +919,23 @@ const Table: React.FC<TableProps> = ({
             {renderExportButton()}
           </div>
           {/* end excel download */}
+          {/* start optional switch — در چیدمان RTL بعد از اکسل = سمت چپ آن */}
+          {switchConfig && (
+            <div className={styles.switch_wrapper}>
+              <CustomInput
+                type="switch"
+                id={`${id}-switch-${switchConfig.paramName || "switch"}`}
+                name={`${id}-switch-${switchConfig.paramName || "switch"}`}
+                checked={switchOn}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  handleSwitchToggle(e.target.checked)
+                }
+                disabled={exportStatus === "exporting"}
+                label={switchConfig.title ?? ""}
+              />
+            </div>
+          )}
+          {/* end optional switch */}
           <SettingModal
             tableName={id}
             isOpen={settingModal}

@@ -33,6 +33,17 @@ interface ExcelExportResponse<T = unknown> {
 }
 
 type translateProp = Record<string, string> | null;
+
+export interface TableSwitchConfig {
+  /** عنوان کنار سوئیچ؛ رشته‌ی ساده بدون ترجمه؛ پیش‌فرض "" */
+  title?: string;
+  /** نام پارامتر برای ساخت کلید payload؛ پیش‌فرض "" */
+  paramName?: string;
+  /** وضعیت اولیه‌ی سوئیچ؛ پیش‌فرض false */
+  value?: boolean;
+  /** تابع بازگشتی با payload به شکل { [paramName]: boolean } */
+  onSwitchChange?: (payload: Record<string, boolean>) => void;
+}
 export interface TableProps {
   id: string;
   data: unknown[];
@@ -50,6 +61,7 @@ export interface TableProps {
   translates?: translateProp;
   defaultPage?: number;
   rowKey?: string;
+  switch?: TableSwitchConfig;
 }
 
 export interface TableColumn {

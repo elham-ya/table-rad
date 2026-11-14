@@ -245,3 +245,19 @@
     right: 0;
   }
 }
+.switch_wrapper {
+  display: inline-flex;
+  align-items: center;
+  margin-right: 0.75rem; // فاصله از دکمه‌ی اکسل در چیدمان RTL
+  vertical-align: middle;
+
+  input[type="checkbox"] {
+    margin-bottom: 0;
+  }
+
+  label {
+    user-select: none;
+    margin-bottom: 0;
+    line-height: 1.5;
+  }
+}
