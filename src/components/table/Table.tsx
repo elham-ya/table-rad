@@ -13,6 +13,7 @@ import {
   TableProps,
   ContentType,
   ApiResponse,
+  BulkActionItem,
 } from "../../types/index";
 import styles from "./table.module.scss";
 import {
@@ -26,6 +27,7 @@ import {
 import moment from "moment-jalaali";
 import Checkbox from "../checkBox";
 import ActionRenderer from "../actionRenderer";
+import BulkActions from "../bulkActions";
 import { PaginationToolbar } from "../pagination/index";
 import SettingModal from "../setting";
 import SettingButtonIcon from "../../assets/icons/SettingButton.svg";
@@ -92,6 +94,7 @@ const Table: React.FC<TableProps> = ({
   defaultPage = 1,
   rowKey = "id",
   switch: switchConfig,
+  bulkActions,
 }) => {
   // just keeping index
   const [selectedRowIds, setSelectedRowIds] = useState<Set<string | number>>(
@@ -170,6 +173,29 @@ const Table: React.FC<TableProps> = ({
     [rowKey, cols],
   );
 
+  // ---------- عملیات دسته‌ای ----------
+  // فقط آیتم‌هایی که visible !== false دارند معتبرند؛ ملاک همه‌ی تصمیم‌ها
+  // (رندر دکمه و اجبارِ چک‌باکس) همین لیستِ پس‌از‌فیلتر است.
+  const visibleBulkActions = useMemo<BulkActionItem[]>(
+    () =>
+      Array.isArray(bulkActions)
+        ? bulkActions.filter((item) => item?.visible !== false)
+        : [],
+    [bulkActions],
+  );
+  const hasBulkActions = visibleBulkActions.length > 0;
+  // چک‌باکس: یا پروپ checkBox، یا وجودِ عملیات دسته‌ای معتبر
+  const effectiveCheckBox = checkBox || hasBulkActions;
+
+  // ردیف‌های انتخاب‌شده‌ی صفحه‌ی فعلی — منبع واحد برای onRowSelect و bulkActions
+  const selectedRowsData = useMemo(
+    () =>
+      data.filter((row, index) =>
+        selectedRowIds.has(getRowUniqueId(row, index)),
+      ),
+    [data, selectedRowIds, getRowUniqueId],
+  );
+
   useEffect(() => {
     if (totalCount <= 0) {
       setShowStickyPagination(false);
@@ -197,13 +223,9 @@ const Table: React.FC<TableProps> = ({
   // selection of rows send to parent
   useEffect(() => {
     if (onRowSelect) {
-      const selectedData = data.filter((row, index) => {
-        const rowId = getRowUniqueId(row, index);
-        return selectedRowIds.has(rowId);
-      });
-      onRowSelect(selectedData);
+      onRowSelect(selectedRowsData);
     }
-  }, [selectedRowIds, data, onRowSelect, getRowUniqueId]);
+  }, [selectedRowsData, onRowSelect]);
 
   useEffect(() => {
     if (requestConfig?.url && requestConfig["Access-Token"] && !configData) {
@@ -275,7 +297,7 @@ const Table: React.FC<TableProps> = ({
     };
 
     // checkboxColumn
-    const checkboxColumnForRender: TableColumn | null = checkBox
+    const checkboxColumnForRender: TableColumn | null = effectiveCheckBox
       ? {
           uniqueId: "__row_selector__",
           key: "__row_selector__",
@@ -424,7 +446,7 @@ const Table: React.FC<TableProps> = ({
 
     return resultColumns;
   }, [
-    checkBox,
+    effectiveCheckBox,
     cols,
     data.length,
     selectedRowIds,
@@ -458,6 +480,17 @@ const Table: React.FC<TableProps> = ({
 
   const toggleSetting = () => {
     setSettingModal(!settingModal);
+  };
+
+  // جریان کلیک روی یک اکشن دسته‌ای:
+  // ۱) ردیف‌های انتخاب‌شده‌ی فعلی captura می‌شوند
+  // ۲) انتخاب خودکار پاک می‌شود (onRowSelect با آرایه‌ی خالی صدا زده می‌شود)
+  // ۳) onClick همان آیتم با ردیف‌های capturaشده صدا زده می‌شود
+  // (بستن منو داخل خودِ کامپوننت BulkActions انجام می‌شود)
+  const handleBulkActionClick = (action: BulkActionItem) => {
+    const rows = selectedRowsData;
+    setSelectedRowIds(new Set());
+    action.onClick?.(rows);
   };
 
   // هر بار سوئیچ عوض می‌شود: وضعیت داخلی به‌روز + اطلاع به دولوپر
@@ -909,7 +942,15 @@ const Table: React.FC<TableProps> = ({
   } else {
     return (
       <Row>
-        <Col xs="6"></Col>
+        <Col xs="6" className={`py-2 ${styles.bulk_actions_col}`}>
+          {hasBulkActions && (
+            <BulkActions
+              actions={visibleBulkActions}
+              disabled={selectedRowsData.length === 0}
+              onActionClick={handleBulkActionClick}
+            />
+          )}
+        </Col>
         <Col xs="6" className={`py-2 ${styles.modal_Setting}`}>
           <Button onClick={toggleSetting} className={styles.btn_setting}>
             <img width={33} src={SettingButtonIcon} />

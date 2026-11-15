@@ -62,6 +62,7 @@ export interface TableProps {
   defaultPage?: number;
   rowKey?: string;
   switch?: TableSwitchConfig;
+  bulkActions?: BulkActionItem[];
 }
 
 export interface TableColumn {
@@ -114,7 +115,22 @@ export interface ActionItem {
   className?: string;
   disable?: boolean;
   visible?: boolean;
-  
+}
+
+/** آیتم اکشن دسته‌ای (هر دکمه داخل منوی «عملیات دسته‌ای») */
+export interface BulkActionItem {
+  /** کلید یکتا برای رندر؛ اختیاری (fallback به ایندکس) */
+  uniqueId?: string;
+  /** متن نمایشی دکمه داخل منو */
+  title: string;
+  /** با کلیک روی آیتم، با ردیف‌های انتخاب‌شده‌ی صفحه‌ی فعلی صدا زده می‌شود */
+  onClick?: (selectedRows: unknown[]) => void;
+  /** نمایش/عدم نمایش آیتم؛ پیش‌فرض true (پرمیشن سمت دولوپر) */
+  visible?: boolean;
+  /** آیکون اختیاری کنار عنوان (کلاس رشته یا ReactNode) */
+  icon?: string | React.ReactNode;
+  /** کلاس استایل سفارشی هر آیتم */
+  className?: string;
 }
 export interface ButtonActionProps {
   row: any;

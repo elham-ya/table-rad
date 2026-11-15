@@ -1,0 +1,71 @@
+// دکمه‌ی اصلی «عملیات دسته‌ای» — کادر سفید دورخط، گوشه‌گرد، مطابق طرح
+.bulk_toggle_btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.45rem 1rem;
+  background: #fff;
+  border: 1px solid #ced4da;
+  border-radius: 8px;
+  color: #212529;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  cursor: pointer;
+  white-space: nowrap;
+
+  i {
+    font-size: 0.75rem;
+    transition: transform 0.2s ease;
+  }
+
+  &:hover:not(:disabled) {
+    background: #f8f9fa;
+  }
+
+  &:disabled {
+    background: #e9ecef;
+    border-color: #d3d7db;
+    color: #6c757d;
+    cursor: not-allowed;
+  }
+}
+
+// حالت باز: فلش می‌چرخد
+.bulk_toggle_open i {
+  transform: rotate(180deg);
+}
+
+// منوی پورتالی: کارت سفید، گوشه‌گرد، سایه‌ی ملایم، آیتم‌ها با فاصله (بدون خط جداکننده)
+.portalBulkMenu {
+  padding: 8px;
+  background: #fff;
+  border: none;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+// هر آیتم: دکمه‌ی تمام‌عرض، دورخط روشن، گوشه‌گرد، hover خاکستری
+.bulkItem {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  background: #fff;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  color: #212529;
+  font-size: 0.875rem;
+  text-align: right;
+  cursor: pointer;
+
+  &:hover {
+    background: #f1f3f5;
+  }
+
+  &:active {
+    background: #e9ecef;
+  }
+}
