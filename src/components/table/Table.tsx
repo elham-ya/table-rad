@@ -110,6 +110,8 @@ const Table: React.FC<TableProps> = ({
   const [exportProgress, setExportProgress] = useState(0);
 
   const paginationRef = useRef<HTMLDivElement>(null);
+  // نگهدارنده‌ی بدنه‌ی جدول برای تشخیصِ «کاربر داخل ناحیه‌ی جدول است یا نه»
+  const tableWrapperRef = useRef<HTMLDivElement>(null);
   const cleanupTimerRef = useRef<NodeJS.Timeout | null>(null);
   // آخرین پیامِ خطای API (hasError: true) در دریافتِ داده‌ی اکسل؛ خالی = پیامِ عمومی
   const exportErrorMessageRef = useRef("");
@@ -149,29 +151,60 @@ const Table: React.FC<TableProps> = ({
     [rowKey, cols],
   );
 
+  // ---------- منطق pagination چسبان (sticky) ----------
+  // نسخه‌ی چسبان فقط وقتی نمایش داده می‌شود که هر دو شرط برقرار باشد:
+  // ۱) pagination معمولی کاملاً زیر viewport باشد (کاربر به انتهای جدول نرسیده)،
+  // ۲) بدنه‌ی جدول هم‌اکنون با viewport تقاطع داشته باشد (کاربر داخل ناحیه‌ی جدول است).
+  // با این قانون:
+  // - اگر کاربر از روی جدولِ کوتاه عبور کند (جدول بالای صفحه)، sticky نمایش داده نمی‌شود
+  //   و pagination به انتهای جدول چسبیده می‌ماند (رفع باگ).
+  // - اگر جدول هنوز به صفحه نرسیده باشد (پایین‌تر از viewport)، sticky نمایش داده نمی‌شود.
+  // - در جدول‌های بلند، تا وقتی انتهای جدول دیده نشود، sticky فعال می‌ماند.
   useEffect(() => {
     if (totalCount <= 0) {
       setShowStickyPagination(false);
       return;
     }
+    if (!paginationRef.current || !tableWrapperRef.current) return;
 
-    if (!paginationRef.current) return;
+    // محاسبه‌ی وضعیت از روی مستطیل‌های واقعی، نه فقط رویداد تقاطع
+    const updateStickyState = () => {
+      const pagRect = paginationRef.current?.getBoundingClientRect();
+      const wrapRect = tableWrapperRef.current?.getBoundingClientRect();
+      if (!pagRect || !wrapRect) return;
 
-    const element = paginationRef.current;
+      // آیا pagination طبیعی الان داخل viewport دیده می‌شود؟
+      const paginationVisible =
+        pagRect.top < window.innerHeight && pagRect.bottom > 0;
+      // آیا pagination طبیعی کاملاً زیر viewport است؟
+      const paginationBelow = pagRect.top >= window.innerHeight;
+      // آیا بدنه‌ی جدول با viewport تقاطع دارد؟
+      const tableInView =
+        wrapRect.top < window.innerHeight && wrapRect.bottom > 0;
 
+      setShowStickyPagination(
+        !paginationVisible && paginationBelow && tableInView,
+      );
+    };
+
+    // هر تغییری در تقاطعِ «pagination» یا «بدنه‌ی جدول» با viewport → محاسبه‌ی مجدد
     const observer = new IntersectionObserver(
-      ([entry]) => {
-        setShowStickyPagination(!entry.isIntersecting);
+      () => {
+        updateStickyState();
       },
-      {
-        threshold: 0.1,
-      },
+      { threshold: 0 },
     );
+    observer.observe(paginationRef.current);
+    observer.observe(tableWrapperRef.current);
 
-    observer.observe(element);
+    // پوشش تغییر ابعاد پنجره بدون رویداد تقاطع
+    window.addEventListener("resize", updateStickyState);
 
-    return () => observer.disconnect();
-  }, [configData, totalCount]); // ← totalCount هم اضافه شد
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("resize", updateStickyState);
+    };
+  }, [configData, totalCount, data.length]);
 
   // selection of rows send to parent
   useEffect(() => {
@@ -708,7 +741,6 @@ const Table: React.FC<TableProps> = ({
     offset: number,
     signal: AbortSignal,
   ): Promise<unknown[] | null> => {
-
     for (let attempt = 1; attempt <= 3; attempt++) {
       try {
         if (signal.aborted) {
@@ -890,7 +922,7 @@ const Table: React.FC<TableProps> = ({
             onGetData={handleGetDataAfterChange}
           />
         </Col>
-        <div className={styles.table_wrapper}>
+        <div className={styles.table_wrapper} ref={tableWrapperRef}>
           <div className={styles.table_outer_wrapper}>
             <div className={styles.table_inner_wrapper}>
               <ReactstrapTable bordered className={styles.tableContainer}>
