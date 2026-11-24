@@ -511,7 +511,7 @@ const SettingModal: React.FC<SettingModalProps> = ({
               در حال ذخیره...
             </Spinner>
           )}
-          تایید
+          ذخیره
         </Button>
       </ModalFooter>
     </Modal>

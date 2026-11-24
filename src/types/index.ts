@@ -257,4 +257,8 @@ export type PriceProps = {
   strings?: translateProp
 }
  
-
+/** متدهایی که جدول از طریق ref در اختیار کامپوننت والد می‌گذارد */
+export interface TableRadHandle {
+  /** پاک‌کردن همه‌ی ردیف‌های انتخاب‌شده (چک‌باکس‌ها) */
+  selectedReset: () => void;
+}

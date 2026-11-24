@@ -4,6 +4,8 @@ import React, {
   useMemo,
   useRef,
   useCallback,
+  forwardRef,
+  useImperativeHandle,
 } from "react";
 import { toast } from "react-toastify";
 import ReactDOMServer from "react-dom/server";
@@ -14,6 +16,7 @@ import {
   ContentType,
   ApiResponse,
   BulkActionItem,
+  TableRadHandle,
 } from "../../types/index";
 import styles from "./table.module.scss";
 import {
@@ -77,1173 +80,1194 @@ const extractApiMessage = (message: unknown): string => {
     .join("\n");
 };
 
-const Table: React.FC<TableProps> = ({
-  id,
-  data,
-  cols,
-  checkBox = false,
-  onRowSelect,
-  onPageChange,
-  onSizeChange,
-  requestConfig,
-  totalCount = 0,
-  pageSizeOptions = [10, 20, 25, 30, 40, 50],
-  onExcelExportRequest,
-  size = 10,
-  translates = null,
-  defaultPage = 1,
-  rowKey = "id",
-  switch: switchConfig,
-  bulkActions,
-}) => {
-  // just keeping index
-  const [selectedRowIds, setSelectedRowIds] = useState<Set<string | number>>(
-    new Set(),
-  );
+const Table = forwardRef<TableRadHandle, TableProps>(
+  (
+    {
+      id,
+      data,
+      cols,
+      checkBox = false,
+      onRowSelect,
+      onPageChange,
+      onSizeChange,
+      requestConfig,
+      totalCount = 0,
+      pageSizeOptions = [10, 20, 25, 30, 40, 50],
+      onExcelExportRequest,
+      size = 10,
+      translates = null,
+      defaultPage = 1,
+      rowKey = "id",
+      switch: switchConfig,
+      bulkActions,
+    },
+    ref,
+  ) => {
+    // just keeping index
+    const [selectedRowIds, setSelectedRowIds] = useState<Set<string | number>>(
+      new Set(),
+    );
 
-  const [page, setPage] = useState(defaultPage);
-  const [pageSize, setPageSize] = useState(size);
-  const [settingModal, setSettingModal] = useState(false);
-  const [configData, setConfigData] = useState<ApiResponse | null>(null);
+    // ---------- دسترسی imperative والد ----------
+    // تنها متدِ exposeشده: پاک‌کردن انتخاب ردیف‌ها.
+    // والد هر وقت بداند عملیات موفق بوده (hasError: false) این متد را صدا می‌زند؛
+    // جدول خودش هیچ پاک‌سازی خودکاری انجام نمی‌دهد.
+    // نکته‌ی حیاتی: این hook باید قبل از هر early return صدا زده شود (قانون hookها).
+    useImperativeHandle(
+      ref,
+      () => ({
+        selectedReset: () => {
+          setSelectedRowIds(new Set());
+        },
+      }),
+      [],
+    );
 
-  // وضعیت دانلود اکسل
-  const [abortController, setAbortController] =
-    useState<AbortController | null>(null);
-  const [exportStatus, setExportStatus] = useState<"idle" | "exporting">(
-    "idle",
-  );
-  const [exportProgress, setExportProgress] = useState(0);
+    const [page, setPage] = useState(defaultPage);
+    const [pageSize, setPageSize] = useState(size);
+    const [settingModal, setSettingModal] = useState(false);
+    const [configData, setConfigData] = useState<ApiResponse | null>(null);
 
-  const paginationRef = useRef<HTMLDivElement>(null);
-  // نگهدارنده‌ی بدنه‌ی جدول برای تشخیصِ «کاربر داخل ناحیه‌ی جدول است یا نه»
-  const tableWrapperRef = useRef<HTMLDivElement>(null);
-  const cleanupTimerRef = useRef<NodeJS.Timeout | null>(null);
-  // آخرین پیامِ خطای API (hasError: true) در دریافتِ داده‌ی اکسل؛ خالی = پیامِ عمومی
-  const exportErrorMessageRef = useRef("");
-  const [showStickyPagination, setShowStickyPagination] = useState(false);
-  const [switchOn, setSwitchOn] = useState<boolean>(
-    Boolean(switchConfig?.value),
-  );
+    // وضعیت دانلود اکسل
+    const [abortController, setAbortController] =
+      useState<AbortController | null>(null);
+    const [exportStatus, setExportStatus] = useState<"idle" | "exporting">(
+      "idle",
+    );
+    const [exportProgress, setExportProgress] = useState(0);
 
-  // همگام‌سازی نیمه‌کنترل‌شده: اگر دولوپر مقدار switch.value را
-  // از بیرون عوض کرد (مثلاً بعد از خواندن کوئری‌استرینگ)، UI همگام می‌شود.
-  useEffect(() => {
-    setSwitchOn(Boolean(switchConfig?.value));
-  }, [switchConfig?.value]);
+    const paginationRef = useRef<HTMLDivElement>(null);
+    // نگهدارنده‌ی بدنه‌ی جدول برای تشخیصِ «کاربر داخل ناحیه‌ی جدول است یا نه»
+    const tableWrapperRef = useRef<HTMLDivElement>(null);
+    const cleanupTimerRef = useRef<NodeJS.Timeout | null>(null);
+    // آخرین پیامِ خطای API (hasError: true) در دریافتِ داده‌ی اکسل؛ خالی = پیامِ عمومی
+    const exportErrorMessageRef = useRef("");
+    const [showStickyPagination, setShowStickyPagination] = useState(false);
+    const [switchOn, setSwitchOn] = useState<boolean>(
+      Boolean(switchConfig?.value),
+    );
 
-  // هشدار یک‌باره در mount: سوئیچ بدون callback یعنی مقدار به بیرون نمی‌رسد
-  useEffect(() => {
-    if (switchConfig && typeof switchConfig.onSwitchChange !== "function") {
-      console.warn(
-        "[TableRad] پروپ switch بدون تابع onSwitchChange پاس داده شده است؛ مقدار سوئیچ به بیرون ارسال نمی‌شود.",
+    // همگام‌سازی نیمه‌کنترل‌شده: اگر دولوپر مقدار switch.value را
+    // از بیرون عوض کرد (مثلاً بعد از خواندن کوئری‌استرینگ)، UI همگام می‌شود.
+    useEffect(() => {
+      setSwitchOn(Boolean(switchConfig?.value));
+    }, [switchConfig?.value]);
+
+    // هشدار یک‌باره در mount: سوئیچ بدون callback یعنی مقدار به بیرون نمی‌رسد
+    useEffect(() => {
+      if (switchConfig && typeof switchConfig.onSwitchChange !== "function") {
+        console.warn(
+          "[TableRad] پروپ switch بدون تابع onSwitchChange پاس داده شده است؛ مقدار سوئیچ به بیرون ارسال نمی‌شود.",
+        );
+      }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
+    const getRowUniqueId = useCallback(
+      (row: any, rowIndex: number): string | number => {
+        // گام ۱: تبدیل cols به آرایه
+        const columnsArray: TableColumn[] = Array.isArray(cols)
+          ? cols
+          : cols
+            ? [cols]
+            : [];
+
+        // گام ۲: پیدا کردن ستونی که uniqueId آن برابر با مقدارِ پراپِ «کلیدِ یکتا» است
+        const targetColumn = columnsArray.find(
+          (col) => col.uniqueId === rowKey,
+        );
+
+        // گام ۳: استخراجِ فیلدِ «key» از آن ستون (مسیرِ واقعی در داده، مثل "barCode" یا "metadata.billNumber")
+        const dataKey = targetColumn?.key;
+
+        // گام ۴: خواندن مقدار از ردیف با استفاده از آن مسیر
+        if (dataKey) {
+          const value = _.get(row, dataKey);
+          if (value != null && value !== "") {
+            return value;
+          }
+        }
+
+        // اولویت بعدی: فیلد id (برای سازگاری با کد قبلی)
+        if (row?.id != null) {
+          return row.id;
+        }
+
+        // اولویت نهایی: استفاده از شماره ردیف (برای جلوگیری از تکرار)
+        return `row-${rowIndex}`;
+      },
+      [rowKey, cols],
+    );
+
+    // ---------- عملیات دسته‌ای ----------
+    // فقط آیتم‌هایی که visible !== false دارند معتبرند؛ ملاک همه‌ی تصمیم‌ها
+    // (رندر دکمه و اجبارِ چک‌باکس) همین لیستِ پس‌از‌فیلتر است.
+    const visibleBulkActions = useMemo<BulkActionItem[]>(
+      () =>
+        Array.isArray(bulkActions)
+          ? bulkActions.filter((item) => item?.visible !== false)
+          : [],
+      [bulkActions],
+    );
+    const hasBulkActions = visibleBulkActions.length > 0;
+    // چک‌باکس: یا پروپ checkBox، یا وجودِ عملیات دسته‌ای معتبر
+    const effectiveCheckBox = checkBox || hasBulkActions;
+
+    // ردیف‌های انتخاب‌شده‌ی صفحه‌ی فعلی — منبع واحد برای onRowSelect و bulkActions
+    const selectedRowsData = useMemo(
+      () =>
+        data.filter((row, index) =>
+          selectedRowIds.has(getRowUniqueId(row, index)),
+        ),
+      [data, selectedRowIds, getRowUniqueId],
+    );
+
+    // ---------- منطق pagination چسبان (sticky) ----------
+    // نسخه‌ی چسبان فقط وقتی نمایش داده می‌شود که هر دو شرط برقرار باشد:
+    // ۱) pagination معمولی کاملاً زیر viewport باشد (کاربر به انتهای جدول نرسیده)،
+    // ۲) بدنه‌ی جدول هم‌اکنون با viewport تقاطع داشته باشد (کاربر داخل ناحیه‌ی جدول است).
+    // با این قانون:
+    // - اگر کاربر از روی جدولِ کوتاه عبور کند (جدول بالای صفحه)، sticky نمایش داده نمی‌شود
+    //   و pagination به انتهای جدول چسبیده می‌ماند (رفع باگ).
+    // - اگر جدول هنوز به صفحه نرسیده باشد (پایین‌تر از viewport)، sticky نمایش داده نمی‌شود.
+    // - در جدول‌های بلند، تا وقتی انتهای جدول دیده نشود، sticky فعال می‌ماند.
+
+    useEffect(() => {
+      if (totalCount <= 0) {
+        setShowStickyPagination(false);
+        return;
+      }
+      if (!paginationRef.current || !tableWrapperRef.current) return;
+
+      // محاسبه‌ی وضعیت از روی مستطیل‌های واقعی، نه فقط رویداد تقاطع
+      const updateStickyState = () => {
+        const pagRect = paginationRef.current?.getBoundingClientRect();
+        const wrapRect = tableWrapperRef.current?.getBoundingClientRect();
+        if (!pagRect || !wrapRect) return;
+
+        // آیا pagination طبیعی الان داخل viewport دیده می‌شود؟
+        const paginationVisible =
+          pagRect.top < window.innerHeight && pagRect.bottom > 0;
+        // آیا pagination طبیعی کاملاً زیر viewport است؟
+        const paginationBelow = pagRect.top >= window.innerHeight;
+        // آیا بدنه‌ی جدول با viewport تقاطع دارد؟
+        const tableInView =
+          wrapRect.top < window.innerHeight && wrapRect.bottom > 0;
+
+        setShowStickyPagination(
+          !paginationVisible && paginationBelow && tableInView,
+        );
+      };
+
+      // هر تغییری در تقاطعِ «pagination» یا «بدنه‌ی جدول» با viewport → محاسبه‌ی مجدد
+      const observer = new IntersectionObserver(
+        () => {
+          updateStickyState();
+        },
+        { threshold: 0 },
       );
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+      observer.observe(paginationRef.current);
+      observer.observe(tableWrapperRef.current);
 
-  const getRowUniqueId = useCallback(
-    (row: any, rowIndex: number): string | number => {
-      // گام ۱: تبدیل cols به آرایه
-      const columnsArray: TableColumn[] = Array.isArray(cols)
-        ? cols
+      // پوشش تغییر ابعاد پنجره بدون رویداد تقاطع
+      window.addEventListener("resize", updateStickyState);
+
+      return () => {
+        observer.disconnect();
+        window.removeEventListener("resize", updateStickyState);
+      };
+    }, [configData, totalCount, data.length]);
+
+    // selection of rows send to parent
+    useEffect(() => {
+      if (onRowSelect) {
+        onRowSelect(selectedRowsData);
+      }
+    }, [selectedRowsData, onRowSelect]);
+
+    useEffect(() => {
+      if (requestConfig?.url && requestConfig["Access-Token"] && !configData) {
+        // get all settings
+        const requestGetSetting = async () => {
+          if (
+            !requestConfig ||
+            !requestConfig.url ||
+            !requestConfig["Access-Token"] ||
+            !requestConfig["Client-Id"]
+          ) {
+            console.warn(
+              "requestConfig ناقص است یا وجود ندارد. درخواست تنظیمات ارسال نشد.",
+              requestConfig,
+            );
+            return;
+          }
+          try {
+            const res = await fetch(requestConfig.url, {
+              method: "GET",
+              headers: {
+                "Access-Token": requestConfig["Access-Token"],
+                "Client-Id": requestConfig["Client-Id"],
+                "Content-Type": "application/json",
+              },
+            });
+            if (!res.ok) {
+              throw new Error(`Error: ${res.statusText}`);
+            }
+            const data = await res.json();
+            setConfigData(data);
+          } catch (error) {
+            console.log("error fetching setting:", error);
+          }
+        };
+        requestGetSetting();
+      }
+    }, [requestConfig, configData]);
+
+    // final column for mapping and show data on cells
+    const finalColumns = useMemo(() => {
+      // change cols to array
+      const baseColumns: TableColumn[] = Array.isArray(cols)
+        ? [...cols]
         : cols
           ? [cols]
           : [];
 
-      // گام ۲: پیدا کردن ستونی که uniqueId آن برابر با مقدارِ پراپِ «کلیدِ یکتا» است
-      const targetColumn = columnsArray.find((col) => col.uniqueId === rowKey);
-
-      // گام ۳: استخراجِ فیلدِ «key» از آن ستون (مسیرِ واقعی در داده، مثل "barCode" یا "metadata.billNumber")
-      const dataKey = targetColumn?.key;
-
-      // گام ۴: خواندن مقدار از ردیف با استفاده از آن مسیر
-      if (dataKey) {
-        const value = _.get(row, dataKey);
-        if (value != null && value !== "") {
-          return value;
-        }
-      }
-
-      // اولویت بعدی: فیلد id (برای سازگاری با کد قبلی)
-      if (row?.id != null) {
-        return row.id;
-      }
-
-      // اولویت نهایی: استفاده از شماره ردیف (برای جلوگیری از تکرار)
-      return `row-${rowIndex}`;
-    },
-    [rowKey, cols],
-  );
-
-  // ---------- عملیات دسته‌ای ----------
-  // فقط آیتم‌هایی که visible !== false دارند معتبرند؛ ملاک همه‌ی تصمیم‌ها
-  // (رندر دکمه و اجبارِ چک‌باکس) همین لیستِ پس‌از‌فیلتر است.
-  const visibleBulkActions = useMemo<BulkActionItem[]>(
-    () =>
-      Array.isArray(bulkActions)
-        ? bulkActions.filter((item) => item?.visible !== false)
-        : [],
-    [bulkActions],
-  );
-  const hasBulkActions = visibleBulkActions.length > 0;
-  // چک‌باکس: یا پروپ checkBox، یا وجودِ عملیات دسته‌ای معتبر
-  const effectiveCheckBox = checkBox || hasBulkActions;
-
-  // ردیف‌های انتخاب‌شده‌ی صفحه‌ی فعلی — منبع واحد برای onRowSelect و bulkActions
-  const selectedRowsData = useMemo(
-    () =>
-      data.filter((row, index) =>
-        selectedRowIds.has(getRowUniqueId(row, index)),
-      ),
-    [data, selectedRowIds, getRowUniqueId],
-  );
-  
-
-  // ---------- منطق pagination چسبان (sticky) ----------
-  // نسخه‌ی چسبان فقط وقتی نمایش داده می‌شود که هر دو شرط برقرار باشد:
-  // ۱) pagination معمولی کاملاً زیر viewport باشد (کاربر به انتهای جدول نرسیده)،
-  // ۲) بدنه‌ی جدول هم‌اکنون با viewport تقاطع داشته باشد (کاربر داخل ناحیه‌ی جدول است).
-  // با این قانون:
-  // - اگر کاربر از روی جدولِ کوتاه عبور کند (جدول بالای صفحه)، sticky نمایش داده نمی‌شود
-  //   و pagination به انتهای جدول چسبیده می‌ماند (رفع باگ).
-  // - اگر جدول هنوز به صفحه نرسیده باشد (پایین‌تر از viewport)، sticky نمایش داده نمی‌شود.
-  // - در جدول‌های بلند، تا وقتی انتهای جدول دیده نشود، sticky فعال می‌ماند.
-  
-  useEffect(() => {
-    if (totalCount <= 0) {
-      setShowStickyPagination(false);
-      return;
-    }
-    if (!paginationRef.current || !tableWrapperRef.current) return;
-
-    // محاسبه‌ی وضعیت از روی مستطیل‌های واقعی، نه فقط رویداد تقاطع
-    const updateStickyState = () => {
-      const pagRect = paginationRef.current?.getBoundingClientRect();
-      const wrapRect = tableWrapperRef.current?.getBoundingClientRect();
-      if (!pagRect || !wrapRect) return;
-
-      // آیا pagination طبیعی الان داخل viewport دیده می‌شود؟
-      const paginationVisible =
-        pagRect.top < window.innerHeight && pagRect.bottom > 0;
-      // آیا pagination طبیعی کاملاً زیر viewport است؟
-      const paginationBelow = pagRect.top >= window.innerHeight;
-      // آیا بدنه‌ی جدول با viewport تقاطع دارد؟
-      const tableInView =
-        wrapRect.top < window.innerHeight && wrapRect.bottom > 0;
-
-      setShowStickyPagination(
-        !paginationVisible && paginationBelow && tableInView,
+      // remove columns start with __
+      const baseColumnsWithoutSpecials = baseColumns.filter(
+        (col) => !col.uniqueId?.startsWith("__"),
       );
-    };
 
-    // هر تغییری در تقاطعِ «pagination» یا «بدنه‌ی جدول» با viewport → محاسبه‌ی مجدد
-    const observer = new IntersectionObserver(
-      () => {
-        updateStickyState();
-      },
-      { threshold: 0 },
-    );
-    observer.observe(paginationRef.current);
-    observer.observe(tableWrapperRef.current);
+      // withPrefix without number and checkbox
+      const withPrefix: TableColumn[] = [...baseColumnsWithoutSpecials];
 
-    // پوشش تغییر ابعاد پنجره بدون رویداد تقاطع
-    window.addEventListener("resize", updateStickyState);
-
-    return () => {
-      observer.disconnect();
-      window.removeEventListener("resize", updateStickyState);
-    };
-  }, [configData, totalCount, data.length]);
-
-  // selection of rows send to parent
-  useEffect(() => {
-    if (onRowSelect) {
-      onRowSelect(selectedRowsData);
-    }
-  }, [selectedRowsData, onRowSelect]);
-
-  useEffect(() => {
-    if (requestConfig?.url && requestConfig["Access-Token"] && !configData) {
-      // get all settings
-      const requestGetSetting = async () => {
-        if (
-          !requestConfig ||
-          !requestConfig.url ||
-          !requestConfig["Access-Token"] ||
-          !requestConfig["Client-Id"]
-        ) {
-          console.warn(
-            "requestConfig ناقص است یا وجود ندارد. درخواست تنظیمات ارسال نشد.",
-            requestConfig,
-          );
-          return;
-        }
-        try {
-          const res = await fetch(requestConfig.url, {
-            method: "GET",
-            headers: {
-              "Access-Token": requestConfig["Access-Token"],
-              "Client-Id": requestConfig["Client-Id"],
-              "Content-Type": "application/json",
-            },
-          });
-          if (!res.ok) {
-            throw new Error(`Error: ${res.statusText}`);
-          }
-          const data = await res.json();
-          setConfigData(data);
-        } catch (error) {
-          console.log("error fetching setting:", error);
-        }
+      // number column
+      const numberColumnForRender: TableColumn = {
+        uniqueId: "__number__selector__",
+        key: "__number__selector__",
+        width: "50",
+        type: ContentType.Function,
+        title: "#",
+        htmlFunc: (row: any, rowIndex: number) => {
+          return (page - 1) * pageSize + rowIndex + 1;
+        },
+        visible: true,
+        excel: false,
       };
-      requestGetSetting();
-    }
-  }, [requestConfig, configData]);
 
-  // final column for mapping and show data on cells
-  const finalColumns = useMemo(() => {
-    // change cols to array
-    const baseColumns: TableColumn[] = Array.isArray(cols)
-      ? [...cols]
-      : cols
-        ? [cols]
-        : [];
-
-    // remove columns start with __
-    const baseColumnsWithoutSpecials = baseColumns.filter(
-      (col) => !col.uniqueId?.startsWith("__"),
-    );
-
-    // withPrefix without number and checkbox
-    const withPrefix: TableColumn[] = [...baseColumnsWithoutSpecials];
-
-    // number column
-    const numberColumnForRender: TableColumn = {
-      uniqueId: "__number__selector__",
-      key: "__number__selector__",
-      width: "50",
-      type: ContentType.Function,
-      title: "#",
-      htmlFunc: (row: any, rowIndex: number) => {
-        return (page - 1) * pageSize + rowIndex + 1;
-      },
-      visible: true,
-      excel: false,
-    };
-
-    // checkboxColumn
-    const checkboxColumnForRender: TableColumn | null = effectiveCheckBox
-      ? {
-          uniqueId: "__row_selector__",
-          key: "__row_selector__",
-          width: "50",
-          type: ContentType.Function,
-          title: (
-            <Checkbox
-              checked={data.length > 0 && selectedRowIds.size === data.length}
-              indeterminate={
-                data.length > 0 &&
-                selectedRowIds.size > 0 &&
-                selectedRowIds.size < data.length
-              }
-              onChange={(checked: boolean) => {
-                setSelectedRowIds(
-                  checked
-                    ? new Set(
-                        data.map((row, index) => getRowUniqueId(row, index)),
-                      )
-                    : new Set(),
-                );
-              }}
-            />
-          ),
-          htmlFunc: (row: any, rowIndex: number) => {
-            const rowId = getRowUniqueId(row, rowIndex);
-            return (
+      // checkboxColumn
+      const checkboxColumnForRender: TableColumn | null = effectiveCheckBox
+        ? {
+            uniqueId: "__row_selector__",
+            key: "__row_selector__",
+            width: "50",
+            type: ContentType.Function,
+            title: (
               <Checkbox
-                uniqueId={String(rowId)}
-                checked={selectedRowIds.has(rowId)}
-                onChange={(checked) => {
-                  setSelectedRowIds((prev) => {
-                    const next = new Set(prev);
-                    if (checked) {
-                      next.add(rowId);
-                    } else {
-                      next.delete(rowId);
-                    }
-                    return next;
-                  });
+                checked={data.length > 0 && selectedRowIds.size === data.length}
+                indeterminate={
+                  data.length > 0 &&
+                  selectedRowIds.size > 0 &&
+                  selectedRowIds.size < data.length
+                }
+                onChange={(checked: boolean) => {
+                  setSelectedRowIds(
+                    checked
+                      ? new Set(
+                          data.map((row, index) => getRowUniqueId(row, index)),
+                        )
+                      : new Set(),
+                  );
                 }}
               />
-            );
-          },
-          visible: true,
-          excel: false,
+            ),
+            htmlFunc: (row: any, rowIndex: number) => {
+              const rowId = getRowUniqueId(row, rowIndex);
+              return (
+                <Checkbox
+                  uniqueId={String(rowId)}
+                  checked={selectedRowIds.has(rowId)}
+                  onChange={(checked) => {
+                    setSelectedRowIds((prev) => {
+                      const next = new Set(prev);
+                      if (checked) {
+                        next.add(rowId);
+                      } else {
+                        next.delete(rowId);
+                      }
+                      return next;
+                    });
+                  }}
+                />
+              );
+            },
+            visible: true,
+            excel: false,
+          }
+        : null;
+
+      //api setting columns
+      const apiColumns =
+        configData !== null &&
+        !configData.hasError &&
+        configData.result.length > 0 &&
+        configData.result[0]?.setting?.tables?.[id]?.columns;
+
+      // return default columns if api is empty
+      if (
+        !apiColumns ||
+        !Array.isArray(apiColumns) ||
+        apiColumns.length === 0
+      ) {
+        const defaultResult: TableColumn[] = [];
+        if (checkboxColumnForRender) {
+          defaultResult.push(checkboxColumnForRender);
         }
-      : null;
-
-    //api setting columns
-    const apiColumns =
-      configData !== null &&
-      !configData.hasError &&
-      configData.result.length > 0 &&
-      configData.result[0]?.setting?.tables?.[id]?.columns;
-
-    // return default columns if api is empty
-    if (!apiColumns || !Array.isArray(apiColumns) || apiColumns.length === 0) {
-      const defaultResult: TableColumn[] = [];
-      if (checkboxColumnForRender) {
-        defaultResult.push(checkboxColumnForRender);
-      }
-      defaultResult.push(numberColumnForRender);
-      defaultResult.push(...withPrefix);
-      return defaultResult;
-    }
-
-    const apiColumnMap = new Map<string, any>();
-    apiColumns.forEach((saved: any) => {
-      if (saved?.uniqueId) {
-        apiColumnMap.set(saved.uniqueId, saved);
-      }
-    });
-
-    // order of columns from api columns
-    const orderedApiColumns = apiColumns.filter(
-      (saved: any) => saved?.uniqueId && !saved.uniqueId.startsWith("__"),
-    );
-
-    const resultColumns: TableColumn[] = [];
-
-    // adding number and checkbox column
-    if (checkboxColumnForRender) {
-      resultColumns.push(checkboxColumnForRender);
-    }
-    resultColumns.push(numberColumnForRender);
-
-    // process columns from api
-    orderedApiColumns.forEach((savedColumn: any) => {
-      const uniqueId = savedColumn.uniqueId;
-      const originalCol = withPrefix.find((col) => col.uniqueId === uniqueId);
-
-      // no columns in developer cols
-      if (!originalCol) {
-        return;
+        defaultResult.push(numberColumnForRender);
+        defaultResult.push(...withPrefix);
+        return defaultResult;
       }
 
-      // visible columns to show
-      resultColumns.push({
-        ...originalCol,
-        visible: savedColumn.visible === true,
-        width: savedColumn.width ?? originalCol.width,
-        title: savedColumn.title ?? originalCol.title,
-        excel: savedColumn.excel ?? originalCol.excel,
+      const apiColumnMap = new Map<string, any>();
+      apiColumns.forEach((saved: any) => {
+        if (saved?.uniqueId) {
+          apiColumnMap.set(saved.uniqueId, saved);
+        }
       });
-    });
 
-    // adding new columns is not in api
-    // ستون جدید به‌جای چسبیدن به انتها، در همان جایگاهی که دولوپر در cols
-    // تعریف کرده درج می‌شود: قبل از اولین ستونِ بعدیِ همسایه‌اش که در نتیجه حضور دارد.
-    withPrefix.forEach((originalCol, devIndex) => {
-      // ignore special columns, recently has been added
-      if (originalCol.uniqueId?.startsWith("__")) {
-        return;
-      }
-
-      // check if this column is added before by api
-      const alreadyAdded = resultColumns.some(
-        (col) => col.uniqueId === originalCol.uniqueId,
+      // order of columns from api columns
+      const orderedApiColumns = apiColumns.filter(
+        (saved: any) => saved?.uniqueId && !saved.uniqueId.startsWith("__"),
       );
-      if (alreadyAdded) {
-        return;
-      }
 
-      // لنگر: اولین ستونی که در ترتیبِ دولوپر «بعد» از ستون جدید می‌آید
-      // و هم‌اکنون در resultColumns وجود دارد
-      let anchorId: string | undefined;
-      for (let j = devIndex + 1; j < withPrefix.length; j++) {
-        const nextId = withPrefix[j].uniqueId;
-        if (resultColumns.some((col) => col.uniqueId === nextId)) {
-          anchorId = nextId;
-          break;
+      const resultColumns: TableColumn[] = [];
+
+      // adding number and checkbox column
+      if (checkboxColumnForRender) {
+        resultColumns.push(checkboxColumnForRender);
+      }
+      resultColumns.push(numberColumnForRender);
+
+      // process columns from api
+      orderedApiColumns.forEach((savedColumn: any) => {
+        const uniqueId = savedColumn.uniqueId;
+        const originalCol = withPrefix.find((col) => col.uniqueId === uniqueId);
+
+        // no columns in developer cols
+        if (!originalCol) {
+          return;
         }
-      }
 
-      if (anchorId) {
-        const insertIndex = resultColumns.findIndex(
-          (col) => col.uniqueId === anchorId,
+        // visible columns to show
+        resultColumns.push({
+          ...originalCol,
+          visible: savedColumn.visible === true,
+          width: savedColumn.width ?? originalCol.width,
+          title: savedColumn.title ?? originalCol.title,
+          excel: savedColumn.excel ?? originalCol.excel,
+        });
+      });
+
+      // adding new columns is not in api
+      // ستون جدید به‌جای چسبیدن به انتها، در همان جایگاهی که دولوپر در cols
+      // تعریف کرده درج می‌شود: قبل از اولین ستونِ بعدیِ همسایه‌اش که در نتیجه حضور دارد.
+      withPrefix.forEach((originalCol, devIndex) => {
+        // ignore special columns, recently has been added
+        if (originalCol.uniqueId?.startsWith("__")) {
+          return;
+        }
+
+        // check if this column is added before by api
+        const alreadyAdded = resultColumns.some(
+          (col) => col.uniqueId === originalCol.uniqueId,
         );
-        resultColumns.splice(insertIndex, 0, { ...originalCol });
-      } else {
-        // هیچ همسایه‌ی شناخته‌شده‌ای بعد از آن نیست → انتها
-        resultColumns.push({ ...originalCol });
+        if (alreadyAdded) {
+          return;
+        }
+
+        // لنگر: اولین ستونی که در ترتیبِ دولوپر «بعد» از ستون جدید می‌آید
+        // و هم‌اکنون در resultColumns وجود دارد
+        let anchorId: string | undefined;
+        for (let j = devIndex + 1; j < withPrefix.length; j++) {
+          const nextId = withPrefix[j].uniqueId;
+          if (resultColumns.some((col) => col.uniqueId === nextId)) {
+            anchorId = nextId;
+            break;
+          }
+        }
+
+        if (anchorId) {
+          const insertIndex = resultColumns.findIndex(
+            (col) => col.uniqueId === anchorId,
+          );
+          resultColumns.splice(insertIndex, 0, { ...originalCol });
+        } else {
+          // هیچ همسایه‌ی شناخته‌شده‌ای بعد از آن نیست → انتها
+          resultColumns.push({ ...originalCol });
+        }
+      });
+
+      return resultColumns;
+    }, [
+      effectiveCheckBox,
+      cols,
+      data.length,
+      selectedRowIds,
+      configData,
+      id,
+      page,
+      pageSize,
+      getRowUniqueId,
+    ]);
+
+    const visibleColumns = useMemo(() => {
+      return finalColumns.filter((col) => {
+        if (col.key === "__row_selector__") return true;
+        if (col.key === "__number__selector__") return true;
+
+        return col.visible !== false;
+      });
+    }, [finalColumns]);
+
+    const handlePageChange = (pageNumber: number) => {
+      setPage(pageNumber);
+      onPageChange?.(pageNumber);
+    };
+
+    const handleSizeChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+      const newSize = Number(event.target.value);
+      setPageSize(newSize);
+      setPage(1);
+      onSizeChange?.(event); // حالا خودِ event به مصرف‌کننده‌ی بیرونیِ کامپوننت Table هم پاس داده می‌شود
+    };
+
+    const toggleSetting = () => {
+      setSettingModal(!settingModal);
+    };
+
+    // جریان کلیک روی یک اکشن دسته‌ای (نسخه‌ی جدید):
+    // ۱) ردیف‌های انتخاب‌شده‌ی صفحه‌ی فعلی captura می‌شوند
+    // ۲) منو داخل خودِ کامپوننت BulkActions بسته می‌شود
+    // ۳) onClick همان آیتم با ردیف‌های capturaشده صدا زده می‌شود
+    // پاک‌سازی خودکار حذف شد: انتخاب تا وقتی والد selectedReset() را
+    //    صدا نزند (مثلاً بعد از hasError: false یا تأیید مودال) باقی می‌ماند.
+    const handleBulkActionClick = (action: BulkActionItem) => {
+      const rows = selectedRowsData;
+      action.onClick?.(rows);
+    };
+
+    // هر بار سوئیچ عوض می‌شود: وضعیت داخلی به‌روز + اطلاع به دولوپر
+    // payload دقیقاً به شکل { [paramName]: boolean } ساخته می‌شود.
+    const handleSwitchToggle = (next: boolean) => {
+      setSwitchOn(next);
+      const paramName = switchConfig?.paramName ?? "";
+      if (!paramName) {
+        console.warn(
+          "[TableRad] پروپ switch بدون paramName پاس داده شده است؛ کلید payload خالی خواهد بود.",
+        );
       }
-    });
+      if (typeof switchConfig?.onSwitchChange === "function") {
+        switchConfig.onSwitchChange({ [paramName]: next });
+      } else {
+        console.warn(
+          "[TableRad] onSwitchChange تعریف نشده است؛ مقدار سوئیچ دور ریخته شد.",
+        );
+      }
+    };
 
-    return resultColumns;
-  }, [
-    effectiveCheckBox,
-    cols,
-    data.length,
-    selectedRowIds,
-    configData,
-    id,
-    page,
-    pageSize,
-    getRowUniqueId,
-  ]);
+    const handleGetDataAfterChange = (data: any) => {
+      setConfigData(data);
+    };
 
-  const visibleColumns = useMemo(() => {
-    return finalColumns.filter((col) => {
-      if (col.key === "__row_selector__") return true;
-      if (col.key === "__number__selector__") return true;
+    const formatDateForExcel = (
+      value: any,
+      type?: string,
+      format?: string,
+    ): string => {
+      if (!value) return "";
 
-      return col.visible !== false;
-    });
-  }, [finalColumns]);
+      const momentObj = moment(value);
+      if (!momentObj.isValid()) return String(value);
 
-  const handlePageChange = (pageNumber: number) => {
-    setPage(pageNumber);
-    onPageChange?.(pageNumber);
-  };
+      let defaultFormat = "";
+      switch (type) {
+        case "date":
+          defaultFormat = "jYYYY/jMM/jDD";
+          break;
+        case "time":
+          defaultFormat = "HH:mm:ss";
+          break;
+        case "datetime":
+          defaultFormat = "jYYYY/jMM/jDD HH:mm:ss";
+          break;
+        default:
+          return String(value);
+      }
 
-  const handleSizeChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    const newSize = Number(event.target.value);
-    setPageSize(newSize);
-    setPage(1);
-    onSizeChange?.(event); // حالا خودِ event به مصرف‌کننده‌ی بیرونیِ کامپوننت Table هم پاس داده می‌شود
-  };
+      const finalFormat = format || defaultFormat;
+      return momentObj.format(finalFormat);
+    };
 
-  const toggleSetting = () => {
-    setSettingModal(!settingModal);
-  };
-
-  // جریان کلیک روی یک اکشن دسته‌ای:
-  // ۱) ردیف‌های انتخاب‌شده‌ی فعلی captura می‌شوند
-  // ۲) انتخاب خودکار پاک می‌شود (onRowSelect با آرایه‌ی خالی صدا زده می‌شود)
-  // ۳) onClick همان آیتم با ردیف‌های capturaشده صدا زده می‌شود
-  // (بستن منو داخل خودِ کامپوننت BulkActions انجام می‌شود)
-  const handleBulkActionClick = (action: BulkActionItem) => {
-    const rows = selectedRowsData;
-    setSelectedRowIds(new Set());
-    action.onClick?.(rows);
-  };
-
-  // هر بار سوئیچ عوض می‌شود: وضعیت داخلی به‌روز + اطلاع به دولوپر
-  // payload دقیقاً به شکل { [paramName]: boolean } ساخته می‌شود.
-  const handleSwitchToggle = (next: boolean) => {
-    setSwitchOn(next);
-    const paramName = switchConfig?.paramName ?? "";
-    if (!paramName) {
-      console.warn(
-        "[TableRad] پروپ switch بدون paramName پاس داده شده است؛ کلید payload خالی خواهد بود.",
-      );
-    }
-    if (typeof switchConfig?.onSwitchChange === "function") {
-      switchConfig.onSwitchChange({ [paramName]: next });
-    } else {
-      console.warn(
-        "[TableRad] onSwitchChange تعریف نشده است؛ مقدار سوئیچ دور ریخته شد.",
-      );
-    }
-  };
-
-  const handleGetDataAfterChange = (data: any) => {
-    setConfigData(data);
-  };
-
-  const formatDateForExcel = (
-    value: any,
-    type?: string,
-    format?: string,
-  ): string => {
-    if (!value) return "";
-
-    const momentObj = moment(value);
-    if (!momentObj.isValid()) return String(value);
-
-    let defaultFormat = "";
-    switch (type) {
-      case "date":
-        defaultFormat = "jYYYY/jMM/jDD";
-        break;
-      case "time":
-        defaultFormat = "HH:mm:ss";
-        break;
-      case "datetime":
-        defaultFormat = "jYYYY/jMM/jDD HH:mm:ss";
-        break;
-      default:
-        return String(value);
-    }
-
-    const finalFormat = format || defaultFormat;
-    return momentObj.format(finalFormat);
-  };
-
-  // رشته‌ی HTML رندرشده را به متنِ خام تبدیل می‌کند؛ مرزهای بلوکی (div/p/br)
-  // را قبل از حذفِ تگ‌ها به newline تبدیل می‌کند تا خط‌ها از هم جدا بمانند.
-  const htmlToPlainText = (html: string): string => {
-    return html
-      .replace(/<\/(div|p|li)>/gi, "\n")
-      .replace(/<br\s*\/?>/gi, "\n")
-      .replace(/<[^>]+>/g, "")
-      .replace(/&nbsp;/g, " ")
-      .split("\n")
-      .map((line) => line.trim())
-      .filter(Boolean)
-      .join("\n");
-  };
-
-  // حالتِ دوم (بدونِ data-excel-value): آخرین راهِ چاره برای گرفتنِ متنِ یک
-  // React Element — بگذار خودِ React واقعاً رندرش کند (برای کامپوننت‌های
-  // پیچیده‌ای مثلِ NumberFormat که فرمتِ عددشان فقط داخلِ رندرِ واقعی
-  // مشخص می‌شود، نه از روی props خامشان).
-  const renderNodeViaSSR = (node: React.ReactNode): string => {
-    try {
-      const html = ReactDOMServer.renderToStaticMarkup(<>{node}</>);
-      return htmlToPlainText(html);
-    } catch {
-      return "";
-    }
-  };
-
-  // React Element (خروجیِ htmlFunc) را به متنِ خامِ قابل‌نمایش در اکسل تبدیل می‌کند.
-  // مثلاً <><div>علی</div><div>محمد</div></> را به "علی\nمحمد" تبدیل می‌کند.
-
-  const reactNodeToPlainText = (node: unknown): string => {
-    if (node === null || node === undefined || typeof node === "boolean") {
-      return "";
-    }
-    if (typeof node === "string" || typeof node === "number") {
-      return String(node);
-    }
-    if (Array.isArray(node)) {
-      return node
-        .map((child) => reactNodeToPlainText(child))
+    // رشته‌ی HTML رندرشده را به متنِ خام تبدیل می‌کند؛ مرزهای بلوکی (div/p/br)
+    // را قبل از حذفِ تگ‌ها به newline تبدیل می‌کند تا خط‌ها از هم جدا بمانند.
+    const htmlToPlainText = (html: string): string => {
+      return html
+        .replace(/<\/(div|p|li)>/gi, "\n")
+        .replace(/<br\s*\/?>/gi, "\n")
+        .replace(/<[^>]+>/g, "")
+        .replace(/&nbsp;/g, " ")
+        .split("\n")
+        .map((line) => line.trim())
         .filter(Boolean)
         .join("\n");
-    }
+    };
 
-    //  اضافه شده: مدیریت آبجکت‌های ساده (مثل آیتم‌های badge)
-    if (
-      typeof node === "object" &&
-      node !== null &&
-      !React.isValidElement(node)
-    ) {
-      const obj = node as Record<string, any>;
-      // اگر آبجکت دارای فیلد value باشد (ساختار badge ها)
-      if ("value" in obj) {
-        const label = obj.label ?? obj.value;
-        return String(label);
-      }
-      // در غیر این صورت stringify
-      return JSON.stringify(obj);
-    }
-
-    if (React.isValidElement(node)) {
-      const props = (node.props as Record<string, any>) || {};
-      if (props["data-excel-value"] !== undefined) {
-        const rawValue = props["data-excel-value"];
-        const label = props["data-excel-label"];
-        const numeric = Number(rawValue);
-        const formattedValue =
-          rawValue !== "" && !Number.isNaN(numeric)
-            ? numeric.toLocaleString("en-US")
-            : String(rawValue);
-        return label ? `${label}: ${formattedValue}` : formattedValue;
-      }
-      if (typeof node.type === "string") {
-        return reactNodeToPlainText(props.children);
-      }
-      if (node.type === React.Fragment) {
-        return reactNodeToPlainText(props.children);
-      }
-      if (typeof node.type === "function") {
-        try {
-          const rendered = (node.type as (p: unknown) => React.ReactNode)(
-            props,
-          );
-          return reactNodeToPlainText(rendered);
-        } catch {
-          return renderNodeViaSSR(node);
-        }
-      }
-      return renderNodeViaSSR(node);
-    }
-    return "";
-  };
-
-  const generateAndDownloadExcel = async (fullData: unknown[]) => {
-    const workbook = new ExcelJS.Workbook();
-    const worksheet = workbook.addWorksheet("داده‌ها");
-
-    const excelColumns = finalColumns.filter((col) => col.excel === true);
-    if (excelColumns.length === 0) return;
-
-    const headerRow = excelColumns.map(
-      (col) => col.title || col.defaultTitle || "",
-    );
-    worksheet.addRow(headerRow);
-
-    fullData.forEach((row, rowIndex) => {
-      const rowValues = excelColumns.map((col) => {
-        // اولویت با excelFunc
-        if (col.excelFunc && typeof col.excelFunc === "function") {
-          return col.excelFunc(row);
-        }
-        // دومین اولویت با htmlFunc
-        if (col.htmlFunc && typeof col.htmlFunc === "function") {
-          return reactNodeToPlainText(col.htmlFunc(row, rowIndex));
-        }
-
-        let rawValue: any = "";
-        if (col.key) {
-          rawValue = _.get(row, col.key.trim());
-        }
-
-        // پردازش بر اساس نوع ستون — دقیقاً با همان کامپوننت‌هایی که خودِ
-        // جدول روی صفحه برای نمایش استفاده می‌کند، تا اکسل همیشه با
-        // چیزی که کاربر روی صفحه می‌بیند یکسان بماند.
-        switch (col.type) {
-          case "date":
-          case "time":
-          case "datetime":
-            return formatDateForExcel(rawValue, col.type, col.format);
-
-          case "text":
-            return reactNodeToPlainText(
-              <Text
-                value={rawValue}
-                strings={translates}
-                translate={col?.translate}
-              />,
-            );
-
-          case "price":
-            return reactNodeToPlainText(
-              <Price value={rawValue} strings={translates} />,
-            );
-
-          case "number":
-            if (typeof rawValue === "string" || typeof rawValue === "number") {
-              return String(rawValue);
-            }
-            return reactNodeToPlainText(<NumberCell value={rawValue} />);
-
-          case "badge":
-            if (Array.isArray(rawValue)) {
-              return rawValue
-                .map((item: any) => {
-                  if (item && typeof item === "object") {
-                    return item.value || item.label || "";
-                  }
-                  return String(item);
-                })
-                .filter(Boolean)
-                .join(", ");
-            } else if (rawValue && typeof rawValue === "object") {
-              return String(
-                (rawValue as any).value || (rawValue as any).label || "",
-              );
-            }
-
-            return reactNodeToPlainText(
-              <Tag
-                value={rawValue as any}
-                strings={translates}
-                translate={col?.translate}
-              />,
-            );
-
-          default:
-            return rawValue;
-        }
-      });
-
-      worksheet.addRow(rowValues);
-    });
-
-    worksheet.eachRow({ includeEmpty: true }, (row) => {
-      row.eachCell({ includeEmpty: true }, (cell) => {
-        cell.alignment = { horizontal: "right", vertical: "middle" };
-      });
-    });
-    worksheet.getRow(1).font = { bold: true };
-
-    const buffer = await workbook.xlsx.writeBuffer();
-    const blob = new Blob([buffer], {
-      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-    });
-
-    const baseName = id || "tableData";
-    const dateStr = new Date().toLocaleDateString("fa-IR").replace(/\//g, "-");
-    const fileName = `${baseName}_${dateStr}.xlsx`;
-
-    const url = window.URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = fileName;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    window.URL.revokeObjectURL(url);
-  };
-
-  // const cleanup1 = (timeout = 0) => {
-  //   setTimeout(() => {
-  //     setExportStatus("idle");
-  //     setExportProgress(0);
-  //     setAbortController(null);
-  //   }, timeout);
-  // };
-
-  const cleanup = (timeout = 0) => {
-    //  لغو timer قبلی اگر وجود دارد
-    if (cleanupTimerRef.current) {
-      clearTimeout(cleanupTimerRef.current);
-    }
-
-    //  ذخیره timer جدید
-    cleanupTimerRef.current = setTimeout(() => {
-      setExportStatus("idle");
-      setExportProgress(0);
-      setAbortController(null);
-      cleanupTimerRef.current = null; // پاکسازی ref
-    }, timeout);
-  };
-
-  const fetchPageWithRetry = async (
-    offset: number,
-    signal: AbortSignal,
-  ): Promise<unknown[] | null> => {
-    for (let attempt = 1; attempt <= 3; attempt++) {
+    // حالتِ دوم (بدونِ data-excel-value): آخرین راهِ چاره برای گرفتنِ متنِ یک
+    // React Element — بگذار خودِ React واقعاً رندرش کند (برای کامپوننت‌های
+    // پیچیده‌ای مثلِ NumberFormat که فرمتِ عددشان فقط داخلِ رندرِ واقعی
+    // مشخص می‌شود، نه از روی props خامشان).
+    const renderNodeViaSSR = (node: React.ReactNode): string => {
       try {
-        if (signal.aborted) {
-          return null;
+        const html = ReactDOMServer.renderToStaticMarkup(<>{node}</>);
+        return htmlToPlainText(html);
+      } catch {
+        return "";
+      }
+    };
+
+    // React Element (خروجیِ htmlFunc) را به متنِ خامِ قابل‌نمایش در اکسل تبدیل می‌کند.
+    // مثلاً <><div>علی</div><div>محمد</div></> را به "علی\nمحمد" تبدیل می‌کند.
+
+    const reactNodeToPlainText = (node: unknown): string => {
+      if (node === null || node === undefined || typeof node === "boolean") {
+        return "";
+      }
+      if (typeof node === "string" || typeof node === "number") {
+        return String(node);
+      }
+      if (Array.isArray(node)) {
+        return node
+          .map((child) => reactNodeToPlainText(child))
+          .filter(Boolean)
+          .join("\n");
+      }
+
+      //  اضافه شده: مدیریت آبجکت‌های ساده (مثل آیتم‌های badge)
+      if (
+        typeof node === "object" &&
+        node !== null &&
+        !React.isValidElement(node)
+      ) {
+        const obj = node as Record<string, any>;
+        // اگر آبجکت دارای فیلد value باشد (ساختار badge ها)
+        if ("value" in obj) {
+          const label = obj.label ?? obj.value;
+          return String(label);
         }
+        // در غیر این صورت stringify
+        return JSON.stringify(obj);
+      }
 
-        if (!onExcelExportRequest) return null;
-        const response = await onExcelExportRequest(offset, signal);
+      if (React.isValidElement(node)) {
+        const props = (node.props as Record<string, any>) || {};
+        if (props["data-excel-value"] !== undefined) {
+          const rawValue = props["data-excel-value"];
+          const label = props["data-excel-label"];
+          const numeric = Number(rawValue);
+          const formattedValue =
+            rawValue !== "" && !Number.isNaN(numeric)
+              ? numeric.toLocaleString("en-US")
+              : String(rawValue);
+          return label ? `${label}: ${formattedValue}` : formattedValue;
+        }
+        if (typeof node.type === "string") {
+          return reactNodeToPlainText(props.children);
+        }
+        if (node.type === React.Fragment) {
+          return reactNodeToPlainText(props.children);
+        }
+        if (typeof node.type === "function") {
+          try {
+            const rendered = (node.type as (p: unknown) => React.ReactNode)(
+              props,
+            );
+            return reactNodeToPlainText(rendered);
+          } catch {
+            return renderNodeViaSSR(node);
+          }
+        }
+        return renderNodeViaSSR(node);
+      }
+      return "";
+    };
 
-        if (response.hasError) {
-          console.warn(`تلاش ${attempt}: hasError = true`, response.message);
+    const generateAndDownloadExcel = async (fullData: unknown[]) => {
+      const workbook = new ExcelJS.Workbook();
+      const worksheet = workbook.addWorksheet("داده‌ها");
+
+      const excelColumns = finalColumns.filter((col) => col.excel === true);
+      if (excelColumns.length === 0) return;
+
+      const headerRow = excelColumns.map(
+        (col) => col.title || col.defaultTitle || "",
+      );
+      worksheet.addRow(headerRow);
+
+      fullData.forEach((row, rowIndex) => {
+        const rowValues = excelColumns.map((col) => {
+          // اولویت با excelFunc
+          if (col.excelFunc && typeof col.excelFunc === "function") {
+            return col.excelFunc(row);
+          }
+          // دومین اولویت با htmlFunc
+          if (col.htmlFunc && typeof col.htmlFunc === "function") {
+            return reactNodeToPlainText(col.htmlFunc(row, rowIndex));
+          }
+
+          let rawValue: any = "";
+          if (col.key) {
+            rawValue = _.get(row, col.key.trim());
+          }
+
+          // پردازش بر اساس نوع ستون — دقیقاً با همان کامپوننت‌هایی که خودِ
+          // جدول روی صفحه برای نمایش استفاده می‌کند، تا اکسل همیشه با
+          // چیزی که کاربر روی صفحه می‌بیند یکسان بماند.
+          switch (col.type) {
+            case "date":
+            case "time":
+            case "datetime":
+              return formatDateForExcel(rawValue, col.type, col.format);
+
+            case "text":
+              return reactNodeToPlainText(
+                <Text
+                  value={rawValue}
+                  strings={translates}
+                  translate={col?.translate}
+                />,
+              );
+
+            case "price":
+              return reactNodeToPlainText(
+                <Price value={rawValue} strings={translates} />,
+              );
+
+            case "number":
+              if (
+                typeof rawValue === "string" ||
+                typeof rawValue === "number"
+              ) {
+                return String(rawValue);
+              }
+              return reactNodeToPlainText(<NumberCell value={rawValue} />);
+
+            case "badge":
+              if (Array.isArray(rawValue)) {
+                return rawValue
+                  .map((item: any) => {
+                    if (item && typeof item === "object") {
+                      return item.value || item.label || "";
+                    }
+                    return String(item);
+                  })
+                  .filter(Boolean)
+                  .join(", ");
+              } else if (rawValue && typeof rawValue === "object") {
+                return String(
+                  (rawValue as any).value || (rawValue as any).label || "",
+                );
+              }
+
+              return reactNodeToPlainText(
+                <Tag
+                  value={rawValue as any}
+                  strings={translates}
+                  translate={col?.translate}
+                />,
+              );
+
+            default:
+              return rawValue;
+          }
+        });
+
+        worksheet.addRow(rowValues);
+      });
+
+      worksheet.eachRow({ includeEmpty: true }, (row) => {
+        row.eachCell({ includeEmpty: true }, (cell) => {
+          cell.alignment = { horizontal: "right", vertical: "middle" };
+        });
+      });
+      worksheet.getRow(1).font = { bold: true };
+
+      const buffer = await workbook.xlsx.writeBuffer();
+      const blob = new Blob([buffer], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      });
+
+      const baseName = id || "tableData";
+      const dateStr = new Date()
+        .toLocaleDateString("fa-IR")
+        .replace(/\//g, "-");
+      const fileName = `${baseName}_${dateStr}.xlsx`;
+
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = fileName;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    };
+
+    // const cleanup1 = (timeout = 0) => {
+    //   setTimeout(() => {
+    //     setExportStatus("idle");
+    //     setExportProgress(0);
+    //     setAbortController(null);
+    //   }, timeout);
+    // };
+
+    const cleanup = (timeout = 0) => {
+      //  لغو timer قبلی اگر وجود دارد
+      if (cleanupTimerRef.current) {
+        clearTimeout(cleanupTimerRef.current);
+      }
+
+      //  ذخیره timer جدید
+      cleanupTimerRef.current = setTimeout(() => {
+        setExportStatus("idle");
+        setExportProgress(0);
+        setAbortController(null);
+        cleanupTimerRef.current = null; // پاکسازی ref
+      }, timeout);
+    };
+
+    const fetchPageWithRetry = async (
+      offset: number,
+      signal: AbortSignal,
+    ): Promise<unknown[] | null> => {
+      for (let attempt = 1; attempt <= 3; attempt++) {
+        try {
+          if (signal.aborted) {
+            return null;
+          }
+
+          if (!onExcelExportRequest) return null;
+          const response = await onExcelExportRequest(offset, signal);
+
+          if (response.hasError) {
+            console.warn(`تلاش ${attempt}: hasError = true`, response.message);
+            if (attempt === 3) return null;
+            await new Promise((resolve) => setTimeout(resolve, 1000 * attempt));
+            continue;
+          }
+
+          exportErrorMessageRef.current = "";
+          return response.result ?? [];
+        } catch (error: any) {
+          if (error.name === "AbortError") {
+            return null;
+          }
+          console.warn(`تلاش ${attempt} ناموفق`, error);
+          exportErrorMessageRef.current = ""; // خطای کلی (شبکه/...) → پیامِ عمومی
           if (attempt === 3) return null;
           await new Promise((resolve) => setTimeout(resolve, 1000 * attempt));
-          continue;
         }
-
-        exportErrorMessageRef.current = "";
-        return response.result ?? [];
-      } catch (error: any) {
-        if (error.name === "AbortError") {
-          return null;
-        }
-        console.warn(`تلاش ${attempt} ناموفق`, error);
-        exportErrorMessageRef.current = ""; // خطای کلی (شبکه/...) → پیامِ عمومی
-        if (attempt === 3) return null;
-        await new Promise((resolve) => setTimeout(resolve, 1000 * attempt));
       }
-    }
-    return null;
-  };
+      return null;
+    };
 
-  const handleExportExcel = async () => {
-    if (!onExcelExportRequest) {
-      console.warn("onExcelExportRequest تعریف نشده است");
-      return;
-    }
+    const handleExportExcel = async () => {
+      if (!onExcelExportRequest) {
+        console.warn("onExcelExportRequest تعریف نشده است");
+        return;
+      }
 
-    if (totalCount === 0) {
-      showExportToast("error", EXPORT_EMPTY_MESSAGE);
-      return;
-    }
+      if (totalCount === 0) {
+        showExportToast("error", EXPORT_EMPTY_MESSAGE);
+        return;
+      }
 
-    // بدونِ ستونِ فعال برای اکسل فایلی ساخته نمی‌شود؛ بی‌خودی داده نگیریم و
-    // پیامِ «موفق» هم نشان ندهیم
-    if (!finalColumns.some((col) => col.excel === true)) {
-      showExportToast("error", EXPORT_NO_COLUMNS_MESSAGE);
-      return;
-    }
+      // بدونِ ستونِ فعال برای اکسل فایلی ساخته نمی‌شود؛ بی‌خودی داده نگیریم و
+      // پیامِ «موفق» هم نشان ندهیم
+      if (!finalColumns.some((col) => col.excel === true)) {
+        showExportToast("error", EXPORT_NO_COLUMNS_MESSAGE);
+        return;
+      }
 
-    //  لغو cleanup قبلی قبل از شروع دانلود جدید
-    if (cleanupTimerRef.current) {
-      clearTimeout(cleanupTimerRef.current);
-      cleanupTimerRef.current = null;
-    }
+      //  لغو cleanup قبلی قبل از شروع دانلود جدید
+      if (cleanupTimerRef.current) {
+        clearTimeout(cleanupTimerRef.current);
+        cleanupTimerRef.current = null;
+      }
 
-    const controller = new AbortController();
-    setAbortController(controller);
-    setExportStatus("exporting");
-    setExportProgress(0);
+      const controller = new AbortController();
+      setAbortController(controller);
+      setExportStatus("exporting");
+      setExportProgress(0);
 
-    let collectedData: unknown[] = [];
-    const totalPages = Math.ceil(totalCount / 50);
+      let collectedData: unknown[] = [];
+      const totalPages = Math.ceil(totalCount / 50);
 
-    try {
-      for (let page = 1; page <= totalPages; page++) {
-        if (controller.signal.aborted) {
-          throw new DOMException("Aborted", "AbortError");
-        }
-
-        const offset = (page - 1) * 50;
-
-        const pageData = await fetchPageWithRetry(offset, controller.signal);
-
-        if (pageData === null) {
-          //  بررسی abort قبل از throw Error
+      try {
+        for (let page = 1; page <= totalPages; page++) {
           if (controller.signal.aborted) {
             throw new DOMException("Aborted", "AbortError");
           }
-          throw new Error("دریافت داده ناموفق پس از تلاش‌ها");
+
+          const offset = (page - 1) * 50;
+
+          const pageData = await fetchPageWithRetry(offset, controller.signal);
+
+          if (pageData === null) {
+            //  بررسی abort قبل از throw Error
+            if (controller.signal.aborted) {
+              throw new DOMException("Aborted", "AbortError");
+            }
+            throw new Error("دریافت داده ناموفق پس از تلاش‌ها");
+          }
+
+          collectedData = [...collectedData, ...pageData];
+
+          const progress = Math.round((page / totalPages) * 100);
+          setExportProgress(progress);
         }
 
-        collectedData = [...collectedData, ...pageData];
+        // ساخت و دانلود فایل
+        await generateAndDownloadExcel(collectedData);
 
-        const progress = Math.round((page / totalPages) * 100);
-        setExportProgress(progress);
-      }
-
-      // ساخت و دانلود فایل
-      await generateAndDownloadExcel(collectedData);
-
-      showExportToast("success", EXPORT_SUCCESS_MESSAGE);
-      cleanup();
-    } catch (error: any) {
-      if (error.name === "AbortError") {
-        // پیامِ «لغو» فقط یک بار و از handleCancelExport نشان داده می‌شود
+        showExportToast("success", EXPORT_SUCCESS_MESSAGE);
         cleanup();
-        return;
+      } catch (error: any) {
+        if (error.name === "AbortError") {
+          // پیامِ «لغو» فقط یک بار و از handleCancelExport نشان داده می‌شود
+          cleanup();
+          return;
+        }
+        console.error("خطا در اکسپورت:", error);
+        // اگر API با hasError پیام داده، همان نمایش داده می‌شود؛ وگرنه پیامِ عمومی
+        showExportToast(
+          "error",
+          exportErrorMessageRef.current || EXPORT_ERROR_MESSAGE,
+        );
+        cleanup();
       }
-      console.error("خطا در اکسپورت:", error);
-      // اگر API با hasError پیام داده، همان نمایش داده می‌شود؛ وگرنه پیامِ عمومی
-      showExportToast(
-        "error",
-        exportErrorMessageRef.current || EXPORT_ERROR_MESSAGE,
-      );
+    };
+
+    const handleCancelExport = () => {
+      if (abortController) {
+        abortController.abort();
+      }
+      showExportToast("info", EXPORT_CANCELLED_MESSAGE);
       cleanup();
-    }
-  };
+    };
 
-  const handleCancelExport = () => {
-    if (abortController) {
-      abortController.abort();
-    }
-    showExportToast("info", EXPORT_CANCELLED_MESSAGE);
-    cleanup();
-  };
-
-  const renderExportButton = () => {
-    if (exportStatus === "exporting") {
-      return (
-        <div>
-          <Button
-            color="success"
-            size="sm"
-            disabled
-            className={styles.btn_xcel}
-          >
-            <img src={Xcel} alt="در حال تهیه" width={33} />
-          </Button>
-          <Progress value={exportProgress} className={styles.progressBar}>
-            <span className="fw-bold text-dark">{exportProgress}%</span>
-          </Progress>
-          <Button
-            color="danger"
-            size="sm"
-            outline
-            onClick={handleCancelExport}
-            className={styles.cancel_btn}
-          >
-            X
-          </Button>
-        </div>
-      );
-    }
-    return (
-      <Button
-        color="success"
-        size="sm"
-        onClick={handleExportExcel}
-        className={styles.btn_xcel}
-      >
-        <img src={Xcel} alt="دانلود اکسل" width={33} />
-      </Button>
-    );
-  };
-
-  const shouldShowPagination = totalCount > 0;
-  if (configData === null || configData?.hasError === true) {
-    return null;
-  } else {
-    return (
-      <Row>
-        <Col xs="6" className={`py-2 ${styles.bulk_actions_col}`}>
-          {hasBulkActions && (
-            <BulkActions
-              actions={visibleBulkActions}
-              disabled={selectedRowsData.length === 0}
-              onActionClick={handleBulkActionClick}
-            />
-          )}
-        </Col>
-        <Col xs="6" className={`py-2 ${styles.modal_Setting}`}>
-          <Button onClick={toggleSetting} className={styles.btn_setting}>
-            <img width={33} src={SettingButtonIcon} />
-          </Button>
-          {/* start excel download */}
-          <div className={styles.download_Excel_wrapper}>
-            {renderExportButton()}
+    const renderExportButton = () => {
+      if (exportStatus === "exporting") {
+        return (
+          <div>
+            <Button
+              color="success"
+              size="sm"
+              disabled
+              className={styles.btn_xcel}
+            >
+              <img src={Xcel} alt="در حال تهیه" width={33} />
+            </Button>
+            <Progress value={exportProgress} className={styles.progressBar}>
+              <span className="fw-bold text-dark">{exportProgress}%</span>
+            </Progress>
+            <Button
+              color="danger"
+              size="sm"
+              outline
+              onClick={handleCancelExport}
+              className={styles.cancel_btn}
+            >
+              X
+            </Button>
           </div>
-          {/* end excel download */}
-          {/* start optional switch — در چیدمان RTL بعد از اکسل = سمت چپ آن */}
-          {switchConfig && (
-            <div className={styles.switch_wrapper}>
-              <CustomInput
-                type="switch"
-                id={`${id}-switch-${switchConfig.paramName || "switch"}`}
-                name={`${id}-switch-${switchConfig.paramName || "switch"}`}
-                checked={switchOn}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                  handleSwitchToggle(e.target.checked)
-                }
-                disabled={exportStatus === "exporting"}
-                label={switchConfig.title ?? ""}
+        );
+      }
+      return (
+        <Button
+          color="success"
+          size="sm"
+          onClick={handleExportExcel}
+          className={styles.btn_xcel}
+        >
+          <img src={Xcel} alt="دانلود اکسل" width={33} />
+        </Button>
+      );
+    };
+
+    const shouldShowPagination = totalCount > 0;
+    if (configData === null || configData?.hasError === true) {
+      return null;
+    } else {
+      return (
+        <Row>
+          <Col xs="6" className={`py-2 ${styles.bulk_actions_col}`}>
+            {hasBulkActions && (
+              <BulkActions
+                actions={visibleBulkActions}
+                disabled={selectedRowsData.length === 0}
+                onActionClick={handleBulkActionClick}
               />
+            )}
+          </Col>
+          <Col xs="6" className={`py-2 ${styles.modal_Setting}`}>
+            <Button onClick={toggleSetting} className={styles.btn_setting}>
+              <img width={33} src={SettingButtonIcon} />
+            </Button>
+            {/* start excel download */}
+            <div className={styles.download_Excel_wrapper}>
+              {renderExportButton()}
             </div>
-          )}
-          {/* end optional switch */}
-          <SettingModal
-            tableName={id}
-            isOpen={settingModal}
-            toggle={toggleSetting}
-            columns={cols}
-            apiConfigData={configData}
-            requestConfig={requestConfig}
-            onGetData={handleGetDataAfterChange}
-          />
-        </Col>
-        <div className={styles.table_wrapper} ref={tableWrapperRef}>
-          <div className={styles.table_outer_wrapper}>
-            <div className={styles.table_inner_wrapper}>
-              <ReactstrapTable bordered className={styles.tableContainer}>
-                <thead className={styles.theader_container}>
-                  <tr className={styles.tr_container}>
-                    {visibleColumns.map((colItem) => {
-                      const isHeaderActionColumn =
-                        colItem && colItem.type === "button";
-                      const isHeaderNumberColumn =
-                        colItem && colItem.key === "__number__selector__";
-                      const isHeaderCheckboxColumn =
-                        colItem && colItem.key === "__row_selector__";
-                      return (
-                        <th
-                          key={colItem.uniqueId}
-                          className={`
+            {/* end excel download */}
+            {/* start optional switch — در چیدمان RTL بعد از اکسل = سمت چپ آن */}
+            {switchConfig && (
+              <div className={styles.switch_wrapper}>
+                <CustomInput
+                  type="switch"
+                  id={`${id}-switch-${switchConfig.paramName || "switch"}`}
+                  name={`${id}-switch-${switchConfig.paramName || "switch"}`}
+                  checked={switchOn}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    handleSwitchToggle(e.target.checked)
+                  }
+                  disabled={exportStatus === "exporting"}
+                  label={switchConfig.title ?? ""}
+                />
+              </div>
+            )}
+            {/* end optional switch */}
+            <SettingModal
+              tableName={id}
+              isOpen={settingModal}
+              toggle={toggleSetting}
+              columns={cols}
+              apiConfigData={configData}
+              requestConfig={requestConfig}
+              onGetData={handleGetDataAfterChange}
+            />
+          </Col>
+          <div className={styles.table_wrapper} ref={tableWrapperRef}>
+            <div className={styles.table_outer_wrapper}>
+              <div className={styles.table_inner_wrapper}>
+                <ReactstrapTable bordered className={styles.tableContainer}>
+                  <thead className={styles.theader_container}>
+                    <tr className={styles.tr_container}>
+                      {visibleColumns.map((colItem) => {
+                        const isHeaderActionColumn =
+                          colItem && colItem.type === "button";
+                        const isHeaderNumberColumn =
+                          colItem && colItem.key === "__number__selector__";
+                        const isHeaderCheckboxColumn =
+                          colItem && colItem.key === "__row_selector__";
+                        return (
+                          <th
+                            key={colItem.uniqueId}
+                            className={`
                               ${styles.th_container} 
                               ${isHeaderActionColumn ? styles.header_action_column : ""}
                               ${isHeaderNumberColumn ? styles.header_sticky_number_column : ""}
                               ${isHeaderCheckboxColumn ? styles.header_sticky_checkbox_column : styles.stick_to_right}
 
                             `}
-                          style={{
-                            width: `${colItem.width ? colItem.width : "120"}px`,
-                          }}
-                        >
-                          {colItem.title}
-                        </th>
-                      );
-                    })}
-                  </tr>
-                </thead>
-                <tbody>
-                  {data.length === 0 ? (
-                    <tr>
-                      <td
-                        colSpan={visibleColumns.length}
-                        className={styles.td_container}
-                      >
-                        داده‌ای وجود ندارد.
-                      </td>
+                            style={{
+                              width: `${colItem.width ? colItem.width : "120"}px`,
+                            }}
+                          >
+                            {colItem.title}
+                          </th>
+                        );
+                      })}
                     </tr>
-                  ) : (
-                    data.map((row, rowIndex) => (
-                      <tr
-                        key={getRowUniqueId(row, rowIndex)}
-                        className={styles.tr_container}
-                      >
-                        {visibleColumns.map((col) => {
-                          const val = col?.key ? _.get(row, col.key) : "";
-                          const isActionColumn = col && col.type === "button";
-                          const isNumberColumn =
-                            col && col.key === "__number__selector__";
-                          const isCheckboxColumn =
-                            col && col.key === "__row_selector__";
-                          return (
-                            <td
-                              key={col.uniqueId}
-                              className={`
+                  </thead>
+                  <tbody>
+                    {data.length === 0 ? (
+                      <tr>
+                        <td
+                          colSpan={visibleColumns.length}
+                          className={styles.td_container}
+                        >
+                          داده‌ای وجود ندارد.
+                        </td>
+                      </tr>
+                    ) : (
+                      data.map((row, rowIndex) => (
+                        <tr
+                          key={getRowUniqueId(row, rowIndex)}
+                          className={styles.tr_container}
+                        >
+                          {visibleColumns.map((col) => {
+                            const val = col?.key ? _.get(row, col.key) : "";
+                            const isActionColumn = col && col.type === "button";
+                            const isNumberColumn =
+                              col && col.key === "__number__selector__";
+                            const isCheckboxColumn =
+                              col && col.key === "__row_selector__";
+                            return (
+                              <td
+                                key={col.uniqueId}
+                                className={`
                                 ${styles.td_container} ${isActionColumn ? styles.action_column : ""}
                                 ${styles.td_container} ${isNumberColumn ? styles.sticky_number_column : ""}
                                 ${styles.td_container} ${isCheckboxColumn ? styles.sticky_checkbox_column : styles.stick_to_right}
                                 `}
-                              style={col.style || undefined}
-                            >
-                              {(() => {
-                                switch (col.type) {
-                                  case "text":
-                                    return (
-                                      <Text
-                                        value={val}
-                                        strings={translates}
-                                        translate={col?.translate}
-                                      />
-                                    );
-
-                                  case "price":
-                                    return (
-                                      <Price value={val} strings={translates} />
-                                    );
-
-                                  case "number":
-                                    return <NumberCell value={val} />;
-
-                                  case "badge":
-                                    return (
-                                      <Tag
-                                        value={val}
-                                        strings={translates}
-                                        translate={col?.translate}
-                                      />
-                                    );
-                                  case "button":
-                                    return (
-                                      <ActionRenderer
-                                        row={row}
-                                        rowIndex={rowIndex}
-                                        actions={col.buttonList || (() => [])}
-                                        strings={translates}
-                                      />
-                                    );
-                                  case "img":
-                                    return val ? (
-                                      <img
-                                        src={val as string}
-                                        alt="تصویر"
-                                        className="w-10 h-10 object-cover rounded"
-                                      />
-                                    ) : (
-                                      <div className="w-10 h-10 bg-gray-200 border-2 border-dashed rounded" />
-                                    );
-
-                                  case "map":
-                                    return val ? (
-                                      <a
-                                        href={`https://www.google.com/maps?q=${val}`}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="text-blue-600 underline text-xs"
-                                      >
-                                        نمایش روی نقشه
-                                      </a>
-                                    ) : (
-                                      "-"
-                                    );
-                                  case "function": {
-                                    if (typeof col?.htmlFunc !== "function") {
-                                      return <span>{val ?? " "}</span>;
-                                    }
-
-                                    try {
-                                      if (col.htmlFunc.length === 2) {
-                                        return (col.htmlFunc as any)(
-                                          row,
-                                          rowIndex,
-                                        );
-                                      } else {
-                                        return (col.htmlFunc as any)(row);
-                                      }
-                                    } catch (error) {
-                                      console.error(
-                                        "خطا در اجرای htmlFunc:",
-                                        error,
-                                        col.uniqueId,
-                                      );
+                                style={col.style || undefined}
+                              >
+                                {(() => {
+                                  switch (col.type) {
+                                    case "text":
                                       return (
-                                        <span className="text-red-600">
-                                          خطا!
-                                        </span>
+                                        <Text
+                                          value={val}
+                                          strings={translates}
+                                          translate={col?.translate}
+                                        />
                                       );
+
+                                    case "price":
+                                      return (
+                                        <Price
+                                          value={val}
+                                          strings={translates}
+                                        />
+                                      );
+
+                                    case "number":
+                                      return <NumberCell value={val} />;
+
+                                    case "badge":
+                                      return (
+                                        <Tag
+                                          value={val}
+                                          strings={translates}
+                                          translate={col?.translate}
+                                        />
+                                      );
+                                    case "button":
+                                      return (
+                                        <ActionRenderer
+                                          row={row}
+                                          rowIndex={rowIndex}
+                                          actions={col.buttonList || (() => [])}
+                                          strings={translates}
+                                        />
+                                      );
+                                    case "img":
+                                      return val ? (
+                                        <img
+                                          src={val as string}
+                                          alt="تصویر"
+                                          className="w-10 h-10 object-cover rounded"
+                                        />
+                                      ) : (
+                                        <div className="w-10 h-10 bg-gray-200 border-2 border-dashed rounded" />
+                                      );
+
+                                    case "map":
+                                      return val ? (
+                                        <a
+                                          href={`https://www.google.com/maps?q=${val}`}
+                                          target="_blank"
+                                          rel="noopener noreferrer"
+                                          className="text-blue-600 underline text-xs"
+                                        >
+                                          نمایش روی نقشه
+                                        </a>
+                                      ) : (
+                                        "-"
+                                      );
+                                    case "function": {
+                                      if (typeof col?.htmlFunc !== "function") {
+                                        return <span>{val ?? " "}</span>;
+                                      }
+
+                                      try {
+                                        if (col.htmlFunc.length === 2) {
+                                          return (col.htmlFunc as any)(
+                                            row,
+                                            rowIndex,
+                                          );
+                                        } else {
+                                          return (col.htmlFunc as any)(row);
+                                        }
+                                      } catch (error) {
+                                        console.error(
+                                          "خطا در اجرای htmlFunc:",
+                                          error,
+                                          col.uniqueId,
+                                        );
+                                        return (
+                                          <span className="text-red-600">
+                                            خطا!
+                                          </span>
+                                        );
+                                      }
                                     }
+                                    case "datetime":
+                                    case "time":
+                                    case "date":
+                                      return (
+                                        <DateTime
+                                          value={val}
+                                          format={col.format}
+                                          type={col.type}
+                                          strings={translates}
+                                        />
+                                      );
+
+                                    default:
+                                      return <span>{val ?? ""}</span>;
                                   }
-                                  case "datetime":
-                                  case "time":
-                                  case "date":
-                                    return (
-                                      <DateTime
-                                        value={val}
-                                        format={col.format}
-                                        type={col.type}
-                                        strings={translates}
-                                      />
-                                    );
-
-                                  default:
-                                    return <span>{val ?? ""}</span>;
-                                }
-                              })()}
-                            </td>
-                          );
-                        })}
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </ReactstrapTable>
+                                })()}
+                              </td>
+                            );
+                          })}
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </ReactstrapTable>
+              </div>
             </div>
+            {shouldShowPagination && (
+              <div ref={paginationRef}>
+                <PaginationToolbar
+                  totalItems={totalCount}
+                  pageNumber={page}
+                  size={size}
+                  onPageChange={handlePageChange}
+                  onSizeChange={handleSizeChange}
+                  pageSizeOptions={pageSizeOptions}
+                />
+              </div>
+            )}
+
+            {shouldShowPagination && showStickyPagination && (
+              <div className={styles.paginationSticky}>
+                <PaginationToolbar
+                  totalItems={totalCount}
+                  pageNumber={page}
+                  size={size}
+                  onPageChange={handlePageChange}
+                  onSizeChange={handleSizeChange}
+                  pageSizeOptions={pageSizeOptions}
+                  showTotal
+                  showSizeChanger
+                />
+              </div>
+            )}
           </div>
-          {shouldShowPagination && (
-            <div ref={paginationRef}>
-              <PaginationToolbar
-                totalItems={totalCount}
-                pageNumber={page}
-                size={size}
-                onPageChange={handlePageChange}
-                onSizeChange={handleSizeChange}
-                pageSizeOptions={pageSizeOptions}
-              />
-            </div>
-          )}
-
-          {shouldShowPagination && showStickyPagination && (
-            <div className={styles.paginationSticky}>
-              <PaginationToolbar
-                totalItems={totalCount}
-                pageNumber={page}
-                size={size}
-                onPageChange={handlePageChange}
-                onSizeChange={handleSizeChange}
-                pageSizeOptions={pageSizeOptions}
-                showTotal
-                showSizeChanger
-              />
-            </div>
-          )}
-        </div>
-        {/* <ToastContainer
-          position="bottom-left"
-          autoClose={4000}
-          hideProgressBar={false}
-          newestOnTop={true}
-          closeOnClick
-          rtl
-          pauseOnFocusLoss
-          draggable
-          pauseOnHover
-          theme="light"
-        /> */}
-      </Row>
-    );
-  }
-};
-
+        </Row>
+      );
+    }
+  },
+);
+Table.displayName = "Table";
 export default Table;
